@@ -13,7 +13,7 @@ use serde_json::json;
 #[command(
     name = "engram",
     version,
-    about = "A brain for your digital past.",
+    about = "Find what remains.",
     long_about = "ENGRAM Developer Preview examines explicitly selected offline files and iPhone backups. Findings describe observed evidence and candidates, not proof of deletion or credential validity. No network requests are made by the analyzer."
 )]
 struct Cli {
