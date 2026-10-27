@@ -8,6 +8,23 @@ The engine accepts a directory supplied by the user. A supported unencrypted iPh
 
 Reads have file-count, per-file and total-byte bounds. Dependency/generated directories and unsupported or inaccessible files can be skipped. Every case carries coverage counters and warnings. A scan that reached a limit is partial, even if it found nothing.
 
+The default scan examines at most 25,000 files, reads at most 8 MiB per file and 512 MiB of source bytes in total. The current engine also applies the following hard work bounds:
+
+| Boundary | Limit |
+| --- | --- |
+| Tree depth | 64 levels |
+| Directory entries visited | `max_files × 4`, clamped to 1,024–1,000,000 |
+| Scan work budget | 120 seconds, checked between operations |
+| Copied SQLite query work | 2-second progress budget per database |
+| SQLite value size | 16 MiB |
+| SQL text | 64 KiB |
+| SQLite expression depth | 64 |
+| Rows emitted per supported database parser | 1,000 |
+| Findings per case | 30,000 |
+| Imported case size | 64 MiB, plus record/graph shape validation |
+
+These are bounds on work the preview attempts, not real-time guarantees: an individual filesystem operation can still wait on the operating system. Readers report truncated coverage. Relationships are bounded as well; the graph is an inspection aid rather than an unlimited all-pairs expansion of duplicate groups.
+
 The source is never an output destination. SQLite files and the available associated journals are copied into a temporary working area for parsing. The CLI additionally rejects a case destination inside the source and refuses an existing output filename.
 
 ## Findings and confidence
@@ -49,6 +66,10 @@ Copying a `-wal` journal alongside a database helps preserve the logical state v
 An available filesystem modification time is a modification time. A database observation can use a supported source timestamp. Neither should be renamed "deletion date" unless the source explicitly establishes that meaning.
 
 Case comparison reports added, removed, changed and unchanged findings across the two supplied snapshots. Read the source types, backup dates, warnings and scan limits together. An absent finding can result from changed source coverage, changed parsing or a different snapshot; it does not prove secure deletion.
+
+Comparison uses exported observations and relationships. Case-local keyed secret fingerprints cannot establish secret-value continuity across independent scans. An unchanged secret finding means its exported evidence is unchanged, not that the underlying secret was verified to be identical or active.
+
+The `source_root` inside an imported case remains inert metadata. Reopening or comparing a case does not resolve it or contact a network share it might name. Only an explicitly selected source is opened for analysis.
 
 ## iPhone backup limitations
 

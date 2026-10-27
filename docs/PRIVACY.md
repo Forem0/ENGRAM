@@ -12,6 +12,8 @@ Readers do not intentionally alter source files. Database parsing uses temporary
 
 Store saved cases outside the selected source. The CLI enforces this rule and refuses to overwrite an existing output. Use a new export filename in the desktop as well.
 
+Imported case source paths are treated as metadata. Opening or comparing a case does not probe its recorded source, including a path that names a network share. A real source is read only after explicit selection.
+
 ## Secret masking
 
 Raw secret candidates are masked before they become persistent findings and events. Matching a supported format means only that the source contains a candidate worth reviewing. ENGRAM does not determine that it is active, leaked, owned by someone else or accepted by a service.

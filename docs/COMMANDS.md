@@ -55,6 +55,8 @@ The source must be supplied explicitly. No computer-wide discovery is performed.
 
 All numeric limits must be positive integers. A completed partial inspection still emits its case; read the counters and warnings before interpreting the findings.
 
+Additional hard bounds apply to traversal, database work and imported case shapes. See the [methodology limits](METHODOLOGY.md#source-selection-and-boundaries). The scan's 120-second work budget is checked between operations; it cannot interrupt every operating-system read immediately.
+
 ## Inspect
 
 ```bash
@@ -77,6 +79,8 @@ engram compare ./before.engram.json ./after.engram.json --out ./comparison.json
 Compares the two saved cases and reports added, removed, changed and unchanged finding IDs. Optional output stores the comparison JSON in a new file. Check that source selection, coverage, dates and parser support are comparable.
 
 "Removed" means that a finding is absent from the later supplied case. It is not proof that the data was securely erased from every copy.
+
+The command does not open or resolve the source paths stored inside imported cases. Secret-value fingerprints are case-local; comparison of unchanged exported metadata does not establish that a secret's underlying value is unchanged.
 
 ## Exit status
 
