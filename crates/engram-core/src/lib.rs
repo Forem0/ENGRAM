@@ -32,4 +32,3 @@ pub(crate) fn time_from_system(time: std::time::SystemTime) -> Option<i64> {
         .ok()
         .and_then(|value| i64::try_from(value.as_secs()).ok())
 }
-
