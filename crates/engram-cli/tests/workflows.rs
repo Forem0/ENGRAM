@@ -1,7 +1,7 @@
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, Output};
-use std::collections::BTreeMap;
 
 fn engram(arguments: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_engram"))
@@ -10,11 +10,17 @@ fn engram(arguments: &[&str]) -> Output {
         .expect("the ENGRAM CLI must start")
 }
 
-fn text(path: &Path) -> &str { path.to_str().expect("temporary test paths are UTF-8") }
+fn text(path: &Path) -> &str {
+    path.to_str().expect("temporary test paths are UTF-8")
+}
 
 fn successful_json(arguments: &[&str]) -> serde_json::Value {
     let output = engram(arguments);
-    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     serde_json::from_slice(&output.stdout).expect("--json must produce one JSON value")
 }
 
@@ -23,8 +29,17 @@ fn source_snapshot(root: &Path) -> BTreeMap<String, Vec<u8>> {
         for entry in fs::read_dir(directory).unwrap() {
             let entry = entry.unwrap();
             let path = entry.path();
-            if entry.file_type().unwrap().is_dir() { visit(root, &path, files); }
-            else { files.insert(path.strip_prefix(root).unwrap().to_string_lossy().into_owned(), fs::read(path).unwrap()); }
+            if entry.file_type().unwrap().is_dir() {
+                visit(root, &path, files);
+            } else {
+                files.insert(
+                    path.strip_prefix(root)
+                        .unwrap()
+                        .to_string_lossy()
+                        .into_owned(),
+                    fs::read(path).unwrap(),
+                );
+            }
         }
     }
     let mut files = BTreeMap::new();
@@ -58,9 +73,16 @@ fn fixture_scan_inspect_compare_roundtrip_preserves_source() {
     let comparison = successful_json(&["compare", text(&first), text(&second), "--json"]);
     assert!(comparison["diff"]["added"].as_array().unwrap().is_empty());
     assert!(comparison["diff"]["removed"].as_array().unwrap().is_empty());
-    assert!(!comparison["diff"]["unchanged"].as_array().unwrap().is_empty());
+    assert!(!comparison["diff"]["unchanged"]
+        .as_array()
+        .unwrap()
+        .is_empty());
     assert!(!source.join("first.engram.json").exists());
-    assert_eq!(source_snapshot(&source), source_before, "case creation and SQLite reads must leave every source byte and filename unchanged");
+    assert_eq!(
+        source_snapshot(&source),
+        source_before,
+        "case creation and SQLite reads must leave every source byte and filename unchanged"
+    );
 }
 
 #[test]
@@ -73,14 +95,25 @@ fn potential_password_never_appears_in_stdout_or_saved_case() {
     fs::write(source.join("settings.txt"), &config).unwrap();
     let saved = temp.path().join("case.engram.json");
     let output = engram(&["scan", text(&source), "--out", text(&saved), "--json"]);
-    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert!(!String::from_utf8_lossy(&output.stdout).contains(secret));
     assert!(!String::from_utf8_lossy(&output.stderr).contains(secret));
     let case_text = fs::read_to_string(saved).unwrap();
     assert!(!case_text.contains(secret));
     let case: serde_json::Value = serde_json::from_str(&case_text).unwrap();
-    assert!(case["findings"].as_array().unwrap().iter().any(|f| f["category"] == "secret"));
-    assert_eq!(fs::read_to_string(source.join("settings.txt")).unwrap(), config);
+    assert!(case["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|f| f["category"] == "secret"));
+    assert_eq!(
+        fs::read_to_string(source.join("settings.txt")).unwrap(),
+        config
+    );
 }
 
 #[test]
@@ -95,7 +128,9 @@ fn scan_refuses_to_put_its_case_in_the_source_or_overwrite_an_output() {
     assert!(!source.join("nested").exists());
     let existing = temp.path().join("existing.json");
     fs::write(&existing, "preserve this file").unwrap();
-    assert!(!engram(&["scan", text(&source), "--out", text(&existing)]).status.success());
+    assert!(!engram(&["scan", text(&source), "--out", text(&existing)])
+        .status
+        .success());
     assert_eq!(fs::read_to_string(existing).unwrap(), "preserve this file");
 }
 
@@ -104,8 +139,19 @@ fn invalid_limits_and_missing_sources_fail_without_a_case() {
     let temp = tempfile::tempdir().unwrap();
     let missing = temp.path().join("missing");
     let saved = temp.path().join("case.json");
-    assert!(!engram(&["scan", text(&missing), "--out", text(&saved)]).status.success());
-    assert!(!engram(&["scan", text(&missing), "--out", text(&saved), "--max-files", "0"]).status.success());
+    assert!(!engram(&["scan", text(&missing), "--out", text(&saved)])
+        .status
+        .success());
+    assert!(!engram(&[
+        "scan",
+        text(&missing),
+        "--out",
+        text(&saved),
+        "--max-files",
+        "0"
+    ])
+    .status
+    .success());
     assert!(!saved.exists());
 }
 
