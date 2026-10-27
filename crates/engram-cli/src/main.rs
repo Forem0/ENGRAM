@@ -140,7 +140,7 @@ fn run(cli: Cli) -> Result<(), EngramError> {
         }
         Command::Inspect { case } => print_case(&read_case(&case)?, cli.json)?,
         Command::Compare { before, after, out } => {
-            let mut out = out
+            let out = out
                 .map(|path| absolute_resolved_target(&path))
                 .transpose()?;
             if let Some(path) = out.as_deref() {
@@ -149,10 +149,8 @@ fn run(cli: Cli) -> Result<(), EngramError> {
             let previous = read_case(&before)?;
             let current = read_case(&after)?;
             for case in [&previous, &current] {
-                if case.source_kind != SourceKind::Demo && Path::new(&case.source_root).exists() {
-                    if let Some(path) = out.as_deref() {
-                        out = Some(ensure_outside_source(Path::new(&case.source_root), path)?);
-                    }
+                if let Some(path) = out.as_deref() {
+                    ensure_outside_stored_source(&case.source_root, path)?;
                 }
             }
             let diff = compare_cases(&previous, &current);
@@ -256,6 +254,18 @@ fn ensure_outside_source(source: &Path, output: &Path) -> Result<PathBuf, Engram
         return Err(EngramError::Input("The case output must be outside the selected source directory, so the source remains unchanged.".into()));
     }
     Ok(output)
+}
+
+// Imported source metadata is inert: resolving a stored UNC path could initiate
+// SMB access. Genuine scan roots are already canonical when the case is created.
+fn ensure_outside_stored_source(stored_source: &str, output: &Path) -> Result<(), EngramError> {
+    let source = Path::new(stored_source);
+    if source.is_absolute() && output.starts_with(source) {
+        return Err(EngramError::Input(
+            "Save comparison output outside the source recorded in the supplied case.".into(),
+        ));
+    }
+    Ok(())
 }
 
 // Resolve an output with not-yet-created parent directories without treating lexical
@@ -404,6 +414,17 @@ mod tests {
     #[test]
     fn terminal_control_sequences_are_escaped() {
         assert_eq!(visible("file\u{1b}[31m\n"), "file\\u{1b}[31m\\u{a}");
+    }
+
+    #[test]
+    fn imported_source_metadata_is_never_resolved() {
+        let remote = "\\\\unreachable.invalid\\share\\evidence";
+        assert!(ensure_outside_stored_source(remote, Path::new("comparison.json")).is_ok());
+        assert!(ensure_outside_stored_source(
+            "synthetic://engram-demo",
+            Path::new("comparison.json")
+        )
+        .is_ok());
     }
 
     #[test]
