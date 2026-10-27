@@ -1,0 +1,25 @@
+[workspace]
+members = ["crates/engram-core", "crates/engram-cli", "crates/engram-desktop"]
+default-members = ["crates/engram-core", "crates/engram-cli"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/Forem0/ENGRAM"
+rust-version = "1.88"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2"
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+tempfile = "3"
+rusqlite = { version = "0.37", features = ["bundled"] }
+
+[profile.release]
+lto = "thin"
+strip = true
+
