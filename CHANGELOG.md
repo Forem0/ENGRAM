@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 — Tauri Developer Preview (unreleased)
+## [0.2.0 — Tauri Developer Preview](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1) — 2026-10-27
 
 The desktop source moves from egui to a Tauri 2 shell and a React/TypeScript memory desk. The shared Rust engine and CLI remain the analysis and case format authority.
 
@@ -11,7 +11,7 @@ The desktop source moves from egui to a Tauri 2 shell and a React/TypeScript mem
 - Native Linux Tauri/WebKit startup and IPC smoke verification with actual window captures.
 - Platform preview packaging with WebView2/WebKit runtime requirements and a macOS application bundle.
 
-Release target: `v0.2.0-preview.1`. Download availability and verification evidence are added only after those builds complete.
+Verified by the [locked cross-platform CI and native Tauri/IPC captures](https://github.com/Forem0/ENGRAM/actions/runs/40575727550). The [native package build](https://github.com/Forem0/ENGRAM/actions/runs/40578609258) produces the Windows, macOS and Linux preview artifacts; release checksums and provenance accompany the downloads.
 
 ## [0.1.0 — Developer Preview](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1) — 2026-10-27
 

@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <img alt="Developer Preview 0.2" src="https://img.shields.io/badge/preview-0.2-C59839?style=flat-square&labelColor=191A18" />
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1"><img alt="Download Developer Preview 0.2" src="https://img.shields.io/badge/preview-0.2-C59839?style=flat-square&labelColor=191A18" /></a>
   <img alt="Tauri 2 and React" src="https://img.shields.io/badge/desktop-Tauri_2_%2B_React-E9DFC5?style=flat-square&labelColor=191A18" />
   <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-E9DFC5?style=flat-square&labelColor=191A18" />
   <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-E9DFC5?style=flat-square&labelColor=191A18" />
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Inspect the traces preserved in your files and backups.</strong><br/>A native workspace for media, documents, secret candidates and the connections between them.</p>
 
-<p align="center"><a href="#start-with-the-demo">Build the desktop</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1">Download</a> · <a href="#start-with-the-demo">Build the desktop</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
 ## A brain for your digital past
 
@@ -60,7 +60,9 @@ An experimental parser can work for a supported source while remaining incomplet
 
 ## Start with the demo
 
-Build the current Tauri desktop from source with Node.js 24, a compatible Rust toolchain and the platform prerequisites in [building](docs/BUILDING.md). The published 0.1 packages use the earlier egui interface.
+[Download Developer Preview 0.2](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1) for **Windows x64**, **macOS Apple Silicon (arm64)** or **Linux x64**. Packages include the CLI, SHA-256 checksums and build provenance. These are unsigned preview builds; the macOS application is not notarized. The Windows portable ZIP requires Microsoft Edge WebView2 Runtime, and the Linux binary requires GTK 3 and WebKitGTK 4.1 runtime libraries. See [platform prerequisites](docs/BUILDING.md).
+
+To build the current Tauri desktop from source, use Node.js 24, a compatible Rust toolchain and the same platform prerequisites:
 
 ```bash
 git clone https://github.com/Forem0/ENGRAM.git
