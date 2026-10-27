@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "engram-main",
+  "description": "The bundled memory desk can request evidence operations through native selection dialogs.",
+  "local": true,
+  "windows": ["main"],
+  "permissions": [
+    "allow-get-runtime-info",
+    "allow-load-demo",
+    "allow-select-source",
+    "allow-open-case",
+    "allow-save-case",
+    "allow-compare-case",
+    "allow-finish-smoke-test"
+  ]
+}

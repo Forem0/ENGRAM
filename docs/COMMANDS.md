@@ -91,3 +91,23 @@ The command does not open or resolve the source paths stored inside imported cas
 | `2` | command-line argument error reported by clap |
 
 The CLI does not validate a candidate secret or elevate a result to "compromised" on the basis of its shape.
+
+## Tauri desktop launch
+
+The desktop is a separate binary, `engram-desktop`, with native source/case dialogs. Its 0.2 renderer is React/TypeScript inside Tauri 2.
+
+```bash
+cd apps/desktop
+npm ci
+npm run tauri -- dev -- -- --demo
+```
+
+The default launch opens a synthetic case. `--view` accepts `map`, `findings`, `timeline`, `connections`, `compare` or `modules`. For an already built production executable:
+
+```bash
+./target/release/engram-desktop --demo --view findings
+```
+
+The `--smoke-test` flag is reserved for automated native startup/IPC verification. It only succeeds after the renderer loads an actual Rust-generated synthetic case and acknowledges readiness through the guarded command. It is not a scan of a personal source. Native capture details are in [BUILDING.md](BUILDING.md#native-smoke-verification-and-screenshots).
+
+The historical egui flags `--screenshot` and `--exit-after-screenshot` are not the 0.2 capture mechanism; CI captures the actual Tauri window externally after its readiness marker.
