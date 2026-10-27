@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "engram-main",
-  "description": "The bundled memory desk can request evidence operations through native selection dialogs.",
+  "description": "The bundled trace desk can request evidence operations through native selection dialogs.",
   "local": true,
   "windows": ["main"],
   "permissions": [
