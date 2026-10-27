@@ -412,7 +412,7 @@ impl EngramApp {
                         self.worker.is_none(),
                         egui::Button::new(RichText::new("Load demonstration").color(PAPER))
                             .fill(RAIL)
-                            .stroke(Stroke::new(1.0, MUTED)),
+                            .stroke(Stroke::new(1.0_f32, MUTED)),
                     )
                     .clicked()
                 {
@@ -437,7 +437,7 @@ impl EngramApp {
 
     fn inspector(&mut self, ctx: &egui::Context) {
         egui::SidePanel::right("inspector").default_width(280.0).width_range(240.0..=380.0)
-            .frame(egui::Frame::new().fill(CARD).stroke(Stroke::new(1.0, LINE)).inner_margin(18))
+            .frame(egui::Frame::new().fill(CARD).stroke(Stroke::new(1.0_f32, LINE)).inner_margin(18))
             .show(ctx, |ui| {
                 eyebrow(ui, "EVIDENCE INSPECTOR"); ui.add_space(12.0);
                 let finding = self.selected.as_ref().and_then(|id| self.case.findings.iter().find(|finding| &finding.id == id)).cloned();
@@ -507,7 +507,7 @@ impl EngramApp {
             for (column, (label, value, description)) in columns.iter_mut().zip(stats) {
                 egui::Frame::new()
                     .fill(CARD)
-                    .stroke(Stroke::new(1.0, LINE))
+                    .stroke(Stroke::new(1.0_f32, LINE))
                     .inner_margin(14)
                     .show(column, |ui| {
                         ui.set_min_width(ui.available_width());
@@ -534,7 +534,7 @@ impl EngramApp {
         ui.add_space(16.0);
         egui::Frame::new()
             .fill(CARD)
-            .stroke(Stroke::new(1.0, LINE))
+            .stroke(Stroke::new(1.0_f32, LINE))
             .inner_margin(16)
             .show(ui, |ui| {
                 ui.horizontal(|ui| {
@@ -661,7 +661,7 @@ impl EngramApp {
                         } else {
                             CARD
                         })
-                        .stroke(Stroke::new(1.0, if active { OCHRE } else { LINE }))
+                        .stroke(Stroke::new(1.0_f32, if active { OCHRE } else { LINE }))
                         .inner_margin(11)
                         .show(ui, |ui| {
                             ui.set_width(ui.available_width());
@@ -775,7 +775,7 @@ impl EngramApp {
         };
         egui::Frame::new()
             .fill(CARD)
-            .stroke(Stroke::new(1.0, LINE))
+            .stroke(Stroke::new(1.0_f32, LINE))
             .inner_margin(14)
             .show(ui, |ui| {
                 ui.label(
@@ -827,7 +827,7 @@ impl EngramApp {
         egui::ScrollArea::vertical().id_salt("module_rows").show(ui, |ui| {
             for module in &self.case.modules {
                 let color = match module.state { ModuleState::Ready => category_color(Category::Document), ModuleState::Experimental => OCHRE, ModuleState::Planned | ModuleState::Unavailable => MUTED };
-                egui::Frame::new().fill(CARD).stroke(Stroke::new(1.0, LINE)).inner_margin(16).show(ui, |ui| {
+                egui::Frame::new().fill(CARD).stroke(Stroke::new(1.0_f32, LINE)).inner_margin(16).show(ui, |ui| {
                     ui.set_width(ui.available_width());
                     ui.horizontal(|ui| { ui.label(RichText::new(&module.name).size(16.0).strong()); ui.with_layout(Layout::right_to_left(Align::Center), |ui| pill(ui, module.state.label(), color)); });
                     ui.label(RichText::new(&module.detail).size(12.0).color(MUTED));

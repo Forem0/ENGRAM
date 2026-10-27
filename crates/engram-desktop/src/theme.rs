@@ -42,14 +42,14 @@ pub fn apply(ctx: &egui::Context) {
     style.visuals.window_fill = CARD;
     style.visuals.extreme_bg_color = CARD;
     style.visuals.faint_bg_color = Color32::from_rgb(237, 233, 222);
-    style.visuals.widgets.noninteractive.bg_stroke = Stroke::new(1.0, LINE);
+    style.visuals.widgets.noninteractive.bg_stroke = Stroke::new(1.0_f32, LINE);
     style.visuals.widgets.inactive.weak_bg_fill = CARD;
-    style.visuals.widgets.inactive.bg_stroke = Stroke::new(1.0, LINE);
+    style.visuals.widgets.inactive.bg_stroke = Stroke::new(1.0_f32, LINE);
     style.visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(235, 225, 199);
-    style.visuals.widgets.hovered.bg_stroke = Stroke::new(1.0, OCHRE);
+    style.visuals.widgets.hovered.bg_stroke = Stroke::new(1.0_f32, OCHRE);
     style.visuals.widgets.active.weak_bg_fill = Color32::from_rgb(225, 209, 169);
     style.visuals.selection.bg_fill = Color32::from_rgb(229, 211, 169);
-    style.visuals.selection.stroke = Stroke::new(1.0, INK);
+    style.visuals.selection.stroke = Stroke::new(1.0_f32, INK);
     ctx.set_style(style);
 }
 

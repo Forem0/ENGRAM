@@ -35,7 +35,7 @@ pub fn draw(
         painter.add(Shape::convex_polygon(
             points,
             Color32::from_rgb(235, 228, 210),
-            Stroke::new(1.3, Color32::from_rgb(195, 185, 161)),
+            Stroke::new(1.3_f32, Color32::from_rgb(195, 185, 161)),
         ));
         for row in 0..4 {
             let y = -0.58 + row as f32 * 0.39;
@@ -50,7 +50,7 @@ pub fn draw(
                 .collect();
             painter.add(Shape::line(
                 curve,
-                Stroke::new(1.0, Color32::from_rgb(212, 201, 177)),
+                Stroke::new(1.0_f32, Color32::from_rgb(212, 201, 177)),
             ));
         }
     }
@@ -73,7 +73,7 @@ pub fn draw(
             .filter(|f| !links_only || !f.related_ids.is_empty())
             .take(80)
             .collect();
-        for (index, finding) in matching.iter().enumerate() {
+        for (index, &finding) in matching.iter().enumerate() {
             let ring = (index as f32).sqrt();
             let theta = index as f32 * 2.399_963;
             let radius = (ring * 0.046).min(0.25);
@@ -99,7 +99,7 @@ pub fn draw(
                     painter.line_segment(
                         [*from, *to],
                         Stroke::new(
-                            if chosen { 2.0 } else { 0.8 },
+                            if chosen { 2.0_f32 } else { 0.8_f32 },
                             if chosen {
                                 OCHRE
                             } else {
@@ -129,7 +129,7 @@ pub fn draw(
             *position,
             radius,
             Stroke::new(
-                if chosen { 2.0 } else { 1.0 },
+                if chosen { 2.0_f32 } else { 1.0_f32 },
                 if chosen {
                     INK
                 } else {
@@ -199,7 +199,7 @@ pub fn draw(
                 label_position.y,
             );
             if x.abs() > 0.1 {
-                painter.line_segment([anchor, line_end], Stroke::new(0.6, LINE));
+                painter.line_segment([anchor, line_end], Stroke::new(0.6_f32, LINE));
             }
         }
     }
