@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "id": "ce09983286914aec9628",
+  "id": "6715b28355fa37859abf",
   "title": "The forgotten archive",
   "source_root": "synthetic://engram-demo",
   "source_kind": "demo",
-  "created_at": 1793130495,
-  "completed_at": 1793130495,
+  "created_at": 1793137641,
+  "completed_at": 1793137642,
   "findings": [
     {
       "id": "d5b74af67ae7f970a1d120ef",
@@ -15,7 +15,7 @@
       "origin": "Synthetic fixture",
       "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
       "locator": "File",
-      "observed_at": 1790777600,
+      "observed_at": 1791123200,
       "bytes": 8192,
       "sha256": "35b71019782b34f50b41d5ad2e08d2871d6ec8857f240434f8f17b0fcc0b4984",
       "confidence": "observed",
@@ -119,7 +119,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790691200,
+      "observed_at": 1791036800,
       "bytes": 68,
       "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
       "confidence": "linked",
@@ -170,7 +170,7 @@
       "origin": "Synthetic fixture",
       "summary": "Thumbnail-path file could not be uniquely associated with the inspected catalogue rows. Cloud-only data, partial coverage and schema differences can explain this; permanent deletion is not established.",
       "locator": "File",
-      "observed_at": 1790604800,
+      "observed_at": 1790950400,
       "bytes": 68,
       "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
       "confidence": "candidate",
@@ -220,7 +220,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790518400,
+      "observed_at": 1790777600,
       "bytes": 145,
       "sha256": "688991640e49499fd9557092eb754beb7a58197768b4a668354c6c8858671d20",
       "confidence": "observed",
@@ -254,7 +254,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790000000,
+      "observed_at": 1790172800,
       "bytes": 119,
       "sha256": null,
       "confidence": "observed",
@@ -288,7 +288,7 @@
       "origin": "Synthetic fixture",
       "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
       "locator": "Line 2, column 10",
-      "observed_at": 1790000000,
+      "observed_at": 1790172800,
       "bytes": 119,
       "sha256": null,
       "confidence": "candidate",
@@ -305,7 +305,7 @@
         },
         {
           "label": "Case-local match",
-          "value": "8f8d11bf0cacec78b7ad5e70"
+          "value": "68e61661da043b3729a8f244"
         },
         {
           "label": "Validation",
@@ -328,7 +328,7 @@
       "origin": "Synthetic fixture",
       "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
       "locator": "Line 3, column 7",
-      "observed_at": 1790000000,
+      "observed_at": 1790172800,
       "bytes": 119,
       "sha256": null,
       "confidence": "candidate",
@@ -345,7 +345,7 @@
         },
         {
           "label": "Case-local match",
-          "value": "79450dcec72d789e49a1fb55"
+          "value": "97770bd66a89bfa18f389567"
         },
         {
           "label": "Validation",
@@ -362,7 +362,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790086400,
+      "observed_at": 1790259200,
       "bytes": 145,
       "sha256": "7667b138c48d95d00114dc537c55e1f0de60b6a65808f6d057276a1251443fc2",
       "confidence": "linked",
@@ -402,7 +402,7 @@
       "origin": "Synthetic fixture",
       "summary": "Thumbnail-path file could not be uniquely associated with the inspected catalogue rows. Cloud-only data, partial coverage and schema differences can explain this; permanent deletion is not established.",
       "locator": "File",
-      "observed_at": 1790172800,
+      "observed_at": 1790086400,
       "bytes": 68,
       "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
       "confidence": "candidate",
@@ -452,7 +452,7 @@
       "origin": "Synthetic fixture",
       "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
       "locator": "File",
-      "observed_at": 1791123200,
+      "observed_at": 1790345600,
       "bytes": 8192,
       "sha256": "66bd644f00c1f2d037a9fdc0a088d9bb3adf219beb222d38cfd8adf96af67b06",
       "confidence": "observed",
@@ -606,7 +606,7 @@
       "origin": "Synthetic fixture",
       "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
       "locator": "File",
-      "observed_at": 1791209600,
+      "observed_at": 1790432000,
       "bytes": 12288,
       "sha256": "29c144fcf3e4ab3ccee09ad179e3df19f714818c6816b250e5da9b4491e68d7a",
       "confidence": "observed",
@@ -700,7 +700,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790259200,
+      "observed_at": 1791209600,
       "bytes": 139,
       "sha256": null,
       "confidence": "observed",
@@ -734,7 +734,7 @@
       "origin": "Synthetic fixture",
       "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
       "locator": "Line 2, column 9",
-      "observed_at": 1790259200,
+      "observed_at": 1791209600,
       "bytes": 139,
       "sha256": null,
       "confidence": "candidate",
@@ -751,7 +751,7 @@
         },
         {
           "label": "Case-local match",
-          "value": "2d2ebb732adb2ebf77140494"
+          "value": "2d899c8a8958608ffdacaefb"
         },
         {
           "label": "Validation",
@@ -774,7 +774,7 @@
       "origin": "Synthetic fixture",
       "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
       "locator": "Line 3, column 10",
-      "observed_at": 1790259200,
+      "observed_at": 1791209600,
       "bytes": 139,
       "sha256": null,
       "confidence": "candidate",
@@ -791,7 +791,7 @@
         },
         {
           "label": "Case-local match",
-          "value": "8f8d11bf0cacec78b7ad5e70"
+          "value": "68e61661da043b3729a8f244"
         },
         {
           "label": "Validation",
@@ -814,7 +814,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790345600,
+      "observed_at": 1790000000,
       "bytes": 138,
       "sha256": null,
       "confidence": "observed",
@@ -848,7 +848,7 @@
       "origin": "Synthetic fixture",
       "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
       "locator": "Line 2, column 9",
-      "observed_at": 1790345600,
+      "observed_at": 1790000000,
       "bytes": 138,
       "sha256": null,
       "confidence": "candidate",
@@ -865,7 +865,7 @@
         },
         {
           "label": "Case-local match",
-          "value": "2d2ebb732adb2ebf77140494"
+          "value": "2d899c8a8958608ffdacaefb"
         },
         {
           "label": "Validation",
@@ -888,7 +888,7 @@
       "origin": "Synthetic fixture",
       "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
       "locator": "Line 3, column 15",
-      "observed_at": 1790345600,
+      "observed_at": 1790000000,
       "bytes": 138,
       "sha256": null,
       "confidence": "candidate",
@@ -905,7 +905,7 @@
         },
         {
           "label": "Case-local match",
-          "value": "8826e35246f3d60be744b730"
+          "value": "2c6f0e8dbb2169c66337d7e3"
         },
         {
           "label": "Validation",
@@ -922,7 +922,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790950400,
+      "observed_at": 1790604800,
       "bytes": 81,
       "sha256": "0ae5a3ffbe3548872e7d77d209378a82596b5df5d798cc93a65f0e445039de83",
       "confidence": "observed",
@@ -956,7 +956,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790864000,
+      "observed_at": 1790691200,
       "bytes": 145,
       "sha256": "7667b138c48d95d00114dc537c55e1f0de60b6a65808f6d057276a1251443fc2",
       "confidence": "linked",
@@ -996,7 +996,7 @@
       "origin": "Synthetic fixture",
       "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
       "locator": "File",
-      "observed_at": 1790432000,
+      "observed_at": 1790864000,
       "bytes": 68,
       "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
       "confidence": "linked",
@@ -1038,7 +1038,7 @@
       "origin": "Synthetic fixture",
       "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
       "locator": "File",
-      "observed_at": 1791036800,
+      "observed_at": 1790518400,
       "bytes": 8192,
       "sha256": "a8523dab7ede8ca59540c7d4694dc409dded93397ac0d9bb7f9014e2b89e6d0b",
       "confidence": "observed",
@@ -1178,7 +1178,7 @@
     "files_examined": 15,
     "bytes_examined": 38048,
     "skipped_files": 0,
-    "elapsed_ms": 233
+    "elapsed_ms": 265
   },
   "modules": [
     {
@@ -1234,7 +1234,7 @@
     {
       "name": "Location and OCR",
       "state": "planned",
-      "detail": "No coordinate extraction or image-text recognition in this preview."
+      "detail": "Coordinate extraction and image-text recognition are planned."
     },
     {
       "name": "Application access",
@@ -1269,157 +1269,157 @@
       "category": "media"
     },
     {
-      "at_ms": 2,
+      "at_ms": 3,
       "message": "Media: Media file: IMG_0001.PNG",
       "category": "media"
     },
     {
-      "at_ms": 2,
+      "at_ms": 3,
       "message": "Media: Media file: UNMATCHED_0042.PNG",
       "category": "media"
     },
     {
-      "at_ms": 220,
+      "at_ms": 250,
       "message": "Documents: Document or archive: README.txt",
       "category": "document"
     },
     {
-      "at_ms": 224,
+      "at_ms": 254,
       "message": "Documents: Document or archive: previous-config.txt",
       "category": "document"
     },
     {
-      "at_ms": 224,
+      "at_ms": 254,
       "message": "Secrets: Possible credential assignment",
       "category": "secret"
     },
     {
-      "at_ms": 224,
+      "at_ms": 255,
       "message": "Secrets: Possible credential assignment",
       "category": "secret"
     },
     {
-      "at_ms": 224,
+      "at_ms": 255,
       "message": "Documents: Document or archive: research-notes-copy.txt",
       "category": "document"
     },
     {
-      "at_ms": 224,
+      "at_ms": 255,
       "message": "Media: Media file: thumbnail-copy.PNG",
       "category": "media"
     },
     {
-      "at_ms": 224,
+      "at_ms": 255,
       "message": "Databases: SQLite database: History",
       "category": "database"
     },
     {
-      "at_ms": 226,
+      "at_ms": 257,
       "message": "Browser: Visit: https://archive.example.invalid",
       "category": "browser"
     },
     {
-      "at_ms": 226,
+      "at_ms": 257,
       "message": "Browser: Visit: https://docs.example.invalid",
       "category": "browser"
     },
     {
-      "at_ms": 226,
+      "at_ms": 257,
       "message": "Browser: Visit: https://research.example.invalid",
       "category": "browser"
     },
     {
-      "at_ms": 226,
+      "at_ms": 257,
       "message": "Browser: Visit: https://archive.example.invalid",
       "category": "browser"
     },
     {
-      "at_ms": 226,
+      "at_ms": 257,
       "message": "Databases: SQLite database: History.db",
       "category": "database"
     },
     {
-      "at_ms": 229,
+      "at_ms": 260,
       "message": "Browser: Visit: https://gallery.example.invalid",
       "category": "browser"
     },
     {
-      "at_ms": 229,
+      "at_ms": 260,
       "message": "Browser: Visit: https://library.example.invalid",
       "category": "browser"
     },
     {
-      "at_ms": 230,
+      "at_ms": 261,
       "message": "Documents: Document or archive: demo.env",
       "category": "document"
     },
     {
-      "at_ms": 230,
+      "at_ms": 261,
       "message": "Secrets: Possible credential assignment",
       "category": "secret"
     },
     {
-      "at_ms": 230,
+      "at_ms": 262,
       "message": "Secrets: Possible credential assignment",
       "category": "secret"
     },
     {
-      "at_ms": 230,
+      "at_ms": 262,
       "message": "Documents: Document or archive: old-session.log",
       "category": "document"
     },
     {
-      "at_ms": 231,
+      "at_ms": 262,
       "message": "Secrets: Possible credential assignment",
       "category": "secret"
     },
     {
-      "at_ms": 231,
+      "at_ms": 262,
       "message": "Secrets: Possible credential assignment",
       "category": "secret"
     },
     {
-      "at_ms": 231,
+      "at_ms": 262,
       "message": "Documents: Document or archive: old-export.csv",
       "category": "document"
     },
     {
-      "at_ms": 231,
+      "at_ms": 262,
       "message": "Documents: Document or archive: research-notes.txt",
       "category": "document"
     },
     {
-      "at_ms": 231,
+      "at_ms": 263,
       "message": "Media: Media file: IMG_0001.PNG",
       "category": "media"
     },
     {
-      "at_ms": 231,
+      "at_ms": 263,
       "message": "Databases: SQLite database: sms.db",
       "category": "database"
     },
     {
-      "at_ms": 232,
+      "at_ms": 264,
       "message": "Messages: Outgoing message record",
       "category": "message"
     },
     {
-      "at_ms": 232,
+      "at_ms": 264,
       "message": "Messages: Incoming message record",
       "category": "message"
     },
     {
-      "at_ms": 232,
+      "at_ms": 264,
       "message": "Messages: Outgoing message record",
       "category": "message"
     },
     {
-      "at_ms": 232,
+      "at_ms": 264,
       "message": "Messages: Incoming message record",
       "category": "message"
     },
     {
-      "at_ms": 233,
+      "at_ms": 265,
       "message": "Completed bounded analysis and evidence connections",
       "category": null
     }
