@@ -735,9 +735,9 @@ svg {
 }
 .brain-map {
   width: 100%;
-  height: auto;
+  height: clamp(290px, calc(100vh - 580px), 430px);
   min-height: 290px;
-  max-height: 510px;
+  max-height: none;
   user-select: none;
 }
 .brain-shadow {
@@ -770,7 +770,7 @@ svg {
   cursor: pointer;
 }
 .category-map-label text {
-  font: 10px var(--font-mono);
+  font: 14px var(--font-mono);
   fill: #777d69;
   transition: fill 0.2s;
 }
@@ -785,7 +785,7 @@ svg {
 }
 .category-map-label .map-count {
   fill: #999c8b;
-  font-size: 8px;
+  font-size: 11px;
 }
 .evidence-line {
   fill: none;
@@ -824,7 +824,7 @@ svg {
   fill: #ad8531;
 }
 .map-caption {
-  font: 7px var(--font-mono);
+  font: 10px var(--font-mono);
   fill: #aaa895;
   letter-spacing: 1.3px;
 }
