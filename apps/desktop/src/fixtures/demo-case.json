@@ -1,0 +1,1427 @@
+{
+  "schema_version": 1,
+  "id": "ce09983286914aec9628",
+  "title": "The forgotten archive",
+  "source_root": "synthetic://engram-demo",
+  "source_kind": "demo",
+  "created_at": 1793130495,
+  "completed_at": 1793130495,
+  "findings": [
+    {
+      "id": "d5b74af67ae7f970a1d120ef",
+      "category": "database",
+      "title": "SQLite database: Photos.sqlite",
+      "path": "PhotoData/Photos.sqlite",
+      "origin": "Synthetic fixture",
+      "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
+      "locator": "File",
+      "observed_at": 1790777600,
+      "bytes": 8192,
+      "sha256": "35b71019782b34f50b41d5ad2e08d2871d6ec8857f240434f8f17b0fcc0b4984",
+      "confidence": "observed",
+      "rule_id": "database.file",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "8192"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "0843041d3f6d3d10cb0a1b13",
+      "category": "media",
+      "title": "Photos catalogue entry",
+      "path": "PhotoData/Photos.sqlite",
+      "origin": "Synthetic fixture",
+      "summary": "An asset row is present in the supplied Photos database. A trash flag is not proof of permanent deletion, and schema interpretation is experimental.",
+      "locator": "ZASSET row 1",
+      "observed_at": 1788307200,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "media.photos_catalogue",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Filename",
+          "value": "IMG_0001.PNG"
+        },
+        {
+          "label": "Directory",
+          "value": "DCIM/100APPLE"
+        },
+        {
+          "label": "Catalogue state",
+          "value": "Not marked trashed in this snapshot"
+        },
+        {
+          "label": "Parser",
+          "value": "Experimental ZASSET schema"
+        }
+      ],
+      "related_ids": [
+        "5667824f1d3f3e7926225a58"
+      ]
+    },
+    {
+      "id": "515c87c9e3855cae31b98bc0",
+      "category": "media",
+      "title": "Photos catalogue entry",
+      "path": "PhotoData/Photos.sqlite",
+      "origin": "Synthetic fixture",
+      "summary": "An asset row is present in the supplied Photos database. A trash flag is not proof of permanent deletion, and schema interpretation is experimental.",
+      "locator": "ZASSET row 2",
+      "observed_at": 1789307200,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "media.photos_catalogue",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Filename",
+          "value": "MISSING_ORIGINAL_0002.PNG"
+        },
+        {
+          "label": "Directory",
+          "value": "DCIM/100APPLE"
+        },
+        {
+          "label": "Catalogue state",
+          "value": "Trashed-state flag is set in this snapshot"
+        },
+        {
+          "label": "Parser",
+          "value": "Experimental ZASSET schema"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "5667824f1d3f3e7926225a58",
+      "category": "media",
+      "title": "Media file: IMG_0001.PNG",
+      "path": "PhotoData/Thumbnails/V2/DCIM/100APPLE/IMG_0001.PNG",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790691200,
+      "bytes": 68,
+      "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
+      "confidence": "linked",
+      "rule_id": "file.media",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "68"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        },
+        {
+          "label": "Repeated content",
+          "value": "4 occurrences in this case"
+        },
+        {
+          "label": "Thumbnail path",
+          "value": "Path suggests a thumbnail/cache; visual identity is not verified"
+        },
+        {
+          "label": "Catalogue association",
+          "value": "Filename stem and available directory match one imported asset row; not a visual/content match"
+        }
+      ],
+      "related_ids": [
+        "1ec0aad79eb91e278074413d",
+        "8d1a0fb5646658f669db4d0b",
+        "d6eca77a86d54fd17789b857",
+        "0843041d3f6d3d10cb0a1b13"
+      ]
+    },
+    {
+      "id": "1ec0aad79eb91e278074413d",
+      "category": "media",
+      "title": "Media file: UNMATCHED_0042.PNG",
+      "path": "PhotoData/Thumbnails/V2/DCIM/100APPLE/UNMATCHED_0042.PNG",
+      "origin": "Synthetic fixture",
+      "summary": "Thumbnail-path file could not be uniquely associated with the inspected catalogue rows. Cloud-only data, partial coverage and schema differences can explain this; permanent deletion is not established.",
+      "locator": "File",
+      "observed_at": 1790604800,
+      "bytes": 68,
+      "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
+      "confidence": "candidate",
+      "rule_id": "file.media",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "68"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        },
+        {
+          "label": "Repeated content",
+          "value": "4 occurrences in this case"
+        },
+        {
+          "label": "Thumbnail path",
+          "value": "Path suggests a thumbnail/cache; visual identity is not verified"
+        },
+        {
+          "label": "Catalogue association",
+          "value": "No match in inspected rows"
+        }
+      ],
+      "related_ids": [
+        "d6eca77a86d54fd17789b857",
+        "5667824f1d3f3e7926225a58",
+        "8d1a0fb5646658f669db4d0b"
+      ]
+    },
+    {
+      "id": "c279ded5ff920eec0f91f2e7",
+      "category": "document",
+      "title": "Document or archive: README.txt",
+      "path": "README.txt",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790518400,
+      "bytes": 145,
+      "sha256": "688991640e49499fd9557092eb754beb7a58197768b4a668354c6c8858671d20",
+      "confidence": "observed",
+      "rule_id": "file.document",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "145"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "aee977043418e9cbcfeec85c",
+      "category": "document",
+      "title": "Document or archive: previous-config.txt",
+      "path": "archives/previous-config.txt",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790000000,
+      "bytes": 119,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "file.document",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "119"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "a226bcec5c407c34ee2d92a6",
+      "category": "secret",
+      "title": "Possible credential assignment",
+      "path": "archives/previous-config.txt",
+      "origin": "Synthetic fixture",
+      "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
+      "locator": "Line 2, column 10",
+      "observed_at": 1790000000,
+      "bytes": 119,
+      "sha256": null,
+      "confidence": "candidate",
+      "rule_id": "secret.assignment",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Detector",
+          "value": "Credential assignment"
+        },
+        {
+          "label": "Value",
+          "value": "[redacted]"
+        },
+        {
+          "label": "Case-local match",
+          "value": "8f8d11bf0cacec78b7ad5e70"
+        },
+        {
+          "label": "Validation",
+          "value": "Not performed"
+        },
+        {
+          "label": "Repeated content",
+          "value": "2 occurrences in this case"
+        }
+      ],
+      "related_ids": [
+        "6ae2790d4c9fcbeeec7418b0"
+      ]
+    },
+    {
+      "id": "86e1bde97eb7c43b16bb5288",
+      "category": "secret",
+      "title": "Possible credential assignment",
+      "path": "archives/previous-config.txt",
+      "origin": "Synthetic fixture",
+      "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
+      "locator": "Line 3, column 7",
+      "observed_at": 1790000000,
+      "bytes": 119,
+      "sha256": null,
+      "confidence": "candidate",
+      "rule_id": "secret.assignment",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Detector",
+          "value": "Credential assignment"
+        },
+        {
+          "label": "Value",
+          "value": "[redacted]"
+        },
+        {
+          "label": "Case-local match",
+          "value": "79450dcec72d789e49a1fb55"
+        },
+        {
+          "label": "Validation",
+          "value": "Not performed"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "21450659ff950bdf715eb628",
+      "category": "document",
+      "title": "Document or archive: research-notes-copy.txt",
+      "path": "archives/research-notes-copy.txt",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790086400,
+      "bytes": 145,
+      "sha256": "7667b138c48d95d00114dc537c55e1f0de60b6a65808f6d057276a1251443fc2",
+      "confidence": "linked",
+      "rule_id": "file.document",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "145"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        },
+        {
+          "label": "Repeated content",
+          "value": "2 occurrences in this case"
+        }
+      ],
+      "related_ids": [
+        "1d72ba2911631ec2d7bc10c8"
+      ]
+    },
+    {
+      "id": "d6eca77a86d54fd17789b857",
+      "category": "media",
+      "title": "Media file: thumbnail-copy.PNG",
+      "path": "archives/thumbnail-copy.PNG",
+      "origin": "Synthetic fixture",
+      "summary": "Thumbnail-path file could not be uniquely associated with the inspected catalogue rows. Cloud-only data, partial coverage and schema differences can explain this; permanent deletion is not established.",
+      "locator": "File",
+      "observed_at": 1790172800,
+      "bytes": 68,
+      "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
+      "confidence": "candidate",
+      "rule_id": "file.media",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "68"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        },
+        {
+          "label": "Repeated content",
+          "value": "4 occurrences in this case"
+        },
+        {
+          "label": "Thumbnail path",
+          "value": "Path suggests a thumbnail/cache; visual identity is not verified"
+        },
+        {
+          "label": "Catalogue association",
+          "value": "No match in inspected rows"
+        }
+      ],
+      "related_ids": [
+        "8d1a0fb5646658f669db4d0b",
+        "1ec0aad79eb91e278074413d",
+        "5667824f1d3f3e7926225a58"
+      ]
+    },
+    {
+      "id": "64e1d038a403ea605b71981a",
+      "category": "database",
+      "title": "SQLite database: History",
+      "path": "browser/chromium/History",
+      "origin": "Synthetic fixture",
+      "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
+      "locator": "File",
+      "observed_at": 1791123200,
+      "bytes": 8192,
+      "sha256": "66bd644f00c1f2d037a9fdc0a088d9bb3adf219beb222d38cfd8adf96af67b06",
+      "confidence": "observed",
+      "rule_id": "database.file",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "8192"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "bc437d543b9a952b89ec8ccc",
+      "category": "browser",
+      "title": "Visit: https://archive.example.invalid",
+      "path": "browser/chromium/History",
+      "origin": "Synthetic fixture",
+      "summary": "A visit record is present in this supplied database snapshot. Page titles, paths and query parameters are omitted.",
+      "locator": "urls row 4",
+      "observed_at": 1785785600,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "browser.chromium_visit",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Website origin",
+          "value": "https://archive.example.invalid"
+        },
+        {
+          "label": "Parser",
+          "value": "Chromium urls"
+        },
+        {
+          "label": "Privacy",
+          "value": "URL path, query, fragment and title omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "213791d1637ac25aa4f95fe4",
+      "category": "browser",
+      "title": "Visit: https://docs.example.invalid",
+      "path": "browser/chromium/History",
+      "origin": "Synthetic fixture",
+      "summary": "A visit record is present in this supplied database snapshot. Page titles, paths and query parameters are omitted.",
+      "locator": "urls row 3",
+      "observed_at": 1785699200,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "browser.chromium_visit",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Website origin",
+          "value": "https://docs.example.invalid"
+        },
+        {
+          "label": "Parser",
+          "value": "Chromium urls"
+        },
+        {
+          "label": "Privacy",
+          "value": "URL path, query, fragment and title omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "c8f2ec658005dd6197cda8d8",
+      "category": "browser",
+      "title": "Visit: https://research.example.invalid",
+      "path": "browser/chromium/History",
+      "origin": "Synthetic fixture",
+      "summary": "A visit record is present in this supplied database snapshot. Page titles, paths and query parameters are omitted.",
+      "locator": "urls row 2",
+      "observed_at": 1785612800,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "browser.chromium_visit",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Website origin",
+          "value": "https://research.example.invalid"
+        },
+        {
+          "label": "Parser",
+          "value": "Chromium urls"
+        },
+        {
+          "label": "Privacy",
+          "value": "URL path, query, fragment and title omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "ebe9a060aad73db892163533",
+      "category": "browser",
+      "title": "Visit: https://archive.example.invalid",
+      "path": "browser/chromium/History",
+      "origin": "Synthetic fixture",
+      "summary": "A visit record is present in this supplied database snapshot. Page titles, paths and query parameters are omitted.",
+      "locator": "urls row 1",
+      "observed_at": 1785526400,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "browser.chromium_visit",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Website origin",
+          "value": "https://archive.example.invalid"
+        },
+        {
+          "label": "Parser",
+          "value": "Chromium urls"
+        },
+        {
+          "label": "Privacy",
+          "value": "URL path, query, fragment and title omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "305c379990a03922840a481b",
+      "category": "database",
+      "title": "SQLite database: History.db",
+      "path": "browser/safari/History.db",
+      "origin": "Synthetic fixture",
+      "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
+      "locator": "File",
+      "observed_at": 1791209600,
+      "bytes": 12288,
+      "sha256": "29c144fcf3e4ab3ccee09ad179e3df19f714818c6816b250e5da9b4491e68d7a",
+      "confidence": "observed",
+      "rule_id": "database.file",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "12288"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "ae5b77693163526b9cf91a37",
+      "category": "browser",
+      "title": "Visit: https://gallery.example.invalid",
+      "path": "browser/safari/History.db",
+      "origin": "Synthetic fixture",
+      "summary": "A Safari visit row exists in this supplied snapshot. It does not establish current browser state or deleted-history recovery.",
+      "locator": "history_visits row 2",
+      "observed_at": 1791307200,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "browser.safari_visit",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Website origin",
+          "value": "https://gallery.example.invalid"
+        },
+        {
+          "label": "Parser",
+          "value": "Safari history_items + history_visits"
+        },
+        {
+          "label": "Privacy",
+          "value": "URL path, query, fragment and title omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "0300d247f5eb1cc1671bf2ac",
+      "category": "browser",
+      "title": "Visit: https://library.example.invalid",
+      "path": "browser/safari/History.db",
+      "origin": "Synthetic fixture",
+      "summary": "A Safari visit row exists in this supplied snapshot. It does not establish current browser state or deleted-history recovery.",
+      "locator": "history_visits row 1",
+      "observed_at": 1790307200,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "browser.safari_visit",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Website origin",
+          "value": "https://library.example.invalid"
+        },
+        {
+          "label": "Parser",
+          "value": "Safari history_items + history_visits"
+        },
+        {
+          "label": "Privacy",
+          "value": "URL path, query, fragment and title omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "0f17c3b1d214276521b105da",
+      "category": "document",
+      "title": "Document or archive: demo.env",
+      "path": "configuration/demo.env",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790259200,
+      "bytes": 139,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "file.document",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "139"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "a60f9b6852042e69aa557551",
+      "category": "secret",
+      "title": "Possible credential assignment",
+      "path": "configuration/demo.env",
+      "origin": "Synthetic fixture",
+      "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
+      "locator": "Line 2, column 9",
+      "observed_at": 1790259200,
+      "bytes": 139,
+      "sha256": null,
+      "confidence": "candidate",
+      "rule_id": "secret.assignment",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Detector",
+          "value": "Credential assignment"
+        },
+        {
+          "label": "Value",
+          "value": "[redacted]"
+        },
+        {
+          "label": "Case-local match",
+          "value": "2d2ebb732adb2ebf77140494"
+        },
+        {
+          "label": "Validation",
+          "value": "Not performed"
+        },
+        {
+          "label": "Repeated content",
+          "value": "2 occurrences in this case"
+        }
+      ],
+      "related_ids": [
+        "7f5b2dc1fdf54dce180214e7"
+      ]
+    },
+    {
+      "id": "6ae2790d4c9fcbeeec7418b0",
+      "category": "secret",
+      "title": "Possible credential assignment",
+      "path": "configuration/demo.env",
+      "origin": "Synthetic fixture",
+      "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
+      "locator": "Line 3, column 10",
+      "observed_at": 1790259200,
+      "bytes": 139,
+      "sha256": null,
+      "confidence": "candidate",
+      "rule_id": "secret.assignment",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Detector",
+          "value": "Credential assignment"
+        },
+        {
+          "label": "Value",
+          "value": "[redacted]"
+        },
+        {
+          "label": "Case-local match",
+          "value": "8f8d11bf0cacec78b7ad5e70"
+        },
+        {
+          "label": "Validation",
+          "value": "Not performed"
+        },
+        {
+          "label": "Repeated content",
+          "value": "2 occurrences in this case"
+        }
+      ],
+      "related_ids": [
+        "a226bcec5c407c34ee2d92a6"
+      ]
+    },
+    {
+      "id": "784debc40b875641f434b7fb",
+      "category": "document",
+      "title": "Document or archive: old-session.log",
+      "path": "diagnostics/old-session.log",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790345600,
+      "bytes": 138,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "file.document",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "138"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "7f5b2dc1fdf54dce180214e7",
+      "category": "secret",
+      "title": "Possible credential assignment",
+      "path": "diagnostics/old-session.log",
+      "origin": "Synthetic fixture",
+      "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
+      "locator": "Line 2, column 9",
+      "observed_at": 1790345600,
+      "bytes": 138,
+      "sha256": null,
+      "confidence": "candidate",
+      "rule_id": "secret.assignment",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Detector",
+          "value": "Credential assignment"
+        },
+        {
+          "label": "Value",
+          "value": "[redacted]"
+        },
+        {
+          "label": "Case-local match",
+          "value": "2d2ebb732adb2ebf77140494"
+        },
+        {
+          "label": "Validation",
+          "value": "Not performed"
+        },
+        {
+          "label": "Repeated content",
+          "value": "2 occurrences in this case"
+        }
+      ],
+      "related_ids": [
+        "a60f9b6852042e69aa557551"
+      ]
+    },
+    {
+      "id": "7797748858ba7918a618a099",
+      "category": "secret",
+      "title": "Possible credential assignment",
+      "path": "diagnostics/old-session.log",
+      "origin": "Synthetic fixture",
+      "summary": "Pattern match in accessible text. The value is fully masked; validity, age and deletion state were not tested.",
+      "locator": "Line 3, column 15",
+      "observed_at": 1790345600,
+      "bytes": 138,
+      "sha256": null,
+      "confidence": "candidate",
+      "rule_id": "secret.assignment",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Detector",
+          "value": "Credential assignment"
+        },
+        {
+          "label": "Value",
+          "value": "[redacted]"
+        },
+        {
+          "label": "Case-local match",
+          "value": "8826e35246f3d60be744b730"
+        },
+        {
+          "label": "Validation",
+          "value": "Not performed"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "8f9602237edb64c5ed41fb47",
+      "category": "document",
+      "title": "Document or archive: old-export.csv",
+      "path": "documents/old-export.csv",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790950400,
+      "bytes": 81,
+      "sha256": "0ae5a3ffbe3548872e7d77d209378a82596b5df5d798cc93a65f0e445039de83",
+      "confidence": "observed",
+      "rule_id": "file.document",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "81"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "1d72ba2911631ec2d7bc10c8",
+      "category": "document",
+      "title": "Document or archive: research-notes.txt",
+      "path": "documents/research-notes.txt",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790864000,
+      "bytes": 145,
+      "sha256": "7667b138c48d95d00114dc537c55e1f0de60b6a65808f6d057276a1251443fc2",
+      "confidence": "linked",
+      "rule_id": "file.document",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "145"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        },
+        {
+          "label": "Repeated content",
+          "value": "2 occurrences in this case"
+        }
+      ],
+      "related_ids": [
+        "21450659ff950bdf715eb628"
+      ]
+    },
+    {
+      "id": "8d1a0fb5646658f669db4d0b",
+      "category": "media",
+      "title": "Media file: IMG_0001.PNG",
+      "path": "media/DCIM/100APPLE/IMG_0001.PNG",
+      "origin": "Synthetic fixture",
+      "summary": "File bytes are present in this supplied source. Presence alone says nothing about deletion history or application access.",
+      "locator": "File",
+      "observed_at": 1790432000,
+      "bytes": 68,
+      "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
+      "confidence": "linked",
+      "rule_id": "file.media",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "68"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        },
+        {
+          "label": "Repeated content",
+          "value": "4 occurrences in this case"
+        }
+      ],
+      "related_ids": [
+        "5667824f1d3f3e7926225a58",
+        "d6eca77a86d54fd17789b857",
+        "1ec0aad79eb91e278074413d"
+      ]
+    },
+    {
+      "id": "1bbea962f6b137b7c23f24f2",
+      "category": "database",
+      "title": "SQLite database: sms.db",
+      "path": "messages/sms.db",
+      "origin": "Synthetic fixture",
+      "summary": "A SQLite file is present. Supported current rows are read from a temporary copy; deleted records are not carved.",
+      "locator": "File",
+      "observed_at": 1791036800,
+      "bytes": 8192,
+      "sha256": "a8523dab7ede8ca59540c7d4694dc409dded93397ac0d9bb7f9014e2b89e6d0b",
+      "confidence": "observed",
+      "rule_id": "database.file",
+      "sensitive": false,
+      "evidence": [
+        {
+          "label": "Source",
+          "value": "Selected folder"
+        },
+        {
+          "label": "Bytes present",
+          "value": "8192"
+        },
+        {
+          "label": "Content read",
+          "value": "Within configured limits"
+        },
+        {
+          "label": "Deletion state",
+          "value": "Not established"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "7db621b550f5267056c3242b",
+      "category": "message",
+      "title": "Outgoing message record",
+      "path": "messages/sms.db",
+      "origin": "Synthetic fixture",
+      "summary": "Message-row metadata is present. Body text, contacts and attachments are not copied into this case. This is not deleted-message recovery.",
+      "locator": "message row 4",
+      "observed_at": 1790566400,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "message.row_metadata",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Parser",
+          "value": "Apple message table metadata"
+        },
+        {
+          "label": "Content",
+          "value": "Message body and contact details omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "dde0704d13db5b13f5aedbcd",
+      "category": "message",
+      "title": "Incoming message record",
+      "path": "messages/sms.db",
+      "origin": "Synthetic fixture",
+      "summary": "Message-row metadata is present. Body text, contacts and attachments are not copied into this case. This is not deleted-message recovery.",
+      "locator": "message row 3",
+      "observed_at": 1790480000,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "message.row_metadata",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Parser",
+          "value": "Apple message table metadata"
+        },
+        {
+          "label": "Content",
+          "value": "Message body and contact details omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "439911d033732b6d00745c6e",
+      "category": "message",
+      "title": "Outgoing message record",
+      "path": "messages/sms.db",
+      "origin": "Synthetic fixture",
+      "summary": "Message-row metadata is present. Body text, contacts and attachments are not copied into this case. This is not deleted-message recovery.",
+      "locator": "message row 2",
+      "observed_at": 1790393600,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "message.row_metadata",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Parser",
+          "value": "Apple message table metadata"
+        },
+        {
+          "label": "Content",
+          "value": "Message body and contact details omitted"
+        }
+      ],
+      "related_ids": []
+    },
+    {
+      "id": "55fa4d59074b8b8bd975b042",
+      "category": "message",
+      "title": "Incoming message record",
+      "path": "messages/sms.db",
+      "origin": "Synthetic fixture",
+      "summary": "Message-row metadata is present. Body text, contacts and attachments are not copied into this case. This is not deleted-message recovery.",
+      "locator": "message row 1",
+      "observed_at": 1790307200,
+      "bytes": 0,
+      "sha256": null,
+      "confidence": "observed",
+      "rule_id": "message.row_metadata",
+      "sensitive": true,
+      "evidence": [
+        {
+          "label": "Parser",
+          "value": "Apple message table metadata"
+        },
+        {
+          "label": "Content",
+          "value": "Message body and contact details omitted"
+        }
+      ],
+      "related_ids": []
+    }
+  ],
+  "warnings": [
+    "SYNTHETIC DEMO: generated files and database rows, analysed by the real engine. No device or personal data was scanned. These are not recovered real-world secrets.",
+    "Results describe only the selected offline source at scan time; missing data does not establish secure deletion or complete device coverage.",
+    "Candidate credentials are not validated. Secret values, message bodies and private URL components are not exported."
+  ],
+  "stats": {
+    "files_examined": 15,
+    "bytes_examined": 38048,
+    "skipped_files": 0,
+    "elapsed_ms": 233
+  },
+  "modules": [
+    {
+      "name": "File inventory",
+      "state": "ready",
+      "detail": "Bounded metadata and content reads from an explicitly selected folder; links and reparse points excluded."
+    },
+    {
+      "name": "Secret candidates",
+      "state": "ready",
+      "detail": "Accessible-text patterns. Values are fully masked; case-local HMAC identifiers link repeated candidates. No validity checks."
+    },
+    {
+      "name": "Duplicate connections",
+      "state": "ready",
+      "detail": "Exact byte-content matches within read limits. Related records are bounded to 16 neighbours."
+    },
+    {
+      "name": "Cases and comparison",
+      "state": "ready",
+      "detail": "Local JSON cases and evidence/metadata comparison. Disappearance is not proof of secure erasure."
+    },
+    {
+      "name": "iPhone backup",
+      "state": "experimental",
+      "detail": "Unencrypted Manifest.db blob mapping only. Encrypted backups and unsupported layouts are rejected."
+    },
+    {
+      "name": "Photos catalogue",
+      "state": "experimental",
+      "detail": "ZASSET metadata and filename/path associations, capped at 1,000 rows per database. Unmatched never means proven deleted."
+    },
+    {
+      "name": "Browser activity",
+      "state": "experimental",
+      "detail": "Chromium urls and Safari history tables. Website origins only; private URL parts and page titles omitted."
+    },
+    {
+      "name": "Message metadata",
+      "state": "experimental",
+      "detail": "Apple message table timestamps and direction only. Bodies and contacts are not exported."
+    },
+    {
+      "name": "Deleted-record recovery",
+      "state": "planned",
+      "detail": "WAL/free-page carving is not implemented. WAL is used only to read the current copied database snapshot."
+    },
+    {
+      "name": "Keychain recovery",
+      "state": "planned",
+      "detail": "No extraction, decryption, or recovery of protected Keychain records."
+    },
+    {
+      "name": "Location and OCR",
+      "state": "planned",
+      "detail": "No coordinate extraction or image-text recognition in this preview."
+    },
+    {
+      "name": "Application access",
+      "state": "planned",
+      "detail": "No claims about which applications actually read a file or currently have permission."
+    }
+  ],
+  "events": [
+    {
+      "at_ms": 0,
+      "message": "Opened explicitly selected offline source",
+      "category": null
+    },
+    {
+      "at_ms": 0,
+      "message": "Indexed 15 source files",
+      "category": null
+    },
+    {
+      "at_ms": 0,
+      "message": "Databases: SQLite database: Photos.sqlite",
+      "category": "database"
+    },
+    {
+      "at_ms": 2,
+      "message": "Media: Photos catalogue entry",
+      "category": "media"
+    },
+    {
+      "at_ms": 2,
+      "message": "Media: Photos catalogue entry",
+      "category": "media"
+    },
+    {
+      "at_ms": 2,
+      "message": "Media: Media file: IMG_0001.PNG",
+      "category": "media"
+    },
+    {
+      "at_ms": 2,
+      "message": "Media: Media file: UNMATCHED_0042.PNG",
+      "category": "media"
+    },
+    {
+      "at_ms": 220,
+      "message": "Documents: Document or archive: README.txt",
+      "category": "document"
+    },
+    {
+      "at_ms": 224,
+      "message": "Documents: Document or archive: previous-config.txt",
+      "category": "document"
+    },
+    {
+      "at_ms": 224,
+      "message": "Secrets: Possible credential assignment",
+      "category": "secret"
+    },
+    {
+      "at_ms": 224,
+      "message": "Secrets: Possible credential assignment",
+      "category": "secret"
+    },
+    {
+      "at_ms": 224,
+      "message": "Documents: Document or archive: research-notes-copy.txt",
+      "category": "document"
+    },
+    {
+      "at_ms": 224,
+      "message": "Media: Media file: thumbnail-copy.PNG",
+      "category": "media"
+    },
+    {
+      "at_ms": 224,
+      "message": "Databases: SQLite database: History",
+      "category": "database"
+    },
+    {
+      "at_ms": 226,
+      "message": "Browser: Visit: https://archive.example.invalid",
+      "category": "browser"
+    },
+    {
+      "at_ms": 226,
+      "message": "Browser: Visit: https://docs.example.invalid",
+      "category": "browser"
+    },
+    {
+      "at_ms": 226,
+      "message": "Browser: Visit: https://research.example.invalid",
+      "category": "browser"
+    },
+    {
+      "at_ms": 226,
+      "message": "Browser: Visit: https://archive.example.invalid",
+      "category": "browser"
+    },
+    {
+      "at_ms": 226,
+      "message": "Databases: SQLite database: History.db",
+      "category": "database"
+    },
+    {
+      "at_ms": 229,
+      "message": "Browser: Visit: https://gallery.example.invalid",
+      "category": "browser"
+    },
+    {
+      "at_ms": 229,
+      "message": "Browser: Visit: https://library.example.invalid",
+      "category": "browser"
+    },
+    {
+      "at_ms": 230,
+      "message": "Documents: Document or archive: demo.env",
+      "category": "document"
+    },
+    {
+      "at_ms": 230,
+      "message": "Secrets: Possible credential assignment",
+      "category": "secret"
+    },
+    {
+      "at_ms": 230,
+      "message": "Secrets: Possible credential assignment",
+      "category": "secret"
+    },
+    {
+      "at_ms": 230,
+      "message": "Documents: Document or archive: old-session.log",
+      "category": "document"
+    },
+    {
+      "at_ms": 231,
+      "message": "Secrets: Possible credential assignment",
+      "category": "secret"
+    },
+    {
+      "at_ms": 231,
+      "message": "Secrets: Possible credential assignment",
+      "category": "secret"
+    },
+    {
+      "at_ms": 231,
+      "message": "Documents: Document or archive: old-export.csv",
+      "category": "document"
+    },
+    {
+      "at_ms": 231,
+      "message": "Documents: Document or archive: research-notes.txt",
+      "category": "document"
+    },
+    {
+      "at_ms": 231,
+      "message": "Media: Media file: IMG_0001.PNG",
+      "category": "media"
+    },
+    {
+      "at_ms": 231,
+      "message": "Databases: SQLite database: sms.db",
+      "category": "database"
+    },
+    {
+      "at_ms": 232,
+      "message": "Messages: Outgoing message record",
+      "category": "message"
+    },
+    {
+      "at_ms": 232,
+      "message": "Messages: Incoming message record",
+      "category": "message"
+    },
+    {
+      "at_ms": 232,
+      "message": "Messages: Outgoing message record",
+      "category": "message"
+    },
+    {
+      "at_ms": 232,
+      "message": "Messages: Incoming message record",
+      "category": "message"
+    },
+    {
+      "at_ms": 233,
+      "message": "Completed bounded analysis and evidence connections",
+      "category": null
+    }
+  ]
+}
