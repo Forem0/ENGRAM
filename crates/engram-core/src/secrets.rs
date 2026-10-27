@@ -85,12 +85,7 @@ pub(crate) fn scan(text: &str, case_key: &[u8; 32]) -> Vec<SecretCandidate> {
             let mut mac =
                 Hmac::<Sha256>::new_from_slice(case_key).expect("HMAC accepts a 32-byte key");
             mac.update(value.as_str().as_bytes());
-            let match_id = mac
-                .finalize()
-                .into_bytes()
-                .iter()
-                .map(|byte| format!("{byte:02x}"))
-                .collect();
+            let match_id = format!("{:x}", mac.finalize().into_bytes());
             found.push(SecretCandidate {
                 line: text[..value.start()]
                     .bytes()

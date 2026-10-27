@@ -86,13 +86,13 @@ fn validate_destination(case: &Case, destination: &Path) -> Result<PathBuf, Engr
             .strip_prefix(existing)
             .map_err(|_| EngramError::Input("Cannot resolve the output parent.".into()))?,
     );
-    if let Ok(source) = Path::new(&case.source_root).canonicalize() {
-        if resolved_parent.starts_with(source) {
-            return Err(EngramError::Input(
-                "Save the case outside the source directory; source evidence is never modified."
-                    .into(),
-            ));
-        }
+    // scan_path stores a canonical root. An imported source_root is inert
+    // metadata: resolving it could contact a UNC endpoint without user selection.
+    let source = Path::new(&case.source_root);
+    if source.is_absolute() && resolved_parent.starts_with(source) {
+        return Err(EngramError::Input(
+            "Save the case outside the source directory; source evidence is never modified.".into(),
+        ));
     }
     Ok(resolved_parent.join(
         destination
@@ -171,7 +171,7 @@ pub fn read_case(path: &Path) -> Result<Case, EngramError> {
     if case
         .findings
         .iter()
-        .any(|finding| !identities.insert(finding.id.as_str()))
+        .any(|finding| !identities.insert(finding.id.clone()))
     {
         return Err(EngramError::Input(
             "Case contains duplicate finding identities.".into(),

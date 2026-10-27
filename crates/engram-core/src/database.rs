@@ -45,6 +45,9 @@ fn columns(connection: &Connection, table: &str) -> HashSet<String> {
     rows.filter_map(Result::ok).collect()
 }
 
+// One normalization boundary for the fixed Finding fields used by all parsers.
+// Keeping the values explicit here avoids four subtly different privacy defaults.
+#[allow(clippy::too_many_arguments)]
 fn record(
     path: &str,
     origin: &str,
