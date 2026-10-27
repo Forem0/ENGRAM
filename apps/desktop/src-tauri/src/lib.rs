@@ -45,7 +45,7 @@ pub fn run() {
                             && url.port().is_none());
                     let development = !cfg!(feature = "custom-protocol")
                         && url.scheme() == "http"
-                        && url.host_str() == Some("localhost")
+                        && matches!(url.host_str(), Some("localhost" | "127.0.0.1"))
                         && url.port() == Some(1420);
                     packaged || development
                 })
