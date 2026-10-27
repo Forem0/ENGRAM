@@ -1,11 +1,19 @@
 # Changelog
 
+## [0.2.0-preview.2 — Visual identity update](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2) — 2026-10-27 (release pending)
+
+- Adopt the user-selected jagged cobalt-blue lightning creature, warm ivory and charcoal.
+- Use the Trace desk and Trace map names with the slogan "Find what remains."
+- Refresh application artwork, active controls and map styling while preserving the Rust analysis engine, CLI, schema-1 cases, evidence rules and coverage statements.
+
+This is an unreleased style update until its native builds and captures are verified. The application version remains 0.2.0. The published preview.1 artifacts remain unchanged and retain their earlier identity.
+
 ## [0.2.0 — Tauri Developer Preview](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1) — 2026-10-27
 
-The desktop source moves from egui to a Tauri 2 shell and a React/TypeScript memory desk. The shared Rust engine and CLI remain the analysis and case format authority.
+The desktop source moves from egui to a Tauri 2 shell and a React/TypeScript evidence workspace. The shared Rust engine and CLI remain the analysis and case format authority.
 
 - Typed frontend-to-Rust commands with native source/case dialogs and guarded background operations.
-- React memory map, filters, evidence inspector, timeline, connections, comparison and module states.
+- React category map, filters, evidence inspector, timeline, connections, comparison and module states.
 - Browser-only synthetic preview with an actual Rust-generated fixture and explicit native-operation boundaries.
 - Frontend type checking and Vitest, native command/session tests, and three-platform locked Rust checks.
 - Native Linux Tauri/WebKit startup and IPC smoke verification with actual window captures.
@@ -19,7 +27,7 @@ Initial native Rust workspace for inspecting explicitly selected offline evidenc
 
 This historical release uses the original egui/eframe interface. Its binaries and screenshots are distinct from the 0.2 Tauri migration.
 
-- Interactive memory map, searchable findings, evidence inspector, timeline and case comparison.
+- Interactive category map, searchable findings, evidence inspector, timeline and case comparison.
 - Bounded file inventory, exact-copy relationships and masked secret candidates.
 - Local iPhone backup manifest reader and supported SQLite activity parsers.
 - Shared engine behind desktop and CLI, with a synthetic fixture demonstration.

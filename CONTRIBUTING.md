@@ -29,6 +29,6 @@ Do not validate found credentials online, bypass OS protections, infer a past re
 
 The desktop and CLI use the core model. Coordinate changes to `model.rs` with all callers and case persistence. Keep `schema_version` and compatibility behavior explicit.
 
-Use the warm ivory, charcoal and ochre brand. Screenshots should show a clearly marked synthetic source. Do not replace working interactions with decorative controls or invent scan results for a demonstration.
+Use the warm ivory, charcoal and electric cobalt brand with the user-selected jagged lightning creature, Trace desk and Trace map labels, and the slogan "Find what remains." Screenshots should show a clearly marked synthetic source and identify the actual build that produced them. Do not replace working interactions with decorative controls or invent scan results for a demonstration.
 
 Describe the final change and relevant validation in a pull request. Keep real cases, credentials, phone backups and private paths out of issues, fixtures and screenshots.
