@@ -2,6 +2,8 @@
 
 The first preview establishes the complete path from an explicitly selected source to a native evidence workspace. Module states are part of the product: **Ready**, **Experimental**, **Planned** and **Unavailable** should describe the actual reader and source.
 
+The 0.2 source moves the desktop to Tauri 2 and React/TypeScript while preserving the Rust core and CLI. Verification includes frontend tests, native command/session tests and an actual Tauri/WebKit IPC launch. Version 0.1 downloads and screenshots describe the earlier egui interface.
+
 ## Current foundation
 
 - Bounded folder inventory and supported text secret candidates.

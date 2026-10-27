@@ -6,6 +6,10 @@ ENGRAM is intended for inspecting data you own or have authorization to examine.
 
 The analysis engine does not send files, candidate secrets, hashes, paths or events to a remote service. It does not call an AI model, test login endpoints, query breach databases or emit telemetry. Building the application downloads dependencies; repository badges and links are separate from the local analyzer.
 
+The Tauri renderer uses bundled React assets and a narrow Rust IPC command surface. Production source/case selection happens in native dialogs, and the Rust session holds the active case. The UI is not granted an unrestricted filesystem, shell or remote-page capability. WebView2/WebKitGTK are platform runtime dependencies, distinct from a remote analysis service.
+
+The Vite browser preview contains a Rust-generated synthetic case and cannot inspect real sources through native commands. Its screenshots must be labelled browser fixture captures, not evidence that the native application ran.
+
 ## Source evidence
 
 Readers do not intentionally alter source files. Database parsing uses temporary working copies and the available supported sidecars. Symlinks are not a route for broadening the selected directory. Read errors, bounds and unsupported data are limitations of coverage, not a clean bill of health.
