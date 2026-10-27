@@ -24,6 +24,8 @@ The native desktop and the CLI use the same Rust analysis engine. A case contain
 
 ![ENGRAM native workspace showing a clearly labelled synthetic demonstration](assets/screenshots/workspace.png)
 
+[Findings](assets/screenshots/findings.png) · [Timeline](assets/screenshots/timeline.png) · [Connections](assets/screenshots/connections.png) · [Capture provenance](assets/screenshots/README.md)
+
 - **Memory map** — category clusters inside a brain-shaped map; open a cluster to inspect its findings.
 - **Findings** — search, filter and inspect the exact source and rule behind an artifact.
 - **Timeline** — available timestamps shown with their source meaning, not invented deletion times.
