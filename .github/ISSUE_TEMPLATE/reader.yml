@@ -1,0 +1,25 @@
+name: Reader support
+description: Propose a source schema with a reproducible non-private fixture.
+title: '[Reader] '
+body:
+  - type: input
+    id: source
+    attributes:
+      label: Application or source format and version
+    validations:
+      required: true
+  - type: textarea
+    id: fields
+    attributes:
+      label: Evidence fields and their source meaning
+      description: Describe what can be observed, rather than inferring deletion or access.
+    validations:
+      required: true
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Synthetic fixture or public format reference
+      description: Do not upload a real personal backup.
+    validations:
+      required: true
+
