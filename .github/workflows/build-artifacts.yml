@@ -1,0 +1,67 @@
+name: Build preview artifacts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Native preview / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+            suffix: ''
+          - os: windows-latest
+            name: windows
+            suffix: .exe
+          - os: macos-latest
+            name: macos
+            suffix: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.os }}
+      - name: Bootstrap lockfile when the initial source has none
+        if: hashFiles('Cargo.lock') == ''
+        run: cargo generate-lockfile
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libxkbcommon-dev libwayland-dev libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libgl1-mesa-dev libgtk-3-dev libdbus-1-dev
+      - name: Verify core and CLI
+        run: cargo test -p engram-core -p engram-cli --locked
+      - name: Build native executables
+        run: cargo build -p engram-cli -p engram-desktop --release --locked
+      - name: Package and checksum
+        shell: bash
+        run: |
+          platform="${{ matrix.name }}-$(rustc -vV | tr -d '\r' | sed -n 's/^host: //p')"
+          checksum() {
+            if command -v sha256sum >/dev/null 2>&1; then sha256sum "$@"; else shasum -a 256 "$@"; fi
+          }
+          mkdir -p "dist/engram-$platform"
+          cp "target/release/engram${{ matrix.suffix }}" "dist/engram-$platform/"
+          cp "target/release/engram-desktop${{ matrix.suffix }}" "dist/engram-$platform/"
+          cp README.md LICENSE "dist/engram-$platform/"
+          printf '%s\n' 'ENGRAM Developer Preview' 'Unsigned native executables. See README and docs/BUILDING.md in the source repository.' 'The bundled demo contains synthetic data; analysis of real files requires explicit source selection.' > "dist/engram-$platform/PREVIEW.txt"
+          (cd "dist/engram-$platform" && checksum "engram${{ matrix.suffix }}" "engram-desktop${{ matrix.suffix }}" > SHA256SUMS.txt)
+          tar -czf "dist/engram-$platform.tar.gz" -C dist "engram-$platform"
+          (cd dist && checksum "engram-$platform.tar.gz" > "engram-$platform.tar.gz.sha256")
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: engram-${{ matrix.name }}-preview
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+          if-no-files-found: error
+

@@ -3,7 +3,9 @@ name: Check ENGRAM
 on:
   push:
     branches: [main, 'codex/**']
+    paths-ignore: ['**/*.md', 'assets/**', '.github/ISSUE_TEMPLATE/**']
   pull_request:
+    paths-ignore: ['**/*.md', 'assets/**', '.github/ISSUE_TEMPLATE/**']
   workflow_dispatch:
 
 permissions:
@@ -22,7 +24,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -74,7 +76,7 @@ jobs:
     name: Capture native desktop / Linux
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -94,12 +96,16 @@ jobs:
           WINIT_UNIX_BACKEND: x11
         run: |
           mkdir -p native-preview
-          timeout 90s xvfb-run -a -s '-screen 0 1600x1100x24' target/debug/engram-desktop --demo --view map --screenshot native-preview/workspace.png --exit-after-screenshot
+          for view in map findings timeline connections; do
+            name="$view"
+            if [ "$view" = map ]; then name=workspace; fi
+            timeout 90s xvfb-run -a -s '-screen 0 1600x1100x24' target/debug/engram-desktop --demo --view "$view" --screenshot "native-preview/$name.png" --exit-after-screenshot
+          done
           test -s native-preview/workspace.png
       - name: Upload native screenshot
         uses: actions/upload-artifact@v4
         with:
           name: native-workspace-preview
-          path: native-preview/workspace.png
+          path: native-preview/*.png
           if-no-files-found: error
 
