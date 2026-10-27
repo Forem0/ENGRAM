@@ -1,0 +1,18 @@
+[package]
+name = "engram-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "engram-desktop"
+path = "src/main.rs"
+
+[dependencies]
+engram-core = { path = "../engram-core" }
+eframe = { version = "=0.33.3", default-features = false, features = ["glow", "default_fonts", "x11", "wayland"] }
+rfd = "0.15"
+image = { version = "0.25", default-features = false, features = ["png"] }
+chrono.workspace = true
+
