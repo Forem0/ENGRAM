@@ -1,4 +1,4 @@
-name: Build preview artifacts
+name: Build ENGRAM app packages
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ env:
 
 jobs:
   build:
-    name: Tauri preview / ${{ matrix.os }}
+    name: Tauri app package / ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -65,6 +65,7 @@ jobs:
         shell: bash
         run: |
           platform="${{ matrix.name }}-$(rustc -vV | tr -d '\r' | sed -n 's/^host: //p')"
+          version=$(python -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("Cargo.toml").read_text(encoding="utf-8"))["workspace"]["package"]["version"])')
           folder="dist/engram-$platform"
           mkdir -p "$folder"
           cp "target/release/engram${{ matrix.suffix }}" "$folder/"
@@ -74,13 +75,13 @@ jobs:
             cp "target/release/engram-desktop${{ matrix.suffix }}" "$folder/"
           fi
           cp README.md LICENSE "$folder/"
-          printf '%s\n' 'ENGRAM 0.2 Developer Preview — Tauri + React' 'Unsigned packages. Synthetic demo; real sources require native selection.' > "$folder/PREVIEW.txt"
+          printf '%s\n' "ENGRAM $version desktop app — Tauri + React" 'Offline analysis of explicitly selected files and backups.' 'Starts with a clearly labelled synthetic demonstration.' 'Unsigned packages; platform runtime requirements are listed below.' > "$folder/USAGE.txt"
           if [ '${{ runner.os }}' = Windows ]; then
-            printf '%s\n' 'Run engram-desktop.exe. Microsoft Edge WebView2 Runtime is required.' 'This portable archive does not download or install the runtime.' >> "$folder/PREVIEW.txt"
+            printf '%s\n' 'Run engram-desktop.exe. Microsoft Edge WebView2 Runtime is required.' 'This portable archive does not download or install the runtime.' >> "$folder/USAGE.txt"
           elif [ '${{ runner.os }}' = Linux ]; then
-            printf '%s\n' 'Run ./engram-desktop. GTK 3 and WebKitGTK 4.1 runtime libraries must be installed.' >> "$folder/PREVIEW.txt"
+            printf '%s\n' 'Run ./engram-desktop. GTK 3 and WebKitGTK 4.1 runtime libraries must be installed.' >> "$folder/USAGE.txt"
           else
-            printf '%s\n' 'Open ENGRAM.app. This preview is unsigned and not notarized.' >> "$folder/PREVIEW.txt"
+            printf '%s\n' 'Open ENGRAM.app. This build is unsigned and not notarized.' >> "$folder/USAGE.txt"
           fi
           export ENGRAM_PACKAGE_DIRECTORY="$folder"
           export ENGRAM_PACKAGE_ARCHIVE="dist/engram-$platform"
@@ -105,10 +106,10 @@ jobs:
           digest = hashlib.sha256(archive.read_bytes()).hexdigest()
           pathlib.Path(str(archive) + '.sha256').write_text(f'{digest}  {archive.name}\n', encoding='utf-8')
           PACKAGE
-      - name: Upload native preview packages
+      - name: Upload native app packages
         uses: actions/upload-artifact@v4
         with:
-          name: engram-${{ matrix.name }}-tauri-preview
+          name: engram-${{ matrix.name }}-tauri-package
           path: |
             dist/*.tar.gz
             dist/*.zip

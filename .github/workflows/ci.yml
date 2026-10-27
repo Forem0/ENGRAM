@@ -131,8 +131,8 @@ jobs:
         if: success() || steps.formatting.outcome == 'failure'
         run: cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
 
-  native-preview:
-    name: Native Tauri window and IPC / Linux
+  native-app:
+    name: Native Tauri app and IPC / Linux
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -163,8 +163,8 @@ jobs:
         run: cargo build -p engram-desktop -p engram-cli --features engram-desktop/custom-protocol --locked
       - name: Generate a real-engine synthetic case
         run: |
-          mkdir -p native-preview
-          cargo run -p engram-cli --locked -- demo --out native-preview/demo-case.json
+          mkdir -p native-captures
+          cargo run -p engram-cli --locked -- demo --out native-captures/demo-case.json
       - name: Verify frontend IPC and capture actual native windows
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
@@ -172,11 +172,11 @@ jobs:
           GDK_BACKEND: x11
         shell: bash
         run: |
-          timeout 240s xvfb-run -a -s '-screen 0 1600x1100x24' dbus-run-session -- bash -euo pipefail <<'SMOKE'
-          for view in map findings timeline connections; do
+          timeout 420s xvfb-run -a -s '-screen 0 1600x1100x24' dbus-run-session -- bash -euo pipefail <<'SMOKE'
+          for view in map findings timeline connections compare modules; do
             name="$view"
             if [ "$view" = map ]; then name=workspace; fi
-            log="native-preview/$name.log"
+            log="native-captures/$name.log"
             target/debug/engram-desktop --demo --view "$view" --smoke-test > "$log" 2>&1 &
             app_pid=$!
             trap 'kill "$app_pid" 2>/dev/null || true' EXIT
@@ -189,8 +189,8 @@ jobs:
             if [ "$ready" != true ]; then cat "$log"; exit 1; fi
             window_id=$(xdotool search --onlyvisible --name '^ENGRAM' | head -n 1)
             test -n "$window_id"
-            import -window "$window_id" "native-preview/$name.png"
-            test -s "native-preview/$name.png"
+            import -window "$window_id" "native-captures/$name.png"
+            test -s "native-captures/$name.png"
             wait "$app_pid"
             trap - EXIT
           done
@@ -199,14 +199,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: native-tauri-workspace-preview
-          path: native-preview/
+          name: native-tauri-workspace
+          path: native-captures/
           if-no-files-found: error
 
   lockfile-committed:
     name: Committed lockfile gate
     if: always()
-    needs: [prepare, frontend, verify, native-preview]
+    needs: [prepare, frontend, verify, native-app]
     runs-on: ubuntu-latest
     steps:
       - name: Require committed verified dependencies
@@ -214,7 +214,7 @@ jobs:
           PREPARE_RESULT: ${{ needs.prepare.result }}
           FRONTEND_RESULT: ${{ needs.frontend.result }}
           VERIFY_RESULT: ${{ needs.verify.result }}
-          NATIVE_RESULT: ${{ needs.native-preview.result }}
+          NATIVE_RESULT: ${{ needs.native-app.result }}
           BOOTSTRAP: ${{ needs.prepare.outputs.bootstrap }}
         run: |
           if [ "$BOOTSTRAP" = true ]; then
