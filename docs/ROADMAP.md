@@ -16,7 +16,7 @@ The 0.2 source moves the desktop to Tauri 2 and React/TypeScript while preservin
 
 ## Visual identity update
 
-The current visual update uses the Trace desk and Trace map names, a jagged cobalt-blue creature, warm ivory and charcoal. It targets `v0.2.0-preview.2` after native verification. Existing release artifacts are not relabelled as the new identity.
+The visual identity in `v0.2.0-preview.2` uses the Trace desk and Trace map names, a jagged cobalt-blue creature, warm ivory and charcoal. Existing release artifacts retain their original identity and provenance.
 
 ## Reader validation
 
