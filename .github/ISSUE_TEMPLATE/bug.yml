@@ -1,0 +1,38 @@
+name: Bug report
+description: Report a reproducible error with synthetic or sanitized data.
+title: '[Bug] '
+body:
+  - type: markdown
+    attributes:
+      value: 'Use generated fixtures or a sanitized reproduction. Do not attach personal backups, case exports, message databases, passwords or private keys.'
+  - type: input
+    id: version
+    attributes:
+      label: ENGRAM version or commit
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system and architecture
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction using synthetic data
+      description: Include the command or UI steps and the module state.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics
+      description: Review paths, URLs and metadata before posting.
+
