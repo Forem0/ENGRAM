@@ -13,7 +13,7 @@ pub fn run() {
         }
     };
     if launch.help {
-        println!("ENGRAM — The memory desk\n\n  --demo         Open the synthetic demonstration (default)\n  --view VIEW    Start in map, findings, timeline, connections, compare or modules\n  --smoke-test   Verify the real frontend/engine bridge and exit\n\nChoose real sources and case files through the native app dialogs.");
+        println!("ENGRAM — Trace desk\n\n  --demo         Open the synthetic demonstration (default)\n  --view VIEW    Start in map, findings, timeline, connections, compare or modules\n  --smoke-test   Verify the real frontend/engine bridge and exit\n\nChoose real sources and case files through the native app dialogs.");
         return;
     }
     tauri::Builder::default()

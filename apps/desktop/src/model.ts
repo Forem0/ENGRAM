@@ -62,20 +62,20 @@ export interface RuntimeInfo {
 }
 
 export const CATEGORIES: { id: Category; label: string; color: string; short: string }[] = [
-  { id: 'media', label: 'Media', color: '#558778', short: 'ME' },
-  { id: 'secret', label: 'Secrets', color: '#b07751', short: 'SE' },
-  { id: 'document', label: 'Documents', color: '#8b9464', short: 'DO' },
-  { id: 'browser', label: 'Browser', color: '#6b82a4', short: 'BR' },
-  { id: 'message', label: 'Messages', color: '#9981a3', short: 'MS' },
-  { id: 'location', label: 'Location', color: '#9a8d63', short: 'LO' },
-  { id: 'database', label: 'Databases', color: '#787e79', short: 'DB' },
+  { id: 'media', label: 'Media', color: '#246BFE', short: 'ME' },
+  { id: 'secret', label: 'Secrets', color: '#BB5C4B', short: 'SE' },
+  { id: 'document', label: 'Documents', color: '#6B73AD', short: 'DO' },
+  { id: 'browser', label: 'Browser', color: '#397A93', short: 'BR' },
+  { id: 'message', label: 'Messages', color: '#8560AD', short: 'MS' },
+  { id: 'location', label: 'Location', color: '#708694', short: 'LO' },
+  { id: 'database', label: 'Databases', color: '#5C667A', short: 'DB' },
 ];
 
 export const VIEWS: { id: View; name: string; subtitle: string; description: string }[] = [
   {
     id: 'map',
-    name: 'Memory map',
-    subtitle: 'What remains, connected.',
+    name: 'Trace map',
+    subtitle: 'Find what remains.',
     description:
       'A map of the artifacts preserved in this source. Every connection has evidence behind it.',
   },

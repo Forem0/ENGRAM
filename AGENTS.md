@@ -1,6 +1,6 @@
 # ENGRAM development
 
-ENGRAM uses a Tauri 2 native shell, a React/TypeScript renderer and a shared Rust analysis core for the user's explicitly selected offline data. Its brand is warm ivory, charcoal and ochre, with a hand-drawn brain archivist. The release is a Developer Preview; label demo, experimental and unavailable functionality accurately. The historical 0.1 release used egui; do not present its binaries or captures as evidence of the current Tauri UI.
+ENGRAM uses a Tauri 2 native shell, a React/TypeScript renderer and a shared Rust analysis core for the user's explicitly selected offline data. The current source identity uses the user-selected jagged cobalt-blue lightning creature, warm ivory and charcoal. Use "Trace desk", "Trace map" and the slogan "Find what remains." The release is a Developer Preview; label demo, experimental and unavailable functionality accurately. The historical 0.1 release used egui; do not present its binaries or captures as evidence of the current Tauri UI. Published preview.1 artifacts retain their original visual identity; verify and publish the style update separately as preview.2.
 
 Never scan the user's personal directories during development. Exercise the engine with generated synthetic fixtures. Never commit real backups, credentials, personal messages or machine paths. Never validate discovered credentials against a service. Never write to source evidence, follow symlinks, bypass OS protections, or claim that an unlinked file proves permanent deletion.
 

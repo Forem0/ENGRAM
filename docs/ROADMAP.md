@@ -11,8 +11,12 @@ The 0.2 source moves the desktop to Tauri 2 and React/TypeScript while preservin
 - Exact-content relationships and evidence inspection.
 - Synthetic demo generated through the analysis engine.
 - Local cases, reopening and snapshot comparison.
-- Native memory map, findings, timeline, connections and module coverage.
+- Native category map, findings, timeline, connections and module coverage.
 - Experimental unencrypted iPhone index/Photos association and supported SQLite activity readers.
+
+## Visual identity update
+
+The visual identity in `v0.2.0-preview.2` uses the Trace desk and Trace map names, a jagged cobalt-blue creature, warm ivory and charcoal. Existing release artifacts retain their original identity and provenance.
 
 ## Reader validation
 

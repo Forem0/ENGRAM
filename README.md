@@ -1,37 +1,37 @@
-<p align="center"><img src="assets/banner.png" alt="ENGRAM — A brain for your digital past." width="100%" /></p>
+<p align="center"><img src="assets/banner.png" alt="ENGRAM — Find what remains." width="100%" /></p>
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1"><img alt="Download Developer Preview 0.2" src="https://img.shields.io/badge/preview-0.2-C59839?style=flat-square&labelColor=191A18" /></a>
-  <img alt="Tauri 2 and React" src="https://img.shields.io/badge/desktop-Tauri_2_%2B_React-E9DFC5?style=flat-square&labelColor=191A18" />
-  <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-E9DFC5?style=flat-square&labelColor=191A18" />
-  <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-E9DFC5?style=flat-square&labelColor=191A18" />
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-E9DFC5?style=flat-square&labelColor=191A18" /></a>
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2"><img alt="Developer Preview 2" src="https://img.shields.io/badge/preview-0.2.0_preview.2-246BFE?style=flat-square&labelColor=171B24" /></a>
+  <img alt="Tauri 2 and React" src="https://img.shields.io/badge/desktop-Tauri_2_%2B_React-F4F0E5?style=flat-square&labelColor=171B24" />
+  <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-F4F0E5?style=flat-square&labelColor=171B24" />
+  <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-F4F0E5?style=flat-square&labelColor=171B24" />
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-F4F0E5?style=flat-square&labelColor=171B24" /></a>
 </p>
 
 <p align="center"><strong>Inspect the traces preserved in your files and backups.</strong><br/>A native workspace for media, documents, secret candidates and the connections between them.</p>
 
-<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1">Download</a> · <a href="#start-with-the-demo">Build the desktop</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2">Download Preview 2</a> · <a href="#start-with-the-demo">Build the desktop</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
-## A brain for your digital past
+## Find what remains.
 
 Deleting an item from an application does not tell you whether another copy exists in an archive, an export or a thumbnail directory. ENGRAM examines the **offline sources you choose**, connects matching artifacts, and keeps the evidence behind every finding visible.
 
-The desktop uses **Tauri 2 with React and TypeScript**, backed by the same Rust analysis engine as the CLI. React handles the memory desk; Rust owns source selection, analysis, case validation and persistence. A case contains source coverage, paths, rules, hashes, available timestamps, relationships and inspection limits. Secret candidates are masked before they reach the case.
+The desktop uses **Tauri 2 with React and TypeScript**, backed by the same Rust analysis engine as the CLI. React handles the Trace desk; Rust owns source selection, analysis, case validation and persistence. A case contains source coverage, paths, rules, hashes, available timestamps, relationships and inspection limits. Secret candidates are masked before they reach the case.
 
 **This is a Developer Preview.** It is an inspection tool, not a guarantee that deleted data can be recovered. A thumbnail without a catalogue match is a candidate to review. A secret-shaped string is not a verified working credential. No finding proves that an application read or transmitted your data.
 
 ## The workspace
 
-The 0.2 source introduces a responsive editorial memory desk, with an SVG brain map, keyboard-friendly controls, shared filters and a persistent evidence inspector. Source operations use native dialogs and the Rust command bridge.
+The Trace desk pairs warm ivory, charcoal and electric cobalt with ENGRAM's jagged lightning creature. The SVG Trace map, keyboard-friendly controls, shared filters and persistent evidence inspector keep source evidence within reach. Source operations use native dialogs and the Rust command bridge.
 
-![ENGRAM Tauri workspace showing the real Rust-generated synthetic demonstration](assets/screenshots/workspace.png)
+![ENGRAM Trace desk running a synthetic demonstration in the native Tauri app](assets/screenshots/workspace.png)
 
 [Findings](assets/screenshots/findings.png) · [Timeline](assets/screenshots/timeline.png) · [Connections](assets/screenshots/connections.png) · [Capture provenance](assets/screenshots/README.md)
 
-These are actual Tauri window captures from the [verified native/IPC run](https://github.com/Forem0/ENGRAM/actions/runs/40575727550), using synthetic sources processed by the shared Rust engine. The [0.1 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1) retains the historical egui interface.
+These are actual native Tauri captures from the [cross-platform checks and Linux Tauri/IPC run](https://github.com/Forem0/ENGRAM/actions/runs/40585483665), using synthetic sources processed by the shared Rust engine. See the [captured source](https://github.com/Forem0/ENGRAM/commit/9709cd8f7e7b453da952eef9eba5d4d7f225922a) and [capture provenance](assets/screenshots/README.md).
 
-- **Memory map** — category clusters inside a brain-shaped map; open a cluster to inspect its findings.
+- **Trace map** — category clusters and recorded relationships; open a cluster to inspect its findings.
 - **Findings** — search, filter and inspect the exact source and rule behind an artifact.
 - **Timeline** — available timestamps shown with their source meaning, not invented deletion times.
 - **Connections** — follow relationships established by the engine, including exact-content duplicates.
@@ -47,7 +47,7 @@ The demonstration is generated from synthetic files and run through the real eng
 | Folder inventory | **Ready** | bounded reads of explicitly selected files, media/document metadata and coverage warnings |
 | Secret candidates | **Ready** | supported text patterns; masked findings and within-case matching without credential validation |
 | Duplicate relationships | **Ready** | exact-content relationships for files the scan can hash |
-| Case memory | **Ready** | local JSON cases, reopening and snapshot comparison |
+| Case files | **Ready** | local JSON cases, reopening and snapshot comparison |
 | iPhone backup index | **Experimental** | unencrypted `Manifest.db` mapping and best-effort Photos catalogue/thumbnail association |
 | Browser history | **Experimental** | supported Chromium and Safari SQLite schemas, when present in the selected source |
 | Message metadata | **Experimental** | supported SMS SQLite rows, when present in the selected source |
@@ -60,7 +60,7 @@ An experimental parser can work for a supported source while remaining incomplet
 
 ## Start with the demo
 
-[Download Developer Preview 0.2](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1) for **Windows x64**, **macOS Apple Silicon (arm64)** or **Linux x64**. Packages include the CLI, SHA-256 checksums and build provenance. These are unsigned preview builds; the macOS application is not notarized. The Windows portable ZIP requires Microsoft Edge WebView2 Runtime, and the Linux binary requires GTK 3 and WebKitGTK 4.1 runtime libraries. See [platform prerequisites](docs/BUILDING.md).
+Download [Developer Preview 2](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2) for **Windows x64**, **macOS Apple Silicon (arm64)** or **Linux x64**, with the CLI, SHA-256 checksums and [native build provenance](https://github.com/Forem0/ENGRAM/actions/runs/40585602758). These are unsigned preview builds; the macOS application is not notarized. The Windows portable ZIP requires Microsoft Edge WebView2 Runtime, and the Linux binary requires GTK 3 and WebKitGTK 4.1 runtime libraries. See [platform prerequisites](docs/BUILDING.md).
 
 To build the current Tauri desktop from source, use Node.js 24, a compatible Rust toolchain and the same platform prerequisites:
 
@@ -158,7 +158,7 @@ Tests use synthetic sources. Core and CLI tests cover parsing, masking, source p
 ```text
 crates/engram-core/       source readers, rules, relationships and case model
 crates/engram-cli/        terminal commands and machine-readable output
-apps/desktop/src/         React/TypeScript memory desk and typed IPC bridge
+apps/desktop/src/         React/TypeScript Trace desk and typed IPC bridge
 apps/desktop/src-tauri/   native Tauri shell, dialogs and Rust session commands
 assets/                  brand and captured application screenshots
 docs/                    methodology, privacy, commands and roadmap
