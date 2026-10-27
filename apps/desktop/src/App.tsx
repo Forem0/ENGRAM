@@ -43,10 +43,7 @@ type IconName =
   | 'copy'
   | 'check';
 const paths: Record<IconName, string[]> = {
-  map: [
-    'M12 4c-3-3-7 0-6 3-4 0-5 5-2 7-1 4 3 7 6 5l2-2 2 2c3 2 7-1 6-5 3-2 2-7-2-7 1-3-3-6-6-3Z',
-    'M12 4v13M6 7l2 3M4 14l4-1M18 7l-2 3M20 14l-4-1',
-  ],
+  map: ['M13 2 5 13h6l-1 9 9-13h-7l1-7Z'],
   findings: ['M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'],
   timeline: ['M6 3v18M3 6h6M3 12h6M3 18h6M12 6h8M12 12h5M12 18h8'],
   connections: [
@@ -231,13 +228,13 @@ function FilterBar({
 }
 
 const clusterPositions: Record<Category, [number, number, number, number]> = {
-  media: [253, 200, 109, 202],
-  secret: [445, 199, 556, 201],
-  document: [222, 306, 81, 306],
-  browser: [260, 405, 116, 408],
-  message: [466, 307, 579, 308],
-  location: [350, 119, 350, 36],
-  database: [433, 407, 568, 410],
+  media: [150, 145, 150, 78],
+  secret: [550, 145, 550, 78],
+  document: [150, 345, 150, 414],
+  browser: [350, 365, 350, 434],
+  message: [550, 345, 550, 414],
+  location: [350, 105, 350, 38],
+  database: [350, 245, 350, 311],
 };
 
 function jitter(id: string, salt: number): number {
@@ -247,7 +244,7 @@ function jitter(id: string, salt: number): number {
   return ((value >>> 0) % 1000) / 1000;
 }
 
-function MemoryMap({
+function TraceMap({
   caseData,
   edges,
   visible,
@@ -291,11 +288,11 @@ function MemoryMap({
   const visibleEdges = edges.filter(([a, b]) => data.points.has(a) && data.points.has(b));
   const selectedEdges = selected ? new Set(selected.related_ids) : new Set<string>();
   return (
-    <section className="panel map-panel" aria-label="Evidence memory map">
+    <section className="panel map-panel" aria-label="Evidence trace map">
       <div className="panel-heading">
         <div>
-          <span className="eyebrow">THE MEMORY MAP</span>
-          <p>Seven categories. One connected source.</p>
+          <span className="eyebrow">TRACE MAP / LOCAL EVIDENCE</span>
+          <p>Seven categories. Follow their recorded connections.</p>
         </div>
         <span className="map-status">
           <span className="status-dot" />
@@ -303,29 +300,31 @@ function MemoryMap({
         </span>
       </div>
       <svg
-        className="brain-map"
+        className="trace-map"
         viewBox="0 0 700 485"
         role="group"
         aria-label={`Interactive map of ${caseData.findings.length} findings. Select a category or a finding.`}
       >
         <defs>
           <pattern id="map-grid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r=".7" fill="#cfc8b6" opacity=".45" />
+            <path d="M1 0v4M0 1h4" stroke="#bcc2cc" strokeWidth=".6" opacity=".4" />
           </pattern>
         </defs>
         <rect x="5" y="5" width="690" height="475" fill="url(#map-grid)" />
-        <path
-          className="brain-shadow"
-          d="M345 73C321 44 301 60 288 83C258 75 237 91 233 114C204 111 181 131 181 158C156 169 148 197 158 222C140 247 144 278 163 296C150 327 160 352 184 364C180 391 202 415 229 416C244 445 270 451 296 434C320 451 341 441 350 418C361 443 383 450 408 434C434 449 461 441 474 416C504 415 522 392 519 364C546 351 554 327 540 297C559 277 562 246 545 223C555 197 545 169 521 158C520 130 497 111 469 114C464 90 445 78 416 82C403 59 378 46 354 73Z"
-        />
-        <path
-          className="brain-fold"
-          d="M350 81C330 111 370 130 345 161S318 215 345 242C367 263 330 292 344 319S368 378 351 418M287 86C309 112 308 130 282 141S237 151 244 183M184 160C210 145 227 158 222 188S190 222 188 249M164 280C190 264 207 278 212 306S236 348 262 337M185 365C203 342 227 363 246 378S282 404 291 435M414 87C392 111 394 132 418 141S461 151 455 183M518 160C492 144 475 158 479 188S513 221 512 247M538 279C511 263 494 279 488 307S466 349 440 338M518 365C498 343 476 363 455 379S420 404 409 434M277 242C299 223 311 232 319 250M381 250C390 230 405 224 426 242"
-        />
-        <path
-          className="brain-contour"
-          d="M291 169C274 187 293 212 281 224M405 168C422 188 406 207 418 221M278 351C294 330 309 342 315 363M386 363C393 341 405 331 423 351"
-        />
+        <g aria-hidden="true" className="signal-guides">
+          <path className="signal-bolt" d="M386 56 266 245h73l-45 185 149-220h-78l21-154Z" />
+          <path className="signal-rule" d="M28 145h644M28 345h644M150 64v360M550 64v360" />
+          <path
+            className="signal-register"
+            d="M48 35H23v25M652 35h25v25M23 421v25h25M677 421v25h-25"
+          />
+          <text className="signal-reference" x="28" y="240">
+            SOURCE
+          </text>
+          <text className="signal-reference" x="672" y="240" textAnchor="end">
+            LOCAL / 01
+          </text>
+        </g>
         <g aria-hidden="true">
           {visibleEdges.map(([a, b]) => {
             const first = data.points.get(a)!;
@@ -335,7 +334,7 @@ function MemoryMap({
               <path
                 key={JSON.stringify([a, b])}
                 className={`evidence-line ${active ? 'selected' : ''}`}
-                d={`M${first.x},${first.y}Q350,250 ${second.x},${second.y}`}
+                d={`M${first.x},${first.y}H${(first.x + second.x) / 2}V${second.y}H${second.x}`}
               />
             );
           })}
@@ -345,7 +344,14 @@ function MemoryMap({
           const active = category.findings.some((finding) => visibleIds.has(finding.id));
           return (
             <g key={category.id} className={`map-cluster ${active ? '' : 'dimmed'}`}>
-              <circle className="cluster-halo" cx={x} cy={y} r="48" fill={category.color} />
+              <rect
+                className="cluster-halo"
+                x={x - 47}
+                y={y - 44}
+                width="94"
+                height="88"
+                fill={category.color}
+              />
               <g
                 role="button"
                 tabIndex={0}
@@ -364,7 +370,7 @@ function MemoryMap({
                   y={labelY - 13}
                   width="116"
                   height="32"
-                  rx="3"
+                  rx="0"
                   fill="transparent"
                 />
                 <text x={labelX} y={labelY} textAnchor="middle">
@@ -407,16 +413,26 @@ function MemoryMap({
               <title>{point.finding.title}</title>
               <circle className="node-hit" cx={point.x} cy={point.y} r="11" fill="transparent" />
               {(active || linked) && (
-                <circle
-                  cx={point.x}
-                  cy={point.y}
-                  r={active ? 10 : 8}
+                <rect
+                  x={point.x - (active ? 9 : 7)}
+                  y={point.y - (active ? 9 : 7)}
+                  width={active ? 18 : 14}
+                  height={active ? 18 : 14}
+                  transform={`rotate(45 ${point.x} ${point.y})`}
                   fill="none"
-                  stroke={active ? '#b88728' : info.color}
+                  stroke={active ? '#246BFE' : info.color}
                   strokeWidth="1.5"
                 />
               )}
-              <circle cx={point.x} cy={point.y} r={active ? 5 : 3.6} fill={info.color} />
+              <rect
+                className="node-core"
+                x={point.x - 3.5}
+                y={point.y - 3.5}
+                width="7"
+                height="7"
+                transform={`rotate(45 ${point.x} ${point.y})`}
+                fill={info.color}
+              />
             </g>
           );
         })}
@@ -973,7 +989,7 @@ export function App() {
   const [selected, setSelected] = useState<Finding | null>(null);
   const [selectionSource, setSelectionSource] = useState<'current' | 'baseline'>('current');
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
-  const [busy, setBusy] = useState<string | null>('Preparing the memory desk');
+  const [busy, setBusy] = useState<string | null>('Preparing the trace desk');
   const [notice, setNotice] = useState<{ kind: 'error' | 'success' | 'info'; text: string } | null>(
     null,
   );
@@ -1110,9 +1126,9 @@ export function App() {
     <div className="app-shell" data-view={view}>
       <aside className="sidebar">
         <div className="brand">
-          <img src="/mascot.png" alt="ENGRAM brain archivist" />
+          <img src="/mascot.png" alt="ENGRAM cobalt lightning creature" />
           <span>ENGRAM</span>
-          <small>DIGITAL MEMORY / {runtime?.version ?? '0.2.0'}</small>
+          <small>LOCAL TRACES / {runtime?.version ?? '0.2.0'}</small>
         </div>
         <nav className="main-nav" aria-label="Workspace views">
           {VIEWS.map((item, index) => (
@@ -1172,7 +1188,7 @@ export function App() {
           <div className="breadcrumb">
             <span>ENGRAM</span>
             <i>/</i>
-            <span>The memory desk</span>
+            <span>Trace desk</span>
           </div>
           <div className="top-actions">
             <Tag state={bridge.native ? 'offline' : 'preview'}>
@@ -1205,7 +1221,7 @@ export function App() {
           <main className="main-content" id="main-content">
             <div className="view-heading">
               <div>
-                <span className="eyebrow">YOUR DIGITAL MEMORY</span>
+                <span className="eyebrow">YOUR DIGITAL EVIDENCE</span>
                 <h1>{activeView.subtitle}</h1>
                 <p>{activeView.description}</p>
               </div>
@@ -1277,7 +1293,7 @@ export function App() {
                 )}
                 {view === 'map' && (
                   <>
-                    <MemoryMap
+                    <TraceMap
                       caseData={caseData}
                       edges={edges}
                       visible={filtered}
@@ -1287,7 +1303,7 @@ export function App() {
                     />
                     <div className="desk-bottom">
                       <div>
-                        <span className="eyebrow">A NOTE FROM THE ARCHIVE</span>
+                        <span className="eyebrow">FIELD NOTE / 001</span>
                         <p>A remaining copy is a finding. Its history still needs evidence.</p>
                       </div>
                       <button className="button text" onClick={() => setView('modules')}>
@@ -1325,7 +1341,7 @@ export function App() {
             ) : (
               !busy && (
                 <Empty
-                  title="The memory desk is waiting"
+                  title="The trace desk is waiting"
                   action={
                     <button
                       className="button primary"
