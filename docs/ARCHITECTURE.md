@@ -1,6 +1,6 @@
 # Architecture
 
-ENGRAM 0.2 combines a shared Rust analysis workspace, a Tauri 2 native shell, and a React/TypeScript renderer. The CLI and desktop call the same core. The renderer does not contain detection rules or an unrestricted filesystem interface.
+ENGRAM combines a shared Rust analysis workspace, a Tauri 2 native shell, and a React/TypeScript renderer. The CLI and desktop call the same core. The renderer does not contain detection rules or an unrestricted filesystem interface.
 
 ```mermaid
 flowchart TD
@@ -79,8 +79,8 @@ The CLI and desktop backend build from the Rust workspace. The frontend has its 
 
 Future modules should implement the same evidence, bounds, masking and explicit-state conventions. An unavailable reader should explain its limitation rather than fabricate findings.
 
-## Version history
+## Release identity and compatibility
 
-Version 0.1 used egui/eframe. Its released executables and old screenshots remain historical artifacts. The 0.2 migration changes the desktop shell and renderer while retaining schema-1 cases and the shared Rust analysis pipeline. A screenshot must identify which frontend produced it.
+Version 0.3.0 uses the cobalt creature and Trace desk identity, the Tauri desktop and schema-1 case format. The desktop and CLI share the same case validation and comparison behavior.
 
-The preview.2 style update adopts the cobalt creature and Trace desk terminology. Its source does not change the analysis or case format. Published preview.1 packages keep their earlier appearance; new identity captures require their own native verification.
+Every release keeps its own native build and capture provenance. Screenshots must identify their source revision and frontend; earlier binaries or captures are not relabelled as a new interface.

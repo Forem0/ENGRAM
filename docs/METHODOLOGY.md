@@ -23,7 +23,7 @@ The default scan examines at most 25,000 files, reads at most 8 MiB per file and
 | Findings per case | 30,000 |
 | Imported case size | 64 MiB, plus record/graph shape validation |
 
-These are bounds on work the preview attempts, not real-time guarantees: an individual filesystem operation can still wait on the operating system. Readers report truncated coverage. Relationships are bounded as well; the graph is an inspection aid rather than an unlimited all-pairs expansion of duplicate groups.
+These are bounds on work the engine attempts, not real-time guarantees: an individual filesystem operation can still wait on the operating system. Readers report truncated coverage. Relationships are bounded as well; the graph is an inspection aid rather than an unlimited all-pairs expansion of duplicate groups.
 
 The source is never an output destination. SQLite files and the available associated journals are copied into a temporary working area for parsing. The CLI additionally rejects a case destination inside the source and refuses an existing output filename.
 
@@ -43,7 +43,7 @@ These labels are statements about evidence. They are not numerical probabilities
 
 Media inventory records eligible files. A supported backup reader can map a logical path through `Manifest.db` and attempt an association with a supported Photos catalogue. Multiple copies or derivatives can be connected where the engine has evidence for that connection.
 
-An unlinked thumbnail is **not proof of a permanently deleted original**. Other explanations include schema changes, a partial backup, a cloud-only original, an edited derivative or a relationship that the current parser does not recognize. The preview does not recover arbitrary deleted files from raw flash storage.
+An unlinked thumbnail is **not proof of a permanently deleted original**. Other explanations include schema changes, a partial backup, a cloud-only original, an edited derivative or a relationship that the current parser does not recognize. ENGRAM does not recover arbitrary deleted files from raw flash storage.
 
 The existence of residual images is technically plausible and historically documented, but a viral post is not a reproducible test of a particular OS version. Apple also describes a [Recovered album](https://support.apple.com/en-gb/120347) for files present on a device but outside its Photos library. That does not establish that every such file was permanently deleted or kept for Spotlight.
 
@@ -73,7 +73,7 @@ The `source_root` inside an imported case remains inert metadata. Reopening or c
 
 ## iPhone backup limitations
 
-This preview supports a bounded subset of unencrypted local backup data. Encrypted backups are detected and reported rather than treated as empty or partially decrypted. Keychain recovery is not implemented.
+The experimental iPhone reader supports a bounded subset of unencrypted local backup data. Encrypted backups are detected and reported rather than treated as empty or partially decrypted. Keychain recovery is not implemented.
 
 Apple explains that [computer backups exclude some data already synced through iCloud](https://support.apple.com/en-ie/108771), including iCloud Photos. [Encrypted backups](https://support.apple.com/en-ie/108353) may contain classes of data that unencrypted backups do not. [Keychain protection classes](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web) also restrict access and migration. A local backup is not an unrestricted image of the phone.
 

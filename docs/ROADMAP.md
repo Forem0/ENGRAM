@@ -1,45 +1,59 @@
-# Developer Preview roadmap
+# ENGRAM roadmap
 
-The first preview establishes the complete path from an explicitly selected source to a native evidence workspace. Module states are part of the product: **Ready**, **Experimental**, **Planned** and **Unavailable** should describe the actual reader and source.
+ENGRAM already provides the native folder-to-case workflow: choose a source, inspect findings and relationships, save an observation, reopen it and compare snapshots. The Rust engine, Tauri desktop and CLI share the same case model and evidence rules.
 
-The 0.2 source moves the desktop to Tauri 2 and React/TypeScript while preserving the Rust core and CLI. Verification includes frontend tests, native command/session tests and an actual Tauri/WebKit IPC launch. Version 0.1 downloads and screenshots describe the earlier egui interface.
+Reader state is independent of application version. **Ready**, **Experimental**, **Planned** and **Unavailable** describe an implemented reader and its supplied source, not a promise of universal coverage.
 
-## Current foundation
+## Working foundation
 
 - Bounded folder inventory and supported text secret candidates.
-- Masking before persistent secret findings.
-- Exact-content relationships and evidence inspection.
-- Synthetic demo generated through the analysis engine.
-- Local cases, reopening and snapshot comparison.
-- Native category map, findings, timeline, connections and module coverage.
-- Experimental unencrypted iPhone index/Photos association and supported SQLite activity readers.
+- Fully masked values before persistent secret findings.
+- Exact-content relationships and source evidence inspection.
+- Synthetic demonstration generated through the actual analysis engine.
+- Local JSON cases, reopening and snapshot comparison.
+- Trace map, findings, timeline, connections, comparison and module views.
+- Experimental unencrypted iPhone manifest/Photos association and supported SQLite activity readers.
+- Native source/case dialogs and guarded Rust background operations.
 
-## Visual identity update
+## Desktop workflow
 
-The visual identity in `v0.2.0-preview.2` uses the Trace desk and Trace map names, a jagged cobalt-blue creature, warm ivory and charcoal. Existing release artifacts retain their original identity and provenance.
+Version 0.3.0 develops the working Trace desk with a clearer source-to-case walkthrough, a six-view showcase and interface refinements. The jagged cobalt creature, warm ivory and charcoal remain the visual identity. Release downloads and screenshot provenance must follow verified artifacts rather than source-only claims.
+
+Next interface work should improve tasks people can complete: locating a source, understanding partial coverage, finding a specific artifact, following an evidence link and comparing a later observation. Keyboard and assistive-technology coverage are part of that work.
 
 ## Reader validation
 
-The next priority is reproducible fixtures across supported operating system and application versions, with a published compatibility matrix. Unknown schemas must remain visible as unsupported or partial coverage.
+The next parser priority is reproducible fixtures across supported operating-system and application versions, with a published compatibility matrix. Unknown schemas must remain visible as unsupported or partial coverage.
 
-Useful additions include more Photos catalogue schemas, explicit timestamp semantics, stronger derivative association and richer supported-browser records. These require tests demonstrating the claimed behavior, not only a screen that looks convincing.
+Useful additions include:
+
+- More supported Photos catalogue schemas.
+- Explicit timestamp meanings for each supported source.
+- Stronger, documented derivative associations.
+- Richer browser metadata where it can be retained without exporting private URL components.
+- More malformed-input, truncation and unsupported-schema fixtures.
+
+A new support claim needs a test demonstrating its behavior and limitations.
 
 ## Experimental research
 
 - Deleted-record reconstruction from suitable SQLite main files and journals.
-- Locally unlocked encrypted backup support using the owner's supplied password.
+- Locally unlocked encrypted backups using the owner's supplied password.
 - Image metadata and optional local OCR, with explicit sensitive-content controls.
-- Better cross-snapshot identity and explanation of changed findings.
+- Better cross-snapshot identity and explanations for changed findings.
 
-These are roadmap items, not capabilities of the current preview. Encryption or overwritten bytes can make recovery unavailable.
+These are research items, not current capabilities. Encryption, missing source material and overwritten bytes can make recovery unavailable.
 
-## Distribution
+## Distribution and verification
 
-- Verify packaged builds on Windows, macOS and Linux.
+- Continue native Windows, macOS and Linux packaging and checks.
+- Exercise packaged executables on their target platforms.
 - Add platform-appropriate signing and notarization.
-- Improve keyboard and assistive-technology coverage.
-- Publish support statements tied to tested artifacts and fixtures.
+- Tie runtime support statements to tested artifacts and fixtures.
+- Capture all workspace views from actual native application windows.
+
+Previous releases retain their original binaries, appearance and provenance. A screenshot from an earlier build is not evidence that a new native build ran.
 
 ## Boundaries that remain
 
-ENGRAM will not turn permission presence into proof of access, validate discovered credentials against online accounts, or present an absent finding as a guarantee of secure erasure. The source and evidence must remain reviewable as the project grows.
+ENGRAM will not turn permission presence into proof of access, validate discovered credentials against online accounts, or present an absent finding as a guarantee of secure erasure. The source and evidence remain reviewable as the project grows.
