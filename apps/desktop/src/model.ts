@@ -77,7 +77,7 @@ export const VIEWS: { id: View; name: string; subtitle: string; description: str
     name: 'Trace map',
     subtitle: 'Find what remains.',
     description:
-      'A map of the artifacts preserved in this source. Every connection has evidence behind it.',
+      'Inspect the artifacts in your source. Select a trace to follow its recorded evidence.',
   },
   {
     id: 'findings',

@@ -343,7 +343,10 @@ function TraceMap({
           const [x, y, labelX, labelY] = clusterPositions[category.id];
           const active = category.findings.some((finding) => visibleIds.has(finding.id));
           return (
-            <g key={category.id} className={`map-cluster ${active ? '' : 'dimmed'}`}>
+            <g
+              key={category.id}
+              className={`map-cluster ${active ? '' : 'dimmed'} ${selected?.category === category.id ? 'current' : ''}`}
+            >
               <rect
                 className="cluster-halo"
                 x={x - 47}
@@ -781,7 +784,7 @@ function Compare({
           }
         >
           Saved cases are compared by the Rust engine. No comparison result is simulated in this
-          browser preview.
+          browser demonstration.
         </Empty>
       )}
     </div>
@@ -1128,7 +1131,7 @@ export function App() {
         <div className="brand">
           <img src="/mascot.png" alt="ENGRAM cobalt lightning creature" />
           <span>ENGRAM</span>
-          <small>LOCAL TRACES / {runtime?.version ?? '0.2.0'}</small>
+          <small>TRACE DESK / {runtime?.version ?? '0.3.0'}</small>
         </div>
         <nav className="main-nav" aria-label="Workspace views">
           {VIEWS.map((item, index) => (
@@ -1180,7 +1183,9 @@ export function App() {
               <span>Your sources stay on your device.</span>
             </div>
           </div>
-          <span className="sidebar-version">DEVELOPER PREVIEW</span>
+          <span className="sidebar-version">
+            {bridge.native ? 'DESKTOP APPLICATION' : 'BROWSER DEMONSTRATION'}
+          </span>
         </div>
       </aside>
       <div className="workspace">
@@ -1188,14 +1193,14 @@ export function App() {
           <div className="breadcrumb">
             <span>ENGRAM</span>
             <i>/</i>
-            <span>Trace desk</span>
+            <strong>Trace desk</strong>
           </div>
           <div className="top-actions">
-            <Tag state={bridge.native ? 'offline' : 'preview'}>
-              {bridge.native ? 'Local workspace' : 'Browser preview · synthetic data'}
+            <Tag state={bridge.native ? 'offline' : 'demo'}>
+              {bridge.native ? 'Local workspace' : 'Browser demo · synthetic data'}
             </Tag>
             {caseData?.source_kind === 'demo' && bridge.native && (
-              <Tag state="preview">Synthetic demo</Tag>
+              <Tag state="demo">Synthetic demo</Tag>
             )}
             <button
               className="button secondary"
@@ -1364,8 +1369,8 @@ export function App() {
                 {caseData ? sourceLabel(caseData.source_kind) : 'No source selected'}
               </span>
               <span>
-                ENGRAM / schema {caseData?.schema_version ?? runtime?.schema_version ?? 1} /{' '}
-                {bridge.native ? 'Rust + Tauri' : 'React preview'}
+                ENGRAM / case format {caseData?.schema_version ?? runtime?.schema_version ?? 1} /{' '}
+                {bridge.native ? 'Offline analysis' : 'Browser demo'}
               </span>
             </footer>
           </main>
