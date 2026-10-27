@@ -2,7 +2,7 @@ mod commands;
 mod session;
 
 use session::{DesktopState, Launch};
-use tauri::{webview::NewWindowResponse, Manager, WebviewWindowBuilder};
+use tauri::{webview::NewWindowResponse, WebviewWindowBuilder};
 
 pub fn run() {
     let launch = match Launch::parse(std::env::args().skip(1)) {
