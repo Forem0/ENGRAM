@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.2.0-preview.2 — Visual identity update](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2) — 2026-10-27 (release pending)
+## [0.2.0-preview.2 — Visual identity update](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2) — 2026-10-27
 
 - Adopt the user-selected jagged cobalt-blue lightning creature, warm ivory and charcoal.
 - Use the Trace desk and Trace map names with the slogan "Find what remains."
 - Refresh application artwork, active controls and map styling while preserving the Rust analysis engine, CLI, schema-1 cases, evidence rules and coverage statements.
 
-This is an unreleased style update until its native builds and captures are verified. The application version remains 0.2.0. The published preview.1 artifacts remain unchanged and retain their earlier identity.
+The application version remains 0.2.0. Verified by the [cross-platform checks and native Tauri/IPC captures](https://github.com/Forem0/ENGRAM/actions/runs/40585483665) and [three-platform native package build](https://github.com/Forem0/ENGRAM/actions/runs/40585602758), from [source 9709cd8](https://github.com/Forem0/ENGRAM/commit/9709cd8f7e7b453da952eef9eba5d4d7f225922a). The published preview.1 artifacts remain unchanged.
 
 ## [0.2.0 — Tauri Developer Preview](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1) — 2026-10-27
 

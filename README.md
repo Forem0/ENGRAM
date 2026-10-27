@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2"><img alt="Style preview 2 — release pending" src="https://img.shields.io/badge/preview.2-pending-246BFE?style=flat-square&labelColor=171B24" /></a>
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2"><img alt="Developer Preview 2" src="https://img.shields.io/badge/preview-0.2.0_preview.2-246BFE?style=flat-square&labelColor=171B24" /></a>
   <img alt="Tauri 2 and React" src="https://img.shields.io/badge/desktop-Tauri_2_%2B_React-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-F4F0E5?style=flat-square&labelColor=171B24" />
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Inspect the traces preserved in your files and backups.</strong><br/>A native workspace for media, documents, secret candidates and the connections between them.</p>
 
-<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2">Preview 2 downloads — pending</a> · <a href="#start-with-the-demo">Build the desktop</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2">Download Preview 2</a> · <a href="#start-with-the-demo">Build the desktop</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
 ## Find what remains.
 
@@ -23,13 +23,13 @@ The desktop uses **Tauri 2 with React and TypeScript**, backed by the same Rust 
 
 ## The workspace
 
-The current source styles the Trace desk in warm ivory, charcoal and electric cobalt, with the user-selected jagged lightning creature. The SVG Trace map, keyboard-friendly controls, shared filters and persistent evidence inspector keep source evidence within reach. Source operations use native dialogs and the Rust command bridge.
+The Trace desk pairs warm ivory, charcoal and electric cobalt with ENGRAM's jagged lightning creature. The SVG Trace map, keyboard-friendly controls, shared filters and persistent evidence inspector keep source evidence within reach. Source operations use native dialogs and the Rust command bridge.
 
-![Earlier preview.1 Tauri capture with the original visual identity and a synthetic demonstration](assets/screenshots/workspace.png)
+![ENGRAM Trace desk running a synthetic demonstration in the native Tauri app](assets/screenshots/workspace.png)
 
 [Findings](assets/screenshots/findings.png) · [Timeline](assets/screenshots/timeline.png) · [Connections](assets/screenshots/connections.png) · [Capture provenance](assets/screenshots/README.md)
 
-The existing captures come from the [original verified Tauri/IPC run](https://github.com/Forem0/ENGRAM/actions/runs/40575727550), using synthetic sources processed by the shared Rust engine. They show the previous visual identity. New style-update captures and `v0.2.0-preview.2` downloads are pending verification. Published preview.1 binaries retain their original appearance; the [0.1 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1) retains the historical egui interface.
+These are actual native Tauri captures from the [cross-platform checks and Linux Tauri/IPC run](https://github.com/Forem0/ENGRAM/actions/runs/40585483665), using synthetic sources processed by the shared Rust engine. See the [captured source](https://github.com/Forem0/ENGRAM/commit/9709cd8f7e7b453da952eef9eba5d4d7f225922a) and [capture provenance](assets/screenshots/README.md).
 
 - **Trace map** — category clusters and recorded relationships; open a cluster to inspect its findings.
 - **Findings** — search, filter and inspect the exact source and rule behind an artifact.
@@ -60,7 +60,7 @@ An experimental parser can work for a supported source while remaining incomplet
 
 ## Start with the demo
 
-The style update targets [Developer Preview 2](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2); its downloads remain pending until the new native builds are verified. The [published preview.1 packages](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.1) retain the previous identity. Packages target **Windows x64**, **macOS Apple Silicon (arm64)** and **Linux x64**, with the CLI, SHA-256 checksums and build provenance. These are unsigned preview builds; the macOS application is not notarized. The Windows portable ZIP requires Microsoft Edge WebView2 Runtime, and the Linux binary requires GTK 3 and WebKitGTK 4.1 runtime libraries. See [platform prerequisites](docs/BUILDING.md).
+Download [Developer Preview 2](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2) for **Windows x64**, **macOS Apple Silicon (arm64)** or **Linux x64**, with the CLI, SHA-256 checksums and [native build provenance](https://github.com/Forem0/ENGRAM/actions/runs/40585602758). These are unsigned preview builds; the macOS application is not notarized. The Windows portable ZIP requires Microsoft Edge WebView2 Runtime, and the Linux binary requires GTK 3 and WebKitGTK 4.1 runtime libraries. See [platform prerequisites](docs/BUILDING.md).
 
 To build the current Tauri desktop from source, use Node.js 24, a compatible Rust toolchain and the same platform prerequisites:
 
