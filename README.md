@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <img alt="Developer Preview" src="https://img.shields.io/badge/release-developer_preview-C59839?style=flat-square&labelColor=191A18" />
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1"><img alt="Download Developer Preview" src="https://img.shields.io/badge/download-developer_preview-C59839?style=flat-square&labelColor=191A18" /></a>
   <img alt="Native Rust" src="https://img.shields.io/badge/native-Rust-E9DFC5?style=flat-square&labelColor=191A18" />
   <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-E9DFC5?style=flat-square&labelColor=191A18" />
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-E9DFC5?style=flat-square&labelColor=191A18" /></a>
@@ -10,7 +10,7 @@
 
 <p align="center"><strong>Inspect the traces preserved in your files and backups.</strong><br/>A native workspace for media, documents, secret candidates and the connections between them.</p>
 
-<p align="center"><a href="#start-with-the-demo">Try the demo</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a> · <a href="README.ru.md">Русский</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1">Download</a> · <a href="#start-with-the-demo">Try the demo</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a> · <a href="README.ru.md">Русский</a></p>
 
 ## A brain for your digital past
 
@@ -54,6 +54,10 @@ The demonstration is generated from synthetic files and run through the real eng
 An experimental parser can work for a supported source while remaining incomplete across OS and application versions. ENGRAM reports unsupported data and read limits instead of treating missing coverage as a clean result.
 
 ## Start with the demo
+
+[Download the native Developer Preview](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1) for Windows x64, macOS Apple Silicon or Linux x64. The Windows ZIP includes a `START-HERE.txt` guide. The packages are unsigned preview builds; checksums and build provenance accompany them.
+
+To build from source:
 
 Use a Rust toolchain compatible with the workspace. Native builds also need the platform's usual C/C++ linker and desktop libraries; see [building](docs/BUILDING.md).
 

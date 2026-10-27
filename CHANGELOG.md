@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 — Developer Preview
+## [0.1.0 — Developer Preview](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1) — 2026-10-27
 
 Initial native Rust workspace for inspecting explicitly selected offline evidence.
 
