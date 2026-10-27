@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "ENGRAM — The memory desk",
+        "title": "ENGRAM — Trace desk",
         "width": 1440,
         "height": 940,
         "minWidth": 1024,
@@ -22,7 +22,7 @@
         "center": true,
         "create": false,
         "dragDropEnabled": false,
-        "backgroundColor": "#F4F0E4"
+        "backgroundColor": "#F4F0E5"
       }
     ],
     "security": {
@@ -36,8 +36,8 @@
     "active": true,
     "targets": "all",
     "category": "Utility",
-    "shortDescription": "A brain for your digital past.",
-    "longDescription": "An offline memory desk for inspecting selected files and backups. Shared Rust analysis, masked candidates and traceable evidence.",
+    "shortDescription": "Find what remains.",
+    "longDescription": "An offline trace desk for inspecting selected files and backups. Shared Rust analysis, masked candidates and traceable evidence.",
     "icon": ["icons/icon.png", "icons/icon.ico", "icons/icon.icns"]
   }
 }
