@@ -2,15 +2,15 @@
 
 # ENGRAM
 
-[Скачать Developer Preview для Windows, macOS и Linux](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1). В Windows ZIP есть приложение, CLI, документация и файл `START-HERE.txt`.
+Исходники версии 0.2 переходят на **Tauri 2, React и TypeScript**. [Релиз 0.1](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1) использует прежний интерфейс egui. Ссылки на новые пакеты и проверенные снимки Tauri появятся после завершения сборок.
 
-Нативное приложение на Rust для изучения цифровых следов в выбранных файлах и локальных резервных копиях. Фотографии, документы, возможные секреты и связи между находками — в одном рабочем пространстве.
+Нативное приложение для изучения цифровых следов в выбранных файлах и локальных резервных копиях. React отвечает за рабочее пространство; общее Rust-ядро — за анализ, проверку дел и сохранение. Фотографии, документы, возможные секреты и связи между находками находятся в одном интерфейсе.
 
 **Developer Preview.** В первой версии есть рабочее ядро анализа и экспериментальные парсеры. Это не обещание восстановить любые удалённые данные и не доказательство того, что стороннее приложение читало ваши файлы.
 
 [English](README.md) · [Методика](docs/METHODOLOGY.md) · [Команды](docs/COMMANDS.md) · [Приватность](docs/PRIVACY.md)
 
-![Нативный интерфейс ENGRAM с явно отмеченными синтетическими данными](assets/screenshots/workspace.png)
+В версии 0.2 интерфейс построен вокруг карты памяти, фильтров и постоянного инспектора доказательств. Исторические снимки egui не представляют новую версию. Проверка Tauri включает запуск настоящего окна и вызов Rust-команд; браузерная демонстрация отмечается отдельно.
 
 ## Что умеет эта версия
 
@@ -28,17 +28,21 @@
 
 ## Запуск
 
-Нужен Rust и обычные для вашей ОС инструменты нативной сборки. Подробности — в [BUILDING.md](docs/BUILDING.md).
+Нужны Node.js 24, Rust и системные зависимости Tauri: WebView2 на Windows, WebKitGTK 4.1 на Linux, инструменты Xcode на macOS. Подробности — в [BUILDING.md](docs/BUILDING.md).
 
 ```bash
 git clone https://github.com/Forem0/ENGRAM.git
 cd ENGRAM
-cargo run -p engram-desktop -- --demo
+cd apps/desktop
+npm ci
+npm run tauri -- dev -- -- --demo
 ```
 
 Демонстрация использует сгенерированные тестовые файлы и настоящее ядро анализа. Личные папки автоматически не сканируются. Для реальной проверки выберите источник явно.
 
-CLI использует то же ядро:
+Команда `npm run dev` без Tauri открывает только браузерную демонстрацию с тестовым делом, сгенерированным Rust CLI. Выбор настоящего источника и операции с делами требуют нативного приложения.
+
+CLI использует то же ядро. Из корня репозитория:
 
 ```bash
 cargo run -p engram-cli -- doctor
@@ -60,9 +64,16 @@ cargo run -p engram-cli -- inspect ./sample.engram.json --json
 
 ```bash
 cargo fmt --all -- --check
-cargo test -p engram-core -p engram-cli
-cargo clippy --workspace --all-targets -- -D warnings
-cargo build -p engram-desktop --release
+cargo test -p engram-core -p engram-cli --locked
+cd apps/desktop
+npm ci
+npm run format:check
+npm run typecheck
+npm test
+npm run build
+cd ../..
+cargo test -p engram-desktop --features engram-desktop/custom-protocol --locked
+cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
 ```
 
 [Лицензия MIT](LICENSE).

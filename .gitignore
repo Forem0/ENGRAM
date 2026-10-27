@@ -2,6 +2,12 @@
 /.engram/
 /cases/
 /exports/
+node_modules/
+/apps/desktop/dist/
+/apps/desktop/.vite/
+/apps/desktop/coverage/
+/apps/desktop/src-tauri/gen/
+*.tsbuildinfo
 *.log
 *.tmp
 .DS_Store

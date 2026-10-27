@@ -1,8 +1,23 @@
 # Changelog
 
+## 0.2.0 — Tauri Developer Preview (unreleased)
+
+The desktop source moves from egui to a Tauri 2 shell and a React/TypeScript memory desk. The shared Rust engine and CLI remain the analysis and case format authority.
+
+- Typed frontend-to-Rust commands with native source/case dialogs and guarded background operations.
+- React memory map, filters, evidence inspector, timeline, connections, comparison and module states.
+- Browser-only synthetic preview with an actual Rust-generated fixture and explicit native-operation boundaries.
+- Frontend type checking and Vitest, native command/session tests, and three-platform locked Rust checks.
+- Native Linux Tauri/WebKit startup and IPC smoke verification with actual window captures.
+- Platform preview packaging with WebView2/WebKit runtime requirements and a macOS application bundle.
+
+Release target: `v0.2.0-preview.1`. Download availability and verification evidence are added only after those builds complete.
+
 ## [0.1.0 — Developer Preview](https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1) — 2026-10-27
 
 Initial native Rust workspace for inspecting explicitly selected offline evidence.
+
+This historical release uses the original egui/eframe interface. Its binaries and screenshots are distinct from the 0.2 Tauri migration.
 
 - Interactive memory map, searchable findings, evidence inspector, timeline and case comparison.
 - Bounded file inventory, exact-copy relationships and masked secret candidates.
