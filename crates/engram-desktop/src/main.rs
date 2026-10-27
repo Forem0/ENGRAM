@@ -35,7 +35,11 @@ fn main() -> eframe::Result {
     }
     let image = image::load_from_memory(include_bytes!("../../../assets/mascot.png"))
         .ok()
-        .map(|image| image.resize(128, 128, image::imageops::FilterType::Lanczos3).into_rgba8());
+        .map(|image| {
+            image
+                .resize(128, 128, image::imageops::FilterType::Lanczos3)
+                .into_rgba8()
+        });
     let mut viewport = eframe::egui::ViewportBuilder::default()
         .with_title("ENGRAM — The memory desk")
         .with_inner_size([1440.0, 940.0])
@@ -49,7 +53,11 @@ fn main() -> eframe::Result {
     }
     eframe::run_native(
         "ENGRAM",
-        eframe::NativeOptions { viewport, renderer: eframe::Renderer::Glow, ..Default::default() },
+        eframe::NativeOptions {
+            viewport,
+            renderer: eframe::Renderer::Glow,
+            ..Default::default()
+        },
         Box::new(move |cc| Ok(Box::new(app::EngramApp::new(cc, launch)))),
     )
 }
