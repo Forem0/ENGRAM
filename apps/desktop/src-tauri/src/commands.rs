@@ -9,7 +9,7 @@ fn require_main(window: &WebviewWindow) -> Result<(), String> {
     if window.label() == "main" {
         Ok(())
     } else {
-        Err("Evidence commands are restricted to the main memory desk.".into())
+        Err("Evidence commands are restricted to the main trace desk.".into())
     }
 }
 
