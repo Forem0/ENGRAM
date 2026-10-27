@@ -567,9 +567,9 @@ impl Engine<'_> {
         connection.set_limit(
             rusqlite::limits::Limit::SQLITE_LIMIT_LENGTH,
             16 * 1024 * 1024,
-        );
-        connection.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_SQL_LENGTH, 64 * 1024);
-        connection.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_EXPR_DEPTH, 64);
+        )?;
+        connection.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_SQL_LENGTH, 64 * 1024)?;
+        connection.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_EXPR_DEPTH, 64)?;
         let query_started = Instant::now();
         connection.progress_handler(
             1_000,
