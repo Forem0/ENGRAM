@@ -783,8 +783,9 @@ function Compare({
               : 'Comparison is available in the desktop app'
           }
         >
-          Saved cases are compared by the Rust engine. No comparison result is simulated in this
-          browser demonstration.
+          {bridge.native
+            ? 'Choose a saved case to compare it with the current observation.'
+            : 'Saved cases are compared by the Rust engine in the desktop app.'}
         </Empty>
       )}
     </div>
