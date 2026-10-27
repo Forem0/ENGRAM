@@ -124,7 +124,7 @@ pub fn read_case(path: &Path) -> Result<Case, EngramError> {
     }
     if case.findings.len() > MAX_FINDINGS || case.events.len() > MAX_FINDINGS {
         return Err(EngramError::Input(
-            "Case contains more records than this preview supports.".into(),
+            "Case contains more records than this application supports.".into(),
         ));
     }
     if case.id.is_empty()
