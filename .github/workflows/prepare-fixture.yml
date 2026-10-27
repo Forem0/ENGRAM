@@ -1,0 +1,26 @@
+name: Generate synthetic browser fixture
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fixture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Generate the fixture with the actual Rust engine
+        run: |
+          mkdir -p generated-fixture
+          cargo run -p engram-cli --locked -- demo --out generated-fixture/demo-case.json
+          cargo run -p engram-cli --locked -- inspect generated-fixture/demo-case.json --json > generated-fixture/inspection.json
+          git rev-parse HEAD > generated-fixture/SOURCE.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-browser-fixture
+          path: generated-fixture/
+          if-no-files-found: error
