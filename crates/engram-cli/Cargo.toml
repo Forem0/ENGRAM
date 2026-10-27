@@ -1,0 +1,20 @@
+[package]
+name = "engram-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Offline evidence inspection and case comparison for ENGRAM"
+
+[[bin]]
+name = "engram"
+path = "src/main.rs"
+
+[dependencies]
+engram-core = { path = "../engram-core" }
+clap = { version = "4", features = ["derive"] }
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
