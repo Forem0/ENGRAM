@@ -10,7 +10,7 @@
 
 <p align="center"><strong>Inspect the traces preserved in your files and backups.</strong><br/>A native workspace for media, documents, secret candidates and the connections between them.</p>
 
-<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1">Download</a> · <a href="#start-with-the-demo">Try the demo</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a> · <a href="README.ru.md">Русский</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.1.0-preview.1">Download</a> · <a href="#start-with-the-demo">Try the demo</a> · <a href="#what-works">Capabilities</a> · <a href="docs/METHODOLOGY.md">Methodology</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
 ## A brain for your digital past
 
