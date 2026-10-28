@@ -6,12 +6,16 @@
 mod database;
 mod demo;
 pub mod model;
+mod review;
 mod scan;
 mod secrets;
 mod storage;
 
 pub use demo::{create_demo_fixture, demo_case};
 pub use model::*;
+pub use review::{
+    validate_review, MAX_REVIEW_ANNOTATIONS, MAX_REVIEW_NOTE_BYTES, MAX_REVIEW_TOTAL_NOTE_BYTES,
+};
 pub use scan::scan_path;
 pub use storage::{compare_cases, read_case, write_case};
 

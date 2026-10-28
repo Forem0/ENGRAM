@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -138,6 +139,42 @@ pub struct ScanEvent {
     pub category: Option<Category>,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ReviewStatus {
+    #[default]
+    Unreviewed,
+    NeedsReview,
+    Reviewed,
+}
+
+impl<'de> Deserialize<'de> for ReviewStatus {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        match String::deserialize(deserializer)?.as_str() {
+            "unreviewed" => Ok(Self::Unreviewed),
+            "needs_review" => Ok(Self::NeedsReview),
+            "reviewed" => Ok(Self::Reviewed),
+            _ => Err(serde::de::Error::custom("Invalid case-review status.")),
+        }
+    }
+}
+
+/// Analyst-authored metadata, separate from source evidence. An absent entry has
+/// the same semantics as this type's default value. Present JSON entries must
+/// supply all three fields so malformed renderer requests fail closed.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ReviewAnnotation {
+    pub bookmarked: bool,
+    pub status: ReviewStatus,
+    pub note: String,
+}
+
+pub type CaseReview = BTreeMap<String, ReviewAnnotation>;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Case {
     pub schema_version: u32,
@@ -152,6 +189,8 @@ pub struct Case {
     pub stats: CaseStats,
     pub modules: Vec<ModuleStatus>,
     pub events: Vec<ScanEvent>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub review: CaseReview,
 }
 
 #[derive(Debug, Clone)]

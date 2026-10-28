@@ -188,6 +188,7 @@ pub fn demo_case() -> Case {
             stats: CaseStats::default(),
             modules: Vec::new(),
             events: Vec::new(),
+            review: Default::default(),
         },
     }
 }

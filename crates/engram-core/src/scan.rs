@@ -211,7 +211,7 @@ pub fn scan_path(path: &Path, options: &ScanOptions) -> Result<Case, EngramError
         case: Case { schema_version: 1, id, title, source_root: root.to_string_lossy().into_owned(), source_kind, created_at: now, completed_at: now, findings: Vec::new(), warnings: vec![
             "Results describe only the selected offline source at scan time; missing data does not establish secure deletion or complete device coverage.".into(),
             "Candidate credentials are not validated. Secret values, message bodies and private URL components are not exported.".into(),
-        ], stats: CaseStats::default(), modules: modules(), events: Vec::new() },
+        ], stats: CaseStats::default(), modules: modules(), events: Vec::new(), review: Default::default() },
         file_groups: HashMap::new(), secret_groups: HashMap::new(), finding_ids: HashSet::new(), photos: Vec::new(), inputs: Vec::new(),
     };
     engine.event("Opened explicitly selected offline source", None);
