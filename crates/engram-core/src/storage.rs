@@ -1,4 +1,4 @@
-use crate::{Case, CaseDiff, EngramError, MAX_FINDINGS};
+use crate::{validate_review, Case, CaseDiff, EngramError, MAX_FINDINGS};
 use std::{
     collections::{BTreeMap, HashSet},
     fs,
@@ -9,6 +9,13 @@ use std::{
 const MAX_CASE_BYTES: u64 = 64 * 1024 * 1024;
 
 pub fn write_case(case: &Case, destination: &Path) -> Result<(), EngramError> {
+    let review = validate_review(&case.findings, &case.review)?;
+    let normalized_case = (review != case.review).then(|| {
+        let mut normalized = case.clone();
+        normalized.review = review;
+        normalized
+    });
+    let persisted = normalized_case.as_ref().unwrap_or(case);
     let destination = validate_destination(case, destination)?;
     let parent = destination
         .parent()
@@ -17,8 +24,13 @@ pub fn write_case(case: &Case, destination: &Path) -> Result<(), EngramError> {
     // Resolve the now-existing parent a second time before creating the output.
     validate_destination(case, &destination)?;
     let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
-    serde_json::to_writer_pretty(&mut temporary, case)?;
+    serde_json::to_writer_pretty(&mut temporary, persisted)?;
     temporary.write_all(b"\n")?;
+    if temporary.as_file().metadata()?.len() > MAX_CASE_BYTES {
+        return Err(EngramError::Input(
+            "Saved case would exceed the 64 MiB import limit; no output file was created.".into(),
+        ));
+    }
     temporary.as_file().sync_all()?;
     temporary
         .persist_noclobber(&destination)
@@ -115,7 +127,7 @@ pub fn read_case(path: &Path) -> Result<Case, EngramError> {
     if bytes.len() as u64 > MAX_CASE_BYTES {
         return Err(EngramError::Input("Case size limit exceeded.".into()));
     }
-    let case: Case = serde_json::from_slice(&bytes)?;
+    let mut case: Case = serde_json::from_slice(&bytes)?;
     if case.schema_version != 1 {
         return Err(EngramError::Input(format!(
             "Unsupported case schema {}. This build supports schema 1.",
@@ -187,6 +199,7 @@ pub fn read_case(path: &Path) -> Result<Case, EngramError> {
             "Case contains a dangling or self-referencing evidence connection.".into(),
         ));
     }
+    case.review = validate_review(&case.findings, &case.review)?;
     Ok(case)
 }
 

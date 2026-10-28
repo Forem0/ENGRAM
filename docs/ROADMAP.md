@@ -11,15 +11,17 @@ Reader state is independent of application version. **Ready**, **Experimental**,
 - Exact-content relationships and source evidence inspection.
 - Synthetic demonstration generated through the actual analysis engine.
 - Local JSON cases, reopening and snapshot comparison.
+- Optional review metadata: finding bookmarks, review states and plain-text notes saved with a case.
+- Structured literal search, review filters and bounded map pan/zoom.
 - Trace map, findings, timeline, connections, comparison and module views.
 - Experimental unencrypted iPhone manifest/Photos association and supported SQLite activity readers.
 - Native source/case dialogs and guarded Rust background operations.
 
 ## Desktop workflow
 
-Version 0.4.0 brings the selected Atlas Focus design into the Trace desk: graphite surfaces, compact source controls, readable file relationships, coordinated category accents and a persistent evidence inspector. The jagged cobalt creature remains the brand mark. The six workspace views retain their source-to-case workflows and the shared engine's evidence rules. Release downloads and screenshot provenance must follow verified artifacts rather than source-only claims.
+Version 0.5.0 adds the review workflow to Atlas Focus: bookmarks and review states, plain-text notes, field/phrase/exclusion search, real map pan/zoom, selection fitting and keyboard shortcuts. The save-case path validates review metadata against the actual active snapshot. Unsaved-review prompts protect ordinary case replacement and desktop closing; source evidence and engine confidence remain separate from analyst annotations. Release downloads and screenshot provenance follow completed verification for their own source.
 
-Next interface work should improve tasks people can complete: locating a source, understanding partial coverage, finding a specific artifact, following an evidence link and comparing a later observation. Keyboard and assistive-technology coverage are part of that work.
+Next interface work should strengthen reproducible native interaction coverage, accessibility across platforms, source-specific diagnostics and review ergonomics. Keep older schema-1 cases readable and preserve the bounds and provenance of optional review metadata.
 
 ## Reader validation
 
