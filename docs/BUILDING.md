@@ -91,6 +91,8 @@ The Linux CI smoke job runs the actual Tauri executable under Xvfb and a D-Bus s
 
 CI then captures the visible native window with ImageMagick before the delayed process exit. The artifact contains PNG captures, per-view IPC logs and a freshly generated `demo-case.json`. This evidence is separate from browser/Playwright fixture captures.
 
+The six Atlas Focus views in the README come from the [passing 0.4.0 cross-platform and native Tauri/IPC checks](https://github.com/Forem0/ENGRAM/actions/runs/40694985190), using [source b7e7e9f](https://github.com/Forem0/ENGRAM/commit/b7e7e9fb4e4fbd3234ed2955b39f58c128566e60). The map, findings, timeline, connections, baseline-selection state and module coverage are actual native captures with a synthetic case. Their hashes and execution evidence are recorded in [capture provenance](../assets/screenshots/README.md).
+
 The Atlas Focus illustrations under `assets/design/atlas-focus/` record the selected visual direction. They are not native captures and must not be used to establish that a build or command bridge ran. The PNGs under `assets/screenshots/` carry their own release/source provenance.
 
 No WebKit sandbox-disabling option is set. A native smoke failure must remain a failure; do not replace its screenshot with a browser image or an earlier egui capture.
@@ -102,5 +104,7 @@ The CI prepare job checks the committed Rust lockfile. If the Tauri migration re
 ## Build artifacts
 
 The manually dispatched [Build artifacts workflow](../.github/workflows/build-artifacts.yml) requires the committed lockfile, tests the frontend/backend, builds through the Tauri CLI and uploads platform archives with SHA-256 checksums. Windows gets a portable ZIP; Linux gets a binary tar archive with runtime prerequisites; macOS gets a tar archive containing the proper `.app` bundle. Each includes the CLI and documentation.
+
+The [0.4.0 package build](https://github.com/Forem0/ENGRAM/actions/runs/40695041263) records the three platform jobs. Published [0.4.0 release downloads](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) include archive checksums and build provenance; earlier release archives retain their own interface and source.
 
 The workflow does not publish a release or install signing credentials. A successful compile is not a substitute for exercising the packaged executable on its target platform. Release availability, provenance and download links are updated only after build artifacts are actually verified and published.
