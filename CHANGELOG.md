@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 — Review workspace — 2026-10-28
+## [0.5.0 — Review workspace](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) — 2026-10-28
 
 - Add finding bookmarks, Unreviewed / Needs review / Reviewed states, and plain-text analyst notes in the persistent inspector.
 - Persist validated, bounded annotations in an optional schema-1 `review` map when saving a new case; older schema-1 cases open with an empty review.
@@ -10,7 +10,9 @@
 - Add search/workspace shortcuts and unsaved-review prompts before case replacement or desktop close. Cancelled or failed saves keep the review dirty.
 - Keep baseline review annotations read-only and evidence comparison independent of review-only edits.
 
-The 0.5.0 source has frontend verification; native execution, package availability and fresh screenshots are recorded only after their own completed verification. Existing 0.4.0 captures remain labelled as 0.4.0 until they are replaced with verified 0.5.0 native captures. Analyst notes are plaintext metadata in the saved case.
+Application and CLI version metadata is aligned with 0.5.0. The gallery contains six actual 1440 × 940 native captures from [source 023d641](https://github.com/Forem0/ENGRAM/commit/023d64122c28e35fd8d84fcea9477d8f4f21710c), exercised by the [successful Tauri/IPC capture job](https://github.com/Forem0/ENGRAM/actions/runs/40766085166/job/123090713655). The [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40768086711) records the frontend and platform checks. Platform archives are produced by the [Build artifacts workflow](https://github.com/Forem0/ENGRAM/actions/workflows/build-artifacts.yml); published downloads carry their own checksums and exact build provenance.
+
+Case schema remains 1 with an optional review map. Analyst notes are plaintext metadata in the saved case. Earlier releases retain their original screenshots, interface and provenance.
 
 ## [0.4.0 — Atlas Focus interface](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) — 2026-10-28
 

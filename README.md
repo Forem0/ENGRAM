@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0"><img alt="Desktop app 0.4.0" src="https://img.shields.io/badge/version-0.4.0-246BFE?style=flat-square&labelColor=171B24" /></a>
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0"><img alt="Desktop app 0.5.0" src="https://img.shields.io/badge/version-0.5.0-246BFE?style=flat-square&labelColor=171B24" /></a>
   <img alt="Windows, macOS and Linux" src="https://img.shields.io/badge/desktop-Windows_%C2%B7_macOS_%C2%B7_Linux-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-F4F0E5?style=flat-square&labelColor=171B24" />
@@ -11,17 +11,17 @@
 
 <p align="center"><strong>Find what remains.</strong><br/>A local desktop app for the traces preserved in your files and backups.</p>
 
-<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
 ## Your files have a history. Follow it.
 
 ENGRAM examines the offline sources you choose and turns their readable contents into a navigable case. Find media and documents, inspect masked secret candidates, follow exact-copy relationships, and compare observations over time.
 
-The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. The current **0.5.0 source** builds on the **Atlas Focus** workspace with finding bookmarks, review states, plain-text notes, structured search and a pannable, zoomable evidence map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
+The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. **ENGRAM 0.5.0** builds on the **Atlas Focus** workspace with finding bookmarks, review states, plain-text notes, structured search and a pannable, zoomable evidence map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
 ![Native Atlas Focus Trace map with the evidence inspector](assets/screenshots/workspace.png)
 
-The six images currently shown below are verified **0.4.0 Atlas Focus native captures**, using synthetic files processed by the shared Rust engine. They retain their [0.4.0 verification](https://github.com/Forem0/ENGRAM/actions/runs/40694985190) and [capture provenance](assets/screenshots/README.md); they are not execution evidence for the 0.5.0 source. New native images and 0.5.0 downloads follow their own completed verification. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
+These six views were captured on Linux from the actual **0.5.0** Tauri application, using synthetic files processed by the shared Rust engine. The [successful native Tauri/IPC capture job](https://github.com/Forem0/ENGRAM/actions/runs/40766085166/job/123090713655) exercised [source 023d641](https://github.com/Forem0/ENGRAM/commit/023d64122c28e35fd8d84fcea9477d8f4f21710c); the [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40768086711) records the platform checks. [Capture provenance](assets/screenshots/README.md) records the exact images and execution evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
 
 | Start with a question | Follow the evidence |
 | --- | --- |
@@ -36,7 +36,7 @@ The six images currently shown below are verified **0.4.0 Atlas Focus native cap
 
 ### 1. Download the app
 
-Download [ENGRAM 0.4.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) for your platform. Each package contains the native desktop app and the `engram` CLI.
+Download [ENGRAM 0.5.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) for your platform. Each package contains the native desktop app and the `engram` CLI.
 
 | Platform | Package | Runtime |
 | --- | --- | --- |
