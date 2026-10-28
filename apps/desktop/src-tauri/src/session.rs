@@ -1,7 +1,7 @@
-use engram_core::{Case, CaseDiff};
+use engram_core::{validate_review, Case, CaseDiff, CaseReview};
 use serde::Serialize;
 use std::sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::{AtomicBool, AtomicU64, Ordering},
     Arc, Mutex,
 };
 
@@ -79,6 +79,7 @@ impl DesktopState {
             session: Arc::new(Session {
                 active: Mutex::new(None),
                 busy: AtomicBool::new(false),
+                revision: AtomicU64::new(0),
                 launch,
             }),
         }
@@ -88,6 +89,7 @@ impl DesktopState {
 pub(crate) struct Session {
     active: Mutex<Option<Case>>,
     busy: AtomicBool,
+    revision: AtomicU64,
     pub launch: Launch,
 }
 
@@ -115,11 +117,82 @@ impl Session {
             .lock()
             .map_err(|_| "The current case is unavailable; restart the application.".to_owned())?;
         *active = Some(case.clone());
+        self.revision.fetch_add(1, Ordering::Relaxed);
         Ok(case)
+    }
+
+    pub fn prepare_save(
+        &self,
+        expected_case_id: &str,
+        review: CaseReview,
+    ) -> Result<SaveSnapshot, String> {
+        let snapshot = {
+            let active = self.active.lock().map_err(|_| {
+                "The current case is unavailable; restart the application.".to_owned()
+            })?;
+            let case = active.as_ref().ok_or_else(|| {
+                "Open a case, choose a source or load the demonstration first.".to_owned()
+            })?;
+            if expected_case_id != case.id {
+                return Err("The active case changed. Save the current case again.".into());
+            }
+            let review = validate_review(&case.findings, &review)
+                .map_err(|error| error.to_string())?;
+            let mut snapshot_case = case.clone();
+            snapshot_case.review = review;
+            SaveSnapshot {
+                case: snapshot_case,
+                revision: self.revision.load(Ordering::Relaxed),
+            }
+        };
+        self.require_current_snapshot(&snapshot)?;
+        Ok(snapshot)
+    }
+
+    pub fn require_current_snapshot(&self, snapshot: &SaveSnapshot) -> Result<(), String> {
+        let active = self.active.lock().map_err(|_| {
+            "The current case is unavailable; restart the application.".to_owned()
+        })?;
+        if self.revision.load(Ordering::Relaxed) != snapshot.revision
+            || active.as_ref().is_none_or(|case| case.id != snapshot.case.id)
+        {
+            return Err("The active case changed. Save the current case again.".into());
+        }
+        Ok(())
+    }
+
+    /// Accept only the review from the snapshot that was actually persisted.
+    /// A cancelled or failed save never calls this method. If another case has
+    /// replaced the snapshot, retain that case and still report the saved file.
+    pub fn accept_saved_review(&self, snapshot: &SaveSnapshot) -> bool {
+        let Ok(mut active) = self.active.lock() else {
+            return false;
+        };
+        if self.revision.load(Ordering::Relaxed) != snapshot.revision {
+            return false;
+        }
+        let Some(case) = active.as_mut().filter(|case| case.id == snapshot.case.id) else {
+            return false;
+        };
+        case.review = snapshot.case.review.clone();
+        self.revision.fetch_add(1, Ordering::Relaxed);
+        true
     }
 
     pub fn busy(&self) -> bool {
         self.busy.load(Ordering::Acquire)
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct SaveSnapshot {
+    case: Case,
+    revision: u64,
+}
+
+impl SaveSnapshot {
+    pub fn case(&self) -> &Case {
+        &self.case
     }
 }
 
@@ -152,6 +225,18 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use engram_core::{demo_case, ReviewAnnotation, ReviewStatus};
+
+    fn marked_review(case: &Case) -> CaseReview {
+        CaseReview::from([(
+            case.findings[0].id.clone(),
+            ReviewAnnotation {
+                bookmarked: true,
+                status: ReviewStatus::NeedsReview,
+                note: "Review this observation.".into(),
+            },
+        )])
+    }
 
     #[test]
     fn native_operation_guard_rejects_overlap_and_recovers_after_drop() {
@@ -187,5 +272,64 @@ mod tests {
     fn absence_of_active_case_is_an_error_and_not_an_empty_success() {
         let state = DesktopState::new(Launch::default());
         assert!(state.session.active_case().is_err());
+        assert!(state.session.prepare_save("missing-case", CaseReview::new()).is_err());
+    }
+
+    #[test]
+    fn stale_renderer_case_ids_and_dangling_review_are_rejected_before_a_picker() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        assert!(state.session.prepare_save("wrong-case-id", marked_review(&original)).is_err());
+        let review = CaseReview::from([("missing-finding".into(), ReviewAnnotation::default())]);
+        assert!(state.session.prepare_save(&original.id, review).is_err());
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+    }
+
+    #[test]
+    fn preparing_and_cancelling_a_save_leave_the_session_review_unchanged() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let operation = state.session.begin().unwrap();
+        let snapshot = operation.session.prepare_save(&original.id, marked_review(&original)).unwrap();
+        assert!(!snapshot.case().review.is_empty());
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+        drop(snapshot);
+        drop(operation);
+        assert!(!state.session.busy());
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+    }
+
+    #[test]
+    fn replacing_a_case_with_the_same_id_still_invalidates_its_save_snapshot() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let snapshot = state.session.prepare_save(&original.id, marked_review(&original)).unwrap();
+        let mut replacement = original.clone();
+        replacement.title = "A later snapshot with the same imported ID".into();
+        state.session.replace_case(replacement.clone()).unwrap();
+        assert!(state.session.require_current_snapshot(&snapshot).is_err());
+        assert!(!state.session.accept_saved_review(&snapshot));
+        assert_eq!(state.session.active_case().unwrap().title, replacement.title);
+        assert_eq!(state.session.active_case().unwrap().review, replacement.review);
+    }
+
+    #[test]
+    fn accepting_a_saved_snapshot_updates_only_its_review_and_invalidates_reuse() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let review = marked_review(&original);
+        let snapshot = state.session.prepare_save(&original.id, review.clone()).unwrap();
+        assert!(state.session.accept_saved_review(&snapshot));
+        let active = state.session.active_case().unwrap();
+        assert_eq!(active.review, review);
+        assert_eq!(active.title, original.title);
+        assert_eq!(active.source_root, original.source_root);
+        assert_eq!(active.findings.len(), original.findings.len());
+        assert!(state.session.require_current_snapshot(&snapshot).is_err());
+        assert!(!state.session.accept_saved_review(&snapshot));
     }
 }

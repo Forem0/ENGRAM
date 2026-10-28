@@ -1,6 +1,7 @@
-use crate::session::{on_worker, Comparison, DesktopState, RuntimeInfo, Session};
+use crate::session::{on_worker, Comparison, DesktopState, RuntimeInfo, SaveSnapshot, Session};
 use engram_core::{
-    compare_cases, demo_case, read_case, scan_path, write_case, Case, ScanOptions, SourceKind,
+    compare_cases, demo_case, read_case, scan_path, write_case, Case, CaseReview, ScanOptions,
+    SourceKind,
 };
 use std::{io::Write, path::Path};
 use tauri::{AppHandle, State, WebviewWindow};
@@ -23,6 +24,17 @@ fn ensure_demo(case: &Case) -> Result<(), String> {
         return Err("The synthetic demonstration could not be generated. Choose a source or open a saved case.".into());
     }
     Ok(())
+}
+
+fn persist_review_snapshot(
+    session: &Session,
+    snapshot: &SaveSnapshot,
+    destination: &Path,
+) -> Result<String, String> {
+    session.require_current_snapshot(snapshot)?;
+    write_case(snapshot.case(), destination).map_err(|error| error.to_string())?;
+    session.accept_saved_review(snapshot);
+    Ok(destination.to_string_lossy().into_owned())
 }
 
 #[tauri::command]
@@ -106,10 +118,14 @@ pub(crate) async fn open_case(
 pub(crate) async fn save_case(
     window: WebviewWindow,
     state: State<'_, DesktopState>,
+    case_id: String,
+    review: CaseReview,
 ) -> Result<Option<String>, String> {
     require_main(&window)?;
     let operation = state.session.begin()?;
-    let case = operation.session.active_case()?;
+    // Only review metadata crosses IPC. Evidence and source paths come from the
+    // guarded native session, and stale renderer case IDs fail before the picker.
+    let snapshot = operation.session.prepare_save(&case_id, review)?;
     let Some(selection) = rfd::AsyncFileDialog::new()
         .set_parent(&window)
         .set_title("Save a new case outside the source folder")
@@ -121,9 +137,8 @@ pub(crate) async fn save_case(
         return Ok(None);
     };
     let destination = selection.path().to_owned();
-    on_worker(operation, move |_| {
-        write_case(&case, &destination).map_err(|error| error.to_string())?;
-        Ok(Some(destination.to_string_lossy().into_owned()))
+    on_worker(operation, move |session| {
+        persist_review_snapshot(session, &snapshot, &destination).map(Some)
     })
     .await
 }
@@ -184,6 +199,18 @@ pub(crate) fn finish_smoke_test(
 mod tests {
     use super::*;
     use crate::session::Launch;
+    use engram_core::{ReviewAnnotation, ReviewStatus};
+
+    fn reviewed_metadata(case: &Case) -> CaseReview {
+        CaseReview::from([(
+            case.findings[0].id.clone(),
+            ReviewAnnotation {
+                bookmarked: true,
+                status: ReviewStatus::Reviewed,
+                note: "Checked this source observation.".into(),
+            },
+        )])
+    }
 
     #[test]
     fn invalid_import_does_not_discard_the_active_case() {
@@ -213,5 +240,61 @@ mod tests {
         let opened = import_case(&state.session, &path).unwrap();
         assert_eq!(opened.id, original.id);
         assert_eq!(state.session.active_case().unwrap().id, original.id);
+    }
+
+    #[test]
+    fn saving_reviewed_metadata_persists_and_updates_the_active_case() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        ensure_demo(&original).unwrap();
+        state.session.replace_case(original.clone()).unwrap();
+        let review = reviewed_metadata(&original);
+        let snapshot = state.session.prepare_save(&original.id, review.clone()).unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("reviewed.engram.json");
+        persist_review_snapshot(&state.session, &snapshot, &output).unwrap();
+        let reopened = read_case(&output).unwrap();
+        assert_eq!(reopened.review, review);
+        assert_eq!(state.session.active_case().unwrap().review, review);
+        assert_eq!(reopened.source_root, original.source_root);
+        let difference = compare_cases(&original, &reopened);
+        assert!(difference.added.is_empty());
+        assert!(difference.removed.is_empty());
+        assert!(difference.changed.is_empty());
+        assert_eq!(difference.unchanged.len(), original.findings.len());
+    }
+
+    #[test]
+    fn failed_save_preserves_the_active_review_and_existing_output() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        ensure_demo(&original).unwrap();
+        state.session.replace_case(original.clone()).unwrap();
+        let snapshot = state.session.prepare_save(&original.id, reviewed_metadata(&original)).unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("existing.engram.json");
+        std::fs::write(&output, "Existing data must remain.").unwrap();
+        assert!(persist_review_snapshot(&state.session, &snapshot, &output).is_err());
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+        assert_eq!(std::fs::read_to_string(&output).unwrap(), "Existing data must remain.");
+    }
+
+    #[test]
+    fn stale_save_snapshot_is_rejected_before_writing_or_updating_a_replacement() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        ensure_demo(&original).unwrap();
+        state.session.replace_case(original.clone()).unwrap();
+        let snapshot = state.session.prepare_save(&original.id, reviewed_metadata(&original)).unwrap();
+        let mut replacement = original.clone();
+        replacement.title = "Replacement with the same imported ID".into();
+        state.session.replace_case(replacement.clone()).unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("must-not-be-written.engram.json");
+        assert!(persist_review_snapshot(&state.session, &snapshot, &output).is_err());
+        assert!(!output.exists());
+        let retained = state.session.active_case().unwrap();
+        assert_eq!(retained.title, replacement.title);
+        assert_eq!(retained.review, replacement.review);
     }
 }
