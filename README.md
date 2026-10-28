@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.3.0"><img alt="Desktop app 0.3.0" src="https://img.shields.io/badge/version-0.3.0-246BFE?style=flat-square&labelColor=171B24" /></a>
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0"><img alt="Desktop app 0.4.0" src="https://img.shields.io/badge/version-0.4.0-246BFE?style=flat-square&labelColor=171B24" /></a>
   <img alt="Windows, macOS and Linux" src="https://img.shields.io/badge/desktop-Windows_%C2%B7_macOS_%C2%B7_Linux-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-F4F0E5?style=flat-square&labelColor=171B24" />
@@ -11,17 +11,17 @@
 
 <p align="center"><strong>Find what remains.</strong><br/>A local desktop app for the traces preserved in your files and backups.</p>
 
-<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.3.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
 ## Your files have a history. Follow it.
 
 ENGRAM examines the offline sources you choose and turns their readable contents into a navigable case. Find media and documents, inspect masked secret candidates, follow exact-copy relationships, and compare observations over time.
 
-The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
+The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. **ENGRAM 0.4.0** implements the **Atlas Focus** graphite-and-cobalt interface, with a compact workspace header, readable file relationships and a persistent inspector. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
-![Atlas Focus interface design with the Trace map and evidence inspector](assets/design/atlas-focus/workspace.png)
+![Native Atlas Focus Trace map with the evidence inspector](assets/screenshots/workspace.png)
 
-The gallery presents **Atlas Focus**, the selected interface design using illustrative synthetic data. Its implementation is a separate update; the **0.3.0** packages retain their released interface. [Actual native application captures and verification](assets/screenshots/README.md) remain available alongside the [design gallery](assets/design/atlas-focus/README.md).
+These six views were captured on Linux from the actual **0.4.0** Tauri application, using synthetic files processed by the shared Rust engine. The [passing cross-platform and native Tauri/IPC checks](https://github.com/Forem0/ENGRAM/actions/runs/40694985190) verify [source b7e7e9f](https://github.com/Forem0/ENGRAM/commit/b7e7e9fb4e4fbd3234ed2955b39f58c128566e60); [capture provenance](assets/screenshots/README.md) records the images and execution evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
 
 | Start with a question | Follow the evidence |
 | --- | --- |
@@ -35,7 +35,7 @@ The gallery presents **Atlas Focus**, the selected interface design using illust
 
 ### 1. Download the app
 
-Download [ENGRAM 0.3.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.3.0) for your platform. Each package contains the native desktop app and the `engram` CLI.
+Download [ENGRAM 0.4.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) for your platform. Each package contains the native desktop app and the `engram` CLI.
 
 | Platform | Package | Runtime |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ Inspect the source again or open a newer saved case. Go to **Compare**, select *
 
 Search across names, paths, origins and rules. Combine category and confidence filters, then open a finding to inspect its locator, available timestamp, content hash where retained, and evidence fields.
 
-![Atlas Focus Findings design with searchable artifacts and the evidence inspector](assets/design/atlas-focus/findings.png)
+![Native Atlas Focus Findings view with searchable artifacts and the evidence inspector](assets/screenshots/findings.png)
 
 The table is paginated, and filters apply to the actual case. The map shows a bounded set of representative nodes while category counts include every finding. No invented exposure score is needed to explain why a result exists.
 
@@ -85,7 +85,7 @@ The table is paginated, and filters apply to the actual case. The map shows a bo
 
 Move between newest-first and oldest-first views. Dated findings retain their source context; the view also reports how many findings have no usable timestamp.
 
-![Atlas Focus Timeline design showing illustrative dated findings](assets/design/atlas-focus/timeline.png)
+![Native Atlas Focus Timeline view showing dated findings from a synthetic case](assets/screenshots/timeline.png)
 
 A filesystem modification time is a modification time. A supported database timestamp is labelled according to its reader. The interface does not turn either into an assumed deletion date.
 
@@ -93,7 +93,7 @@ A filesystem modification time is a modification time. A supported database time
 
 Follow relationships recorded by the engine, including identical file content and repeated masked candidates within a case. Select either endpoint to review its own source evidence.
 
-![Atlas Focus Connections design showing evidence relationships and linked artifacts](assets/design/atlas-focus/connections.png)
+![Native Atlas Focus Connections view showing recorded evidence relationships](assets/screenshots/connections.png)
 
 Links reflect implemented evidence rules. The decorative map guides add no findings or relationships, and a visual connection is not a claim that another application accessed a file.
 
@@ -101,15 +101,15 @@ Links reflect implemented evidence rules. The decorative map guides add no findi
 
 Choose an earlier case as the baseline and inspect **Added**, **Removed**, **Changed** and **Unchanged** groups. Findings removed from the current observation can still be inspected using their baseline evidence.
 
-![Atlas Focus Compare design awaiting saved-case baseline selection](assets/design/atlas-focus/compare.png)
+![Native Atlas Focus Compare view awaiting saved-case baseline selection](assets/screenshots/compare.png)
 
-The design shows the baseline-selection state before a comparison is loaded. Comparison describes the supplied snapshots; different dates, read limits or parser coverage can change the result. A missing finding does not establish that every copy was securely erased.
+The capture shows the baseline-selection state before a comparison is loaded. Comparison describes the supplied snapshots; different dates, read limits or parser coverage can change the result. A missing finding does not establish that every copy was securely erased.
 
 ### Modules — coverage belongs next to the results
 
 See **Ready**, **Experimental**, **Planned** and **Unavailable** states for the active source, alongside skipped-file counters and inspection notes.
 
-![Atlas Focus Modules design with reader states and source coverage notes](assets/design/atlas-focus/modules.png)
+![Native Atlas Focus Modules view with reader states and source coverage notes](assets/screenshots/modules.png)
 
 These states describe the actual reader and supplied format. An unsupported schema stays visible as a limitation; it does not silently become a successful empty inspection.
 

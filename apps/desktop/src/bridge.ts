@@ -7,7 +7,7 @@ export const native = isTauri();
 export async function runtimeInfo(): Promise<RuntimeInfo> {
   if (native) return invoke<RuntimeInfo>('get_runtime_info');
   return {
-    version: '0.3.0',
+    version: '0.4.0',
     engine: 'Browser demo · Rust-generated synthetic fixture',
     schema_version: 1,
     initial_view: new URLSearchParams(location.search).get('view') ?? 'map',
