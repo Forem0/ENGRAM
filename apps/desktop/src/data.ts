@@ -1,37 +1,52 @@
-import type { Case, CaseDiff, Category, Confidence, Finding } from './model';
+import type {
+  Case,
+  CaseDiff,
+  CaseReview,
+  Category,
+  Confidence,
+  Finding,
+  ReviewStatus,
+} from './model';
+import { getReview, validateReview } from './review';
+import { compileSearch } from './search';
 
 export interface Filters {
   query: string;
   category: Category | 'all';
   confidence: Confidence | 'all';
   linkedOnly: boolean;
+  bookmarkedOnly?: boolean;
+  reviewStatus?: ReviewStatus | 'all';
 }
 export const INITIAL_FILTERS: Filters = {
   query: '',
   category: 'all',
   confidence: 'all',
   linkedOnly: false,
+  bookmarkedOnly: false,
+  reviewStatus: 'all',
 };
 
-export function filterFindings(findings: Finding[], filters: Filters): Finding[] {
-  const terms = filters.query.trim().toLocaleLowerCase('en').split(/\s+/).filter(Boolean);
+export function filterFindings(
+  findings: Finding[],
+  filters: Filters,
+  review?: CaseReview,
+): Finding[] {
+  const search = compileSearch(filters.query);
+  if (search.error !== null) return [];
   return findings.filter((finding) => {
     if (filters.category !== 'all' && finding.category !== filters.category) return false;
     if (filters.confidence !== 'all' && finding.confidence !== filters.confidence) return false;
     if (filters.linkedOnly && finding.related_ids.length === 0) return false;
-    if (terms.length === 0) return true;
-    const searchable = [
-      finding.title,
-      finding.path,
-      finding.origin,
-      finding.rule_id,
-      finding.locator,
-      finding.summary,
-      finding.category,
-    ]
-      .join(' ')
-      .toLocaleLowerCase('en');
-    return terms.every((term) => searchable.includes(term));
+    const annotation = getReview(review, finding.id);
+    if (filters.bookmarkedOnly && !annotation.bookmarked) return false;
+    if (
+      filters.reviewStatus &&
+      filters.reviewStatus !== 'all' &&
+      annotation.status !== filters.reviewStatus
+    )
+      return false;
+    return search.matches(finding, review);
   });
 }
 
@@ -117,5 +132,9 @@ export function assertCase(value: unknown): Case {
   ) {
     throw new Error('The engine returned an unsupported case. Your previous case remains open.');
   }
-  return value as Case;
+  const caseData = value as Case;
+  if ('review' in caseData) {
+    return { ...caseData, review: validateReview(caseData.review, caseData.findings) };
+  }
+  return caseData;
 }

@@ -1,5 +1,6 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { assertCase } from './data';
+import { validateReview } from './review';
 import type { Case, Comparison, RuntimeInfo } from './model';
 
 export const native = isTauri();
@@ -7,7 +8,7 @@ export const native = isTauri();
 export async function runtimeInfo(): Promise<RuntimeInfo> {
   if (native) return invoke<RuntimeInfo>('get_runtime_info');
   return {
-    version: '0.4.0',
+    version: '0.5.0',
     engine: 'Browser demo · Rust-generated synthetic fixture',
     schema_version: 1,
     initial_view: new URLSearchParams(location.search).get('view') ?? 'map',
@@ -41,9 +42,10 @@ export async function openCase(): Promise<Case | null> {
   const result = await invoke<Case | null>('open_case');
   return result === null ? null : assertCase(result);
 }
-export async function saveCase(): Promise<string | null> {
+export async function saveCase(caseData: Case): Promise<string | null> {
   requireNative();
-  return invoke<string | null>('save_case');
+  const review = validateReview(caseData.review ?? {}, caseData.findings);
+  return invoke<string | null>('save_case', { caseId: caseData.id, review });
 }
 export async function compareCase(): Promise<Comparison | null> {
   requireNative();

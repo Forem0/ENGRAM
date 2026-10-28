@@ -1,6 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import * as bridge from './bridge';
 import { AtlasTraceMap } from './AtlasTraceMap';
+import { BookmarkGlyph, ReviewPanel, ReviewToolbar, WorkspaceHelp } from './ReviewUI';
+import { WorkspaceDialog } from './WorkspaceDialog';
+import { getReview, reviewKey, reviewSummary, updateReview } from './review';
+import { describeSearch } from './search';
 import {
   bytesLabel,
   chronological,
@@ -24,6 +28,8 @@ import {
   type Comparison,
   type Finding,
   type RuntimeInfo,
+  type CaseReview,
+  type ReviewAnnotation,
   type View,
 } from './model';
 
@@ -156,10 +162,12 @@ function FilterBar({
   filters,
   setFilters,
   showLinked = true,
+  inputRef,
 }: {
   filters: Filters;
   setFilters: (filters: Filters) => void;
   showLinked?: boolean;
+  inputRef?: RefObject<HTMLInputElement | null>;
 }) {
   return (
     <div className="filters">
@@ -167,8 +175,10 @@ function FilterBar({
         <label className="search-field">
           <Icon name="search" />
           <input
+            ref={inputRef}
             aria-label="Search findings"
-            placeholder="Search findings"
+            placeholder="Search findings · Ctrl/⌘ K"
+            maxLength={2048}
             value={filters.query}
             onChange={(event) => setFilters({ ...filters, query: event.target.value })}
           />
@@ -275,6 +285,7 @@ function FindingsTable({
   label = 'Findings',
   compact = false,
   onViewAll,
+  review,
 }: {
   findings: Finding[];
   selected: Finding | null;
@@ -282,6 +293,7 @@ function FindingsTable({
   label?: string;
   compact?: boolean;
   onViewAll?: () => void;
+  review?: CaseReview;
 }) {
   const [page, setPage] = useState(0);
   const size = compact ? 3 : 10;
@@ -339,6 +351,18 @@ function FindingsTable({
                 <CategoryGlyph category={finding.category} />
                 <span>
                   <strong title={finding.title}>{findingTitle(finding)}</strong>
+                  {getReview(review, finding.id).bookmarked && (
+                    <span className="review-mark" aria-label="Bookmarked">
+                      <BookmarkGlyph filled />
+                    </span>
+                  )}
+                  {getReview(review, finding.id).status !== 'unreviewed' && (
+                    <span className={`review-mark ${getReview(review, finding.id).status}`}>
+                      {getReview(review, finding.id).status === 'reviewed'
+                        ? 'Reviewed'
+                        : 'Needs review'}
+                    </span>
+                  )}
                   <small title={finding.path}>{finding.path}</small>
                 </span>
               </span>
@@ -635,6 +659,7 @@ function Compare({
             selected={selected}
             onSelect={(finding) => onSelect(finding, change === 'removed')}
             label={`${change} findings`}
+            review={change === 'removed' ? comparison.before.review : caseData.review}
           />
           <p className="view-note">
             Comparison describes these snapshots. Source dates, read limits and supported readers
@@ -747,6 +772,8 @@ function Inspector({
   onSelect,
   onCopy,
   onClose,
+  onReview,
+  busy,
 }: {
   finding: Finding | null;
   source: 'current' | 'baseline';
@@ -754,6 +781,8 @@ function Inspector({
   onSelect: (finding: Finding) => void;
   onCopy: (text: string) => void;
   onClose: () => void;
+  onReview: (findingId: string, annotation: ReviewAnnotation) => void;
+  busy: boolean;
 }) {
   const index = useMemo(
     () => new Map(caseData?.findings.map((item) => [item.id, item]) ?? []),
@@ -800,6 +829,14 @@ function Inspector({
               </div>
             </div>
           </div>
+          <ReviewPanel
+            findingId={finding.id}
+            annotation={getReview(caseData?.review, finding.id)}
+            onChange={(annotation) => onReview(finding.id, annotation)}
+            disabled={busy}
+            baseline={source === 'baseline'}
+            native={bridge.native}
+          />
           <div className="inspector-section">
             <span className="eyebrow">ABOUT THIS FINDING</span>
             <p className="classification-summary">{finding.summary}</p>
@@ -892,11 +929,29 @@ export function App() {
   const [notice, setNotice] = useState<{ kind: 'error' | 'success' | 'info'; text: string } | null>(
     null,
   );
+  const [savedReviewKey, setSavedReviewKey] = useState(reviewKey(undefined));
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    { kind: 'case'; label: string; action: () => Promise<Case | null> } | { kind: 'close' } | null
+  >(null);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const currentReviewKey = useMemo(() => reviewKey(caseData?.review), [caseData?.review]);
+  const reviewChanged = currentReviewKey !== savedReviewKey;
+  const closeState = useRef({ dirty: false });
+  closeState.current.dirty = reviewChanged;
+  const reviewCounts = useMemo(
+    () =>
+      caseData
+        ? reviewSummary(caseData)
+        : { bookmarked: 0, reviewed: 0, needsReview: 0, withNotes: 0 },
+    [caseData],
+  );
+  const searchDescription = useMemo(() => describeSearch(filters.query), [filters.query]);
   const filtered = useMemo(
-    () => filterFindings(caseData?.findings ?? [], filters),
+    () => filterFindings(caseData?.findings ?? [], filters, caseData?.review),
     [caseData, filters],
   );
-  const edges = useMemo(() => evidenceEdges(caseData?.findings ?? []), [caseData]);
+  const edges = useMemo(() => evidenceEdges(caseData?.findings ?? []), [caseData?.findings]);
   const activeView = VIEWS.find((item) => item.id === view)!;
 
   function receiveCase(next: Case) {
@@ -905,6 +960,7 @@ export function App() {
     setSelected(next.findings[0] ?? null);
     setSelectionSource('current');
     setFilters(INITIAL_FILTERS);
+    setSavedReviewKey(reviewKey(next.review));
   }
   function select(finding: Finding, baseline = false) {
     setSelected(finding);
@@ -948,8 +1004,12 @@ export function App() {
     return () => clearTimeout(timeout);
   }, [notice]);
 
-  async function changeCase(label: string, action: () => Promise<Case | null>) {
+  async function changeCase(label: string, action: () => Promise<Case | null>, confirmed = false) {
     if (busy) return;
+    if (reviewChanged && !confirmed) {
+      setPendingAction({ kind: 'case', label, action });
+      return;
+    }
     setBusy(label);
     setNotice(null);
     try {
@@ -967,18 +1027,21 @@ export function App() {
       setBusy(null);
     }
   }
-  async function save() {
-    if (busy || !caseData) return;
+  async function save(): Promise<boolean> {
+    if (busy || !caseData || !bridge.native) return false;
     setBusy('Saving a separate case file');
     setNotice(null);
     try {
-      const destination = await bridge.saveCase();
+      const destination = await bridge.saveCase(caseData);
+      if (destination) setSavedReviewKey(currentReviewKey);
       setNotice({
         kind: destination ? 'success' : 'info',
         text: destination ? `Case saved to ${destination}` : 'Save cancelled. No file was written.',
       });
+      return destination !== null;
     } catch (error) {
       setNotice({ kind: 'error', text: String(error) });
+      return false;
     } finally {
       setBusy(null);
     }
@@ -1014,15 +1077,181 @@ export function App() {
   }
   function categorySelect(category: Category) {
     setFilters({ ...filters, category });
-    const first = caseData?.findings.find((finding) => finding.category === category);
+    const first = filterFindings(
+      caseData?.findings ?? [],
+      { ...filters, category },
+      caseData?.review,
+    )[0];
     setSelected(first ?? null);
     setSelectionSource('current');
   }
+  function changeReview(findingId: string, annotation: ReviewAnnotation) {
+    if (busy || !caseData || selectionSource === 'baseline') return;
+    try {
+      setCaseData(updateReview(caseData, findingId, annotation));
+    } catch (error) {
+      setNotice({ kind: 'error', text: error instanceof Error ? error.message : String(error) });
+    }
+  }
+  async function continuePending(saveFirst: boolean) {
+    if (!pendingAction || busy) return;
+    if (saveFirst && !(await save())) return;
+    const next = pendingAction;
+    setPendingAction(null);
+    if (next.kind === 'case') await changeCase(next.label, next.action, true);
+    else {
+      try {
+        const { getCurrentWindow } = await import('@tauri-apps/api/window');
+        closeState.current.dirty = false;
+        await getCurrentWindow().destroy();
+      } catch (error) {
+        closeState.current.dirty = reviewChanged;
+        setNotice({ kind: 'error', text: String(error) });
+      }
+    }
+  }
+
+  useEffect(() => {
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (!closeState.current.dirty) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', beforeUnload);
+    let cancelled = false;
+    let unlisten: (() => void) | undefined;
+    if (bridge.native) {
+      void import('@tauri-apps/api/window')
+        .then(async ({ getCurrentWindow }) => {
+          const stop = await getCurrentWindow().onCloseRequested((event) => {
+            if (!closeState.current.dirty) return;
+            event.preventDefault();
+            setHelpOpen(false);
+            setPendingAction({ kind: 'close' });
+          });
+          if (cancelled) stop();
+          else unlisten = stop;
+        })
+        .catch(() => {
+          if (!cancelled)
+            setNotice({
+              kind: 'error',
+              text: 'The close guard is unavailable. Save case before closing the app to keep your review.',
+            });
+        });
+    }
+    return () => {
+      cancelled = true;
+      unlisten?.();
+      window.removeEventListener('beforeunload', beforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+    function keydown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.isComposing || event.repeat) return;
+      const key = event.key.toLowerCase();
+      const command = event.ctrlKey || event.metaKey;
+      if (command && (key === 'k' || key === 's')) {
+        event.preventDefault();
+        if (pendingAction || helpOpen) return;
+        if (key === 's') {
+          void save();
+          return;
+        }
+        if (!['map', 'findings', 'timeline', 'connections'].includes(view)) setView('findings');
+        requestAnimationFrame(() => searchInput.current?.focus());
+        return;
+      }
+      const target = event.target;
+      if (
+        pendingAction ||
+        helpOpen ||
+        command ||
+        event.altKey ||
+        (target instanceof HTMLElement &&
+          (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)))
+      )
+        return;
+      if (key === '?') {
+        event.preventDefault();
+        setHelpOpen(true);
+      } else if (/^[1-6]$/.test(key)) {
+        event.preventDefault();
+        setView(VIEWS[Number(key) - 1].id);
+      } else if (
+        (key === 'b' || key === 'r') &&
+        selected &&
+        selectionSource === 'current' &&
+        caseData &&
+        !busy
+      ) {
+        event.preventDefault();
+        const annotation = getReview(caseData.review, selected.id);
+        changeReview(
+          selected.id,
+          key === 'b'
+            ? { ...annotation, bookmarked: !annotation.bookmarked }
+            : {
+                ...annotation,
+                status: annotation.status === 'reviewed' ? 'unreviewed' : 'reviewed',
+              },
+        );
+      }
+    }
+    window.addEventListener('keydown', keydown);
+    return () => window.removeEventListener('keydown', keydown);
+  }, [pendingAction, helpOpen, view, selected, selectionSource, caseData, busy, currentReviewKey]);
   const inspectorCase = selectionSource === 'baseline' ? (comparison?.before ?? null) : caseData;
   const nativeTitle = !bridge.native ? 'Available in the ENGRAM desktop application.' : undefined;
 
   return (
     <div className="app-shell" data-view={view}>
+      {helpOpen && <WorkspaceHelp onClose={() => setHelpOpen(false)} />}
+      {pendingAction && (
+        <WorkspaceDialog
+          title="Keep your review?"
+          onClose={() => setPendingAction(null)}
+          busy={!!busy}
+        >
+          <p>
+            Your bookmarks, notes and review statuses have unsaved changes.{' '}
+            {pendingAction.kind === 'close'
+              ? 'Save a new case file to keep them before closing.'
+              : 'Save a new case file before switching sources to keep your review.'}
+          </p>
+          {!bridge.native && (
+            <p className="muted">This synthetic demo keeps reviews in the current tab only.</p>
+          )}
+          {notice?.kind === 'error' && <p role="alert">{notice.text}</p>}
+          {busy && <p role="status">{busy}…</p>}
+          <div className="dialog-actions">
+            <button
+              className="button secondary"
+              disabled={!!busy}
+              onClick={() => setPendingAction(null)}
+            >
+              Keep working
+            </button>
+            <button
+              className="button secondary"
+              disabled={!!busy}
+              onClick={() => void continuePending(false)}
+            >
+              {pendingAction.kind === 'close' ? 'Close without saving' : 'Continue without saving'}
+            </button>
+            {bridge.native && (
+              <button
+                className="button primary"
+                disabled={!!busy}
+                onClick={() => void continuePending(true)}
+              >
+                Save and continue
+              </button>
+            )}
+          </div>
+        </WorkspaceDialog>
+      )}
       <aside className="sidebar">
         <div className="brand">
           <img src="/mascot-atlas.png" alt="ENGRAM cobalt lightning creature" />
@@ -1083,7 +1312,7 @@ export function App() {
           </div>
           <span className="sidebar-version">
             {bridge.native ? 'Desktop application' : 'Browser demonstration'} ·{' '}
-            {runtime?.version ?? '0.4.0'}
+            {runtime?.version ?? '0.5.0'}
           </span>
         </div>
       </aside>
@@ -1117,12 +1346,13 @@ export function App() {
               </div>
               <div>
                 <strong>{caseData.warnings.length.toLocaleString('en')}</strong>
-                <span>notes</span>
+                <span>coverage notes</span>
               </div>
             </section>
           )}
 
           <div className="top-actions">
+            {reviewChanged && <span className="review-dirty">Unsaved review</span>}
             <Tag state={bridge.native ? 'offline' : 'demo'}>
               {bridge.native ? 'Local workspace' : 'Browser demo · synthetic data'}
             </Tag>
@@ -1163,9 +1393,25 @@ export function App() {
                   view === 'findings' ||
                   view === 'timeline' ||
                   view === 'connections') && (
-                  <FilterBar filters={filters} setFilters={setFilters} />
+                  <FilterBar filters={filters} setFilters={setFilters} inputRef={searchInput} />
                 )}
             </div>
+            {caseData && ['map', 'findings', 'timeline', 'connections'].includes(view) && (
+              <>
+                <ReviewToolbar
+                  filters={filters}
+                  setFilters={setFilters}
+                  summary={reviewCounts}
+                  total={caseData.findings.length}
+                  onHelp={() => setHelpOpen(true)}
+                />
+                {searchDescription.error && (
+                  <p className="search-query-error" role="alert">
+                    {searchDescription.error}
+                  </p>
+                )}
+              </>
+            )}
 
             {notice && (
               <div
@@ -1207,12 +1453,18 @@ export function App() {
                       selected={selected}
                       onSelect={select}
                       compact
+                      review={caseData.review}
                       onViewAll={() => setView('findings')}
                     />
                   </>
                 )}
                 {view === 'findings' && (
-                  <FindingsTable findings={filtered} selected={selected} onSelect={select} />
+                  <FindingsTable
+                    findings={filtered}
+                    selected={selected}
+                    onSelect={select}
+                    review={caseData.review}
+                  />
                 )}
                 {view === 'timeline' && (
                   <Timeline findings={filtered} selected={selected} onSelect={select} />
@@ -1275,6 +1527,8 @@ export function App() {
             onSelect={(finding) => select(finding, selectionSource === 'baseline')}
             onCopy={(text) => void copy(text)}
             onClose={() => setSelected(null)}
+            onReview={changeReview}
+            busy={!!busy}
           />
         </div>
       </div>

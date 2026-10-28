@@ -2,6 +2,13 @@ export type Category =
   'media' | 'secret' | 'document' | 'browser' | 'message' | 'location' | 'database';
 export type Confidence = 'observed' | 'linked' | 'candidate';
 export type ModuleState = 'ready' | 'experimental' | 'planned' | 'unavailable';
+export type ReviewStatus = 'unreviewed' | 'needs_review' | 'reviewed';
+export interface ReviewAnnotation {
+  bookmarked: boolean;
+  status: ReviewStatus;
+  note: string;
+}
+export type CaseReview = Record<string, ReviewAnnotation>;
 export type View = 'map' | 'findings' | 'timeline' | 'connections' | 'compare' | 'modules';
 
 export interface Finding {
@@ -40,6 +47,7 @@ export interface Case {
   };
   modules: { name: string; state: ModuleState; detail: string }[];
   events: { at_ms: number; message: string; category: Category | null }[];
+  review?: CaseReview;
 }
 
 export interface CaseDiff {
