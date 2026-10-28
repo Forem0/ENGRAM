@@ -37,7 +37,7 @@ The production frontend is embedded through Tauri's custom protocol. Development
 
 ## macOS
 
-Install Rust, Node.js and the Xcode Command Line Tools. Build on the intended architecture; the artifact workflow uses the architecture of the selected GitHub runner.
+Install Rust, Node.js and the Xcode Command Line Tools. Build on the intended architecture; the artifact workflow uses the architecture of the selected GitHub runner. The CI and artifact workflows select `macos-15` for the Apple Silicon build.
 
 ```bash
 xcode-select --install
@@ -91,7 +91,7 @@ The Linux CI smoke job runs the actual Tauri executable under Xvfb and a D-Bus s
 
 CI then captures the visible native window with ImageMagick before the delayed process exit. The artifact contains PNG captures, per-view IPC logs and a freshly generated `demo-case.json`. This evidence is separate from browser/Playwright fixture captures.
 
-The currently published six-view gallery retains the [0.4.0 cross-platform and native Tauri/IPC verification](https://github.com/Forem0/ENGRAM/actions/runs/40694985190), using [source b7e7e9f](https://github.com/Forem0/ENGRAM/commit/b7e7e9fb4e4fbd3234ed2955b39f58c128566e60). Those 0.4.0 images are not execution evidence for the current 0.5.0 source. Fresh images are published only after the corresponding 0.5.0 native capture run is verified; [capture provenance](../assets/screenshots/README.md) identifies the exact build behind each current gallery.
+The six 0.5.0 Atlas Focus views in the README come from the [successful native Tauri/IPC capture job](https://github.com/Forem0/ENGRAM/actions/runs/40766085166/job/123090713655), using [source 023d641](https://github.com/Forem0/ENGRAM/commit/023d64122c28e35fd8d84fcea9477d8f4f21710c). The [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40768086711) records the frontend and platform checks. All six captured launches report `ENGRAM_TAURI_SMOKE_OK`; the unedited images are 1440 × 940 pixels and use a synthetic case. [Capture provenance](../assets/screenshots/README.md) records the artifact identity, image hashes and execution evidence.
 
 The Atlas Focus illustrations under `assets/design/atlas-focus/` record the selected visual direction. They are not native captures and must not be used to establish that a build or command bridge ran. The PNGs under `assets/screenshots/` carry their own release/source provenance.
 
@@ -105,6 +105,6 @@ The CI prepare job checks the committed Rust lockfile. If the Tauri migration re
 
 The manually dispatched [Build artifacts workflow](../.github/workflows/build-artifacts.yml) requires the committed lockfile, tests the frontend/backend, builds through the Tauri CLI and uploads platform archives with SHA-256 checksums. Windows gets a portable ZIP; Linux gets a binary tar archive with runtime prerequisites; macOS gets a tar archive containing the proper `.app` bundle. Each includes the CLI and documentation.
 
-The existing [0.4.0 package build](https://github.com/Forem0/ENGRAM/actions/runs/40695041263) and [0.4.0 release downloads](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) retain their original archive checksums, source and interface. The 0.5.0 source requires its own completed native verification and package build before new downloads are published.
+The [Build artifacts workflow](https://github.com/Forem0/ENGRAM/actions/workflows/build-artifacts.yml) records platform packaging jobs. The [0.5.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) accompanies published archives with their checksums and exact build provenance. The [0.4.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) retains its own source, interface and verification evidence.
 
 The workflow does not publish a release or install signing credentials. A successful compile is not a substitute for exercising the packaged executable on its target platform. Release availability, provenance and download links are updated only after build artifacts are actually verified and published.
