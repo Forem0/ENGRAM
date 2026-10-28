@@ -17,7 +17,7 @@ Reader state is independent of application version. **Ready**, **Experimental**,
 
 ## Desktop workflow
 
-Version 0.3.0 develops the working Trace desk with a clearer source-to-case walkthrough, a six-view showcase and interface refinements. The jagged cobalt creature, warm ivory and charcoal remain the visual identity. Release downloads and screenshot provenance must follow verified artifacts rather than source-only claims.
+Version 0.4.0 brings the selected Atlas Focus design into the Trace desk: graphite surfaces, compact source controls, readable file relationships, coordinated category accents and a persistent evidence inspector. The jagged cobalt creature remains the brand mark. The six workspace views retain their source-to-case workflows and the shared engine's evidence rules. Release downloads and screenshot provenance must follow verified artifacts rather than source-only claims.
 
 Next interface work should improve tasks people can complete: locating a source, understanding partial coverage, finding a specific artifact, following an evidence link and comparing a later observation. Keyboard and assistive-technology coverage are part of that work.
 
