@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 — Atlas Focus interface — 2026-10-28
+
+- Implement the selected graphite-and-cobalt Atlas Focus visual direction across the six native workspace views.
+- Replace the large introductory header with a compact source, observation-count and case-action toolbar.
+- Give file relationships clearer category colors, legible labels and a distinct selected finding on the Trace map.
+- Refine the findings table, source chronology, paired connections, baseline-selection state, module coverage and persistent evidence inspector.
+- Retain the shared Rust analysis rules, guarded native operations, schema-1 cases, reader states and synthetic-demonstration labels.
+
+Application and CLI version metadata is aligned with 0.4.0. Native screenshots, package downloads and verification links are published with the corresponding verified release; the design illustration gallery remains separate from native execution evidence.
+
 ## [0.3.0 — Desktop workflow update](https://github.com/Forem0/ENGRAM/releases/tag/v0.3.0) — 2026-10-28
 
 - Present ENGRAM as the working local desktop application, with accurate reader states and coverage limits.
