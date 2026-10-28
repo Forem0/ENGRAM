@@ -7,8 +7,8 @@ export const native = isTauri();
 export async function runtimeInfo(): Promise<RuntimeInfo> {
   if (native) return invoke<RuntimeInfo>('get_runtime_info');
   return {
-    version: '0.2.0',
-    engine: 'Browser preview · Rust-generated synthetic fixture',
+    version: '0.3.0',
+    engine: 'Browser demo · Rust-generated synthetic fixture',
     schema_version: 1,
     initial_view: new URLSearchParams(location.search).get('view') ?? 'map',
     smoke_test: false,
@@ -20,14 +20,14 @@ export async function loadDemo(): Promise<Case> {
   const fixture = await import('./fixtures/demo-case.json');
   const caseData = assertCase(fixture.default);
   if (caseData.source_kind !== 'demo')
-    throw new Error('Browser previews accept only a synthetic demonstration.');
+    throw new Error('Browser demonstrations accept only a synthetic case.');
   return caseData;
 }
 
 function requireNative(): void {
   if (!native)
     throw new Error(
-      'Choose and inspect local sources in the ENGRAM desktop application. The browser preview uses synthetic data only.',
+      'Choose and inspect local sources in the ENGRAM desktop application. The browser demo uses synthetic data only.',
     );
 }
 

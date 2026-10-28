@@ -14,7 +14,7 @@ use serde_json::json;
     name = "engram",
     version,
     about = "Find what remains.",
-    long_about = "ENGRAM Developer Preview examines explicitly selected offline files and iPhone backups. Findings describe observed evidence and candidates, not proof of deletion or credential validity. No network requests are made by the analyzer."
+    long_about = "ENGRAM examines explicitly selected offline files and iPhone backups. Findings describe observed evidence and candidates, not proof of deletion or credential validity. No network requests are made by the analyzer."
 )]
 struct Cli {
     /// Write structured JSON to stdout instead of the human-readable view.
@@ -203,7 +203,7 @@ fn run(cli: Cli) -> Result<(), EngramError> {
                     "{}",
                     serde_json::to_string_pretty(&json!({
                         "application": "ENGRAM", "version": env!("CARGO_PKG_VERSION"),
-                        "channel": "developer_preview", "operating_system": std::env::consts::OS,
+                        "channel": "release", "operating_system": std::env::consts::OS,
                         "architecture": std::env::consts::ARCH, "network_required": false,
                         "source_selection": "explicit_path", "source_mutation": false,
                         "credential_validation": false, "keychain_recovery": false,
@@ -212,7 +212,7 @@ fn run(cli: Cli) -> Result<(), EngramError> {
                     }))?
                 );
             } else {
-                println!("ENGRAM {} / DEVELOPER PREVIEW", env!("CARGO_PKG_VERSION"));
+                println!("ENGRAM {} / LOCAL ANALYSIS", env!("CARGO_PKG_VERSION"));
                 println!("{} / {}", std::env::consts::OS, std::env::consts::ARCH);
                 println!("\nSource selection       Explicit folder or backup path\nAnalyzer network       None\nWrites to source       None\nCredential validation  None\nKeychain recovery      Not implemented");
                 println!("\nDefault limits\n  Files: {}\n  Per-file read: {} bytes\n  Total read: {} bytes", defaults.max_files, defaults.max_file_bytes, defaults.max_total_bytes);

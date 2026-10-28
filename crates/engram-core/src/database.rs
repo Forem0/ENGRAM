@@ -25,7 +25,7 @@ pub(crate) fn is_regular_table(connection: &Connection, table: &str) -> bool {
         return false;
     };
     // A familiar-looking view or virtual table may execute arbitrary expensive
-    // expressions. This preview's parsers accept ordinary CREATE TABLE sources.
+    // expressions. The parsers accept ordinary CREATE TABLE sources.
     let regular_table =
         regex::Regex::new(r"(?i)^\s*CREATE\s+TABLE\b").expect("static schema detector");
     regular_table.is_match(&definition)

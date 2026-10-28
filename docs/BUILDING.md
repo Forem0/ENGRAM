@@ -1,6 +1,6 @@
 # Build ENGRAM
 
-ENGRAM 0.2 uses a Tauri 2 native shell and a React/TypeScript frontend. The Rust engine and CLI remain in the workspace. The earlier 0.1 release used egui; its binaries and capture flags are not the current desktop build.
+ENGRAM uses a Tauri 2 native shell and a React/TypeScript frontend. The Rust engine and CLI share the workspace. The earlier 0.1 release used egui; its binaries and capture flags are not the current desktop build.
 
 Install the current stable Rust toolchain compatible with the workspace's declared minimum and dependency requirements using the [official Rust installer](https://www.rust-lang.org/tools/install). SQLite is built through the bundled crate feature, so a platform C compiler is required.
 
@@ -22,7 +22,7 @@ The Tauri CLI starts the local Vite development server and the Rust application 
 
 ## Windows
 
-Use Rust's MSVC toolchain and the Microsoft C++ Build Tools with the Windows SDK. The desktop also requires Microsoft Edge WebView2 Runtime. The portable preview archive does not install WebView2 itself. CI uses the standard Windows runner toolchain.
+Use Rust's MSVC toolchain and the Microsoft C++ Build Tools with the Windows SDK. The desktop also requires Microsoft Edge WebView2 Runtime. The portable archive does not install WebView2 itself. CI uses the standard Windows runner toolchain.
 
 ```powershell
 cd apps/desktop
@@ -46,7 +46,7 @@ npm ci
 npm run tauri -- build --bundles app --ci -- --locked
 ```
 
-The application bundle is written under the workspace's `target/release/bundle/macos/ENGRAM.app`. Developer Preview packages are not developer-signed or notarized. Packaging a `.app` is distinct from proving that distribution signing and notarization are complete.
+The application bundle is written under the workspace's `target/release/bundle/macos/ENGRAM.app`. Current distribution packages are unsigned and not notarized. Packaging a `.app` is distinct from proving that distribution signing and notarization are complete.
 
 ## Linux
 

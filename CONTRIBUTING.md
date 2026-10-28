@@ -8,10 +8,19 @@ Read [architecture](docs/ARCHITECTURE.md), [methodology](docs/METHODOLOGY.md) an
 
 ```bash
 cargo fmt --all -- --check
-cargo test -p engram-core -p engram-cli
-cargo clippy --workspace --all-targets -- -D warnings
-cargo build -p engram-desktop
+cargo test -p engram-core -p engram-cli --locked
+cd apps/desktop
+npm ci
+npm run format:check
+npm run typecheck
+npm test
+npm run build
+cd ../..
+cargo test -p engram-desktop --features engram-desktop/custom-protocol --locked
+cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
 ```
+
+Build the frontend before standalone native Cargo commands; its production assets are embedded by the custom-protocol feature. To launch the working application during development, run `npm run tauri -- dev -- -- --demo` from `apps/desktop`. Use the platform requirements in the building guide.
 
 ## Reader requirements
 
@@ -30,5 +39,7 @@ Do not validate found credentials online, bypass OS protections, infer a past re
 The desktop and CLI use the core model. Coordinate changes to `model.rs` with all callers and case persistence. Keep `schema_version` and compatibility behavior explicit.
 
 Use the warm ivory, charcoal and electric cobalt brand with the user-selected jagged lightning creature, Trace desk and Trace map labels, and the slogan "Find what remains." Screenshots should show a clearly marked synthetic source and identify the actual build that produced them. Do not replace working interactions with decorative controls or invent scan results for a demonstration.
+
+Lead documentation with the working desktop workflows. Preserve Ready, Experimental, Planned and Unavailable reader states, source limits and confidence meanings; do not equate a product version with complete source coverage. Release claims and download links must describe verified published artifacts.
 
 Describe the final change and relevant validation in a pull request. Keep real cases, credentials, phone backups and private paths out of issues, fixtures and screenshots.

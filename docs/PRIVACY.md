@@ -26,7 +26,7 @@ Case metadata remains sensitive. Paths can reveal usernames and project names; U
 
 ## Unsupported protections
 
-This preview does not bypass encryption, brute-force passwords, unlock Keychain, recover a device passcode, read an arbitrary application's sandbox, extract browser sessions from a live process, or remove data from a phone. Encrypted backup support is not implemented; the source is reported as unavailable rather than silently decrypted or scanned as empty.
+ENGRAM does not bypass encryption, brute-force passwords, unlock Keychain, recover a device passcode, read an arbitrary application's sandbox, extract browser sessions from a live process, or remove data from a phone. Encrypted backup support is not implemented; the source is reported as unavailable rather than silently decrypted or scanned as empty.
 
 ## Sharing a report
 

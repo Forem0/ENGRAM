@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0 — Desktop workflow update](https://github.com/Forem0/ENGRAM/releases/tag/v0.3.0) — 2026-10-28
+
+- Present ENGRAM as the working local desktop application, with accurate reader states and coverage limits.
+- Expand the README into a six-view application tour and a download, inspect, filter, save and compare walkthrough.
+- Add practical supported-source workflows, bounded CLI examples and a clearer case-format and architecture reference.
+- Align contributor checks, build documentation and security wording with the current Tauri application.
+
+The application and CLI use version 0.3.0 and retain the schema-1 case format. Earlier release artifacts remain unchanged.
+
+Validated by the [seven passing CI checks, including six native Tauri/IPC views](https://github.com/Forem0/ENGRAM/actions/runs/40591718267), from [source d9a559b](https://github.com/Forem0/ENGRAM/commit/d9a559b2768b02582051c79584d4f95df9ebc42f).
+
 ## [0.2.0-preview.2 — Visual identity update](https://github.com/Forem0/ENGRAM/releases/tag/v0.2.0-preview.2) — 2026-10-27
 
 - Adopt the user-selected jagged cobalt-blue lightning creature, warm ivory and charcoal.

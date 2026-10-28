@@ -1,12 +1,12 @@
 # Security policy
 
-ENGRAM is a Developer Preview that handles potentially sensitive local material. Review [privacy boundaries](docs/PRIVACY.md) before examining a source or sharing a case.
+ENGRAM is a local desktop application that handles potentially sensitive material. Review [privacy boundaries](docs/PRIVACY.md) before examining a source or sharing a case.
 
 ## Reporting
 
 For a suspected vulnerability, use GitHub's private vulnerability reporting **if it is enabled for this repository**. Otherwise contact the maintainer through an available private channel shown on the repository profile. Do not publish a real secret, backup or personal case as a public reproduction.
 
-A useful report includes the affected commit, platform, impact, a synthetic reproduction and the relevant source/reader boundary. No particular response time or security certification is promised by this preview.
+A useful report includes the affected commit, platform, impact, a synthetic reproduction and the relevant source/reader boundary. No particular response time or security certification is promised.
 
 ## Areas worth testing
 

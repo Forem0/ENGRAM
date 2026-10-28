@@ -883,7 +883,7 @@ checksum = "66b7e2430c6dff6a955451e2cfc438f09cea1965a9d6f87f7e3b90decc014099"
 
 [[package]]
 name = "engram-cli"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "engram-core",
@@ -893,7 +893,7 @@ dependencies = [
 
 [[package]]
 name = "engram-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "hmac",
@@ -911,7 +911,7 @@ dependencies = [
 
 [[package]]
 name = "engram-desktop"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "engram-core",
  "rfd",

@@ -63,7 +63,7 @@ fn modules() -> Vec<ModuleStatus> {
         ("Message metadata", ModuleState::Experimental, "Apple message table timestamps and direction only. Bodies and contacts are not exported."),
         ("Deleted-record recovery", ModuleState::Planned, "WAL/free-page carving is not implemented. WAL is used only to read the current copied database snapshot."),
         ("Keychain recovery", ModuleState::Planned, "No extraction, decryption, or recovery of protected Keychain records."),
-        ("Location and OCR", ModuleState::Planned, "No coordinate extraction or image-text recognition in this preview."),
+        ("Location and OCR", ModuleState::Planned, "Coordinate extraction and image-text recognition are planned."),
         ("Application access", ModuleState::Planned, "No claims about which applications actually read a file or currently have permission."),
     ];
     entries
@@ -126,7 +126,7 @@ fn input_file(
 ) -> Result<InputFile, EngramError> {
     if logical.len() > 16_384 || origin.len() > 1024 {
         return Err(EngramError::Input(
-            "Source path exceeds preview shape limits.".into(),
+            "Source path exceeds supported shape limits.".into(),
         ));
     }
     let metadata = metadata_for(root, &physical)?;
@@ -178,7 +178,7 @@ pub fn scan_path(path: &Path, options: &ScanOptions) -> Result<Case, EngramError
         || options.max_total_bytes == 0
         || options.max_total_bytes > 8 * 1024 * 1024 * 1024
     {
-        return Err(EngramError::Input("Scan limits must be positive and within preview bounds (1M files, 256 MiB/file, 8 GiB total).".into()));
+        return Err(EngramError::Input("Scan limits must be positive and within supported bounds (1M files, 256 MiB/file, 8 GiB total).".into()));
     }
     let metadata = path.symlink_metadata()?;
     if !metadata.is_dir() || metadata.file_type().is_symlink() || is_reparse(&metadata) {
@@ -189,7 +189,7 @@ pub fn scan_path(path: &Path, options: &ScanOptions) -> Result<Case, EngramError
     let root = path.canonicalize()?;
     if root.to_string_lossy().len() > 16_384 {
         return Err(EngramError::Input(
-            "Selected root path exceeds preview shape limits.".into(),
+            "Selected root path exceeds supported shape limits.".into(),
         ));
     }
     let now = Utc::now().timestamp();
@@ -385,7 +385,7 @@ impl Engine<'_> {
             .and_then(plist::Value::as_boolean)
             == Some(true)
         {
-            return Err(EngramError::Input("Encrypted iPhone backups are not supported by this Developer Preview. ENGRAM will not bypass encryption or request your device passcode.".into()));
+            return Err(EngramError::Input("Encrypted iPhone backups are not supported. ENGRAM will not bypass encryption or request your device passcode.".into()));
         }
         let manifest = input_file(
             &self.root,
