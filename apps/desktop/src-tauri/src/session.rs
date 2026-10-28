@@ -136,8 +136,8 @@ impl Session {
             if expected_case_id != case.id {
                 return Err("The active case changed. Save the current case again.".into());
             }
-            let review = validate_review(&case.findings, &review)
-                .map_err(|error| error.to_string())?;
+            let review =
+                validate_review(&case.findings, &review).map_err(|error| error.to_string())?;
             let mut snapshot_case = case.clone();
             snapshot_case.review = review;
             SaveSnapshot {
@@ -150,11 +150,14 @@ impl Session {
     }
 
     pub fn require_current_snapshot(&self, snapshot: &SaveSnapshot) -> Result<(), String> {
-        let active = self.active.lock().map_err(|_| {
-            "The current case is unavailable; restart the application.".to_owned()
-        })?;
+        let active = self
+            .active
+            .lock()
+            .map_err(|_| "The current case is unavailable; restart the application.".to_owned())?;
         if self.revision.load(Ordering::Relaxed) != snapshot.revision
-            || active.as_ref().is_none_or(|case| case.id != snapshot.case.id)
+            || active
+                .as_ref()
+                .is_none_or(|case| case.id != snapshot.case.id)
         {
             return Err("The active case changed. Save the current case again.".into());
         }
@@ -272,7 +275,10 @@ mod tests {
     fn absence_of_active_case_is_an_error_and_not_an_empty_success() {
         let state = DesktopState::new(Launch::default());
         assert!(state.session.active_case().is_err());
-        assert!(state.session.prepare_save("missing-case", CaseReview::new()).is_err());
+        assert!(state
+            .session
+            .prepare_save("missing-case", CaseReview::new())
+            .is_err());
     }
 
     #[test]
@@ -280,7 +286,10 @@ mod tests {
         let state = DesktopState::new(Launch::default());
         let original = demo_case();
         state.session.replace_case(original.clone()).unwrap();
-        assert!(state.session.prepare_save("wrong-case-id", marked_review(&original)).is_err());
+        assert!(state
+            .session
+            .prepare_save("wrong-case-id", marked_review(&original))
+            .is_err());
         let review = CaseReview::from([("missing-finding".into(), ReviewAnnotation::default())]);
         assert!(state.session.prepare_save(&original.id, review).is_err());
         assert_eq!(state.session.active_case().unwrap().review, original.review);
@@ -292,7 +301,10 @@ mod tests {
         let original = demo_case();
         state.session.replace_case(original.clone()).unwrap();
         let operation = state.session.begin().unwrap();
-        let snapshot = operation.session.prepare_save(&original.id, marked_review(&original)).unwrap();
+        let snapshot = operation
+            .session
+            .prepare_save(&original.id, marked_review(&original))
+            .unwrap();
         assert!(!snapshot.case().review.is_empty());
         assert_eq!(state.session.active_case().unwrap().review, original.review);
         drop(snapshot);
@@ -306,14 +318,23 @@ mod tests {
         let state = DesktopState::new(Launch::default());
         let original = demo_case();
         state.session.replace_case(original.clone()).unwrap();
-        let snapshot = state.session.prepare_save(&original.id, marked_review(&original)).unwrap();
+        let snapshot = state
+            .session
+            .prepare_save(&original.id, marked_review(&original))
+            .unwrap();
         let mut replacement = original.clone();
         replacement.title = "A later snapshot with the same imported ID".into();
         state.session.replace_case(replacement.clone()).unwrap();
         assert!(state.session.require_current_snapshot(&snapshot).is_err());
         assert!(!state.session.accept_saved_review(&snapshot));
-        assert_eq!(state.session.active_case().unwrap().title, replacement.title);
-        assert_eq!(state.session.active_case().unwrap().review, replacement.review);
+        assert_eq!(
+            state.session.active_case().unwrap().title,
+            replacement.title
+        );
+        assert_eq!(
+            state.session.active_case().unwrap().review,
+            replacement.review
+        );
     }
 
     #[test]
@@ -322,7 +343,10 @@ mod tests {
         let original = demo_case();
         state.session.replace_case(original.clone()).unwrap();
         let review = marked_review(&original);
-        let snapshot = state.session.prepare_save(&original.id, review.clone()).unwrap();
+        let snapshot = state
+            .session
+            .prepare_save(&original.id, review.clone())
+            .unwrap();
         assert!(state.session.accept_saved_review(&snapshot));
         let active = state.session.active_case().unwrap();
         assert_eq!(active.review, review);

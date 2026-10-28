@@ -249,7 +249,10 @@ mod tests {
         ensure_demo(&original).unwrap();
         state.session.replace_case(original.clone()).unwrap();
         let review = reviewed_metadata(&original);
-        let snapshot = state.session.prepare_save(&original.id, review.clone()).unwrap();
+        let snapshot = state
+            .session
+            .prepare_save(&original.id, review.clone())
+            .unwrap();
         let directory = tempfile::tempdir().unwrap();
         let output = directory.path().join("reviewed.engram.json");
         persist_review_snapshot(&state.session, &snapshot, &output).unwrap();
@@ -270,13 +273,19 @@ mod tests {
         let original = demo_case();
         ensure_demo(&original).unwrap();
         state.session.replace_case(original.clone()).unwrap();
-        let snapshot = state.session.prepare_save(&original.id, reviewed_metadata(&original)).unwrap();
+        let snapshot = state
+            .session
+            .prepare_save(&original.id, reviewed_metadata(&original))
+            .unwrap();
         let directory = tempfile::tempdir().unwrap();
         let output = directory.path().join("existing.engram.json");
         std::fs::write(&output, "Existing data must remain.").unwrap();
         assert!(persist_review_snapshot(&state.session, &snapshot, &output).is_err());
         assert_eq!(state.session.active_case().unwrap().review, original.review);
-        assert_eq!(std::fs::read_to_string(&output).unwrap(), "Existing data must remain.");
+        assert_eq!(
+            std::fs::read_to_string(&output).unwrap(),
+            "Existing data must remain."
+        );
     }
 
     #[test]
@@ -285,7 +294,10 @@ mod tests {
         let original = demo_case();
         ensure_demo(&original).unwrap();
         state.session.replace_case(original.clone()).unwrap();
-        let snapshot = state.session.prepare_save(&original.id, reviewed_metadata(&original)).unwrap();
+        let snapshot = state
+            .session
+            .prepare_save(&original.id, reviewed_metadata(&original))
+            .unwrap();
         let mut replacement = original.clone();
         replacement.title = "Replacement with the same imported ID".into();
         state.session.replace_case(replacement.clone()).unwrap();
