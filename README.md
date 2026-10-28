@@ -19,9 +19,9 @@ ENGRAM examines the offline sources you choose and turns their readable contents
 
 The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
-![ENGRAM Trace desk with the native application map and evidence inspector](assets/screenshots/workspace.png)
+![Atlas Focus interface design with the Trace map and evidence inspector](assets/design/atlas-focus/workspace.png)
 
-The screenshots use synthetic files processed by the actual Rust engine. All six native views were captured in the [passing cross-platform and native Tauri/IPC checks](https://github.com/Forem0/ENGRAM/actions/runs/40591718267), from [source d9a559b](https://github.com/Forem0/ENGRAM/commit/d9a559b2768b02582051c79584d4f95df9ebc42f). Details are recorded in [screenshot provenance](assets/screenshots/README.md).
+The gallery presents **Atlas Focus**, the selected interface design using illustrative synthetic data. Its implementation is a separate update; the **0.3.0** packages retain their released interface. [Actual native application captures and verification](assets/screenshots/README.md) remain available alongside the [design gallery](assets/design/atlas-focus/README.md).
 
 | Start with a question | Follow the evidence |
 | --- | --- |
@@ -77,7 +77,7 @@ Inspect the source again or open a newer saved case. Go to **Compare**, select *
 
 Search across names, paths, origins and rules. Combine category and confidence filters, then open a finding to inspect its locator, available timestamp, content hash where retained, and evidence fields.
 
-![Native Findings view with searchable artifacts and the shared evidence inspector](assets/screenshots/findings.png)
+![Atlas Focus Findings design with searchable artifacts and the evidence inspector](assets/design/atlas-focus/findings.png)
 
 The table is paginated, and filters apply to the actual case. The map shows a bounded set of representative nodes while category counts include every finding. No invented exposure score is needed to explain why a result exists.
 
@@ -85,7 +85,7 @@ The table is paginated, and filters apply to the actual case. The map shows a bo
 
 Move between newest-first and oldest-first views. Dated findings retain their source context; the view also reports how many findings have no usable timestamp.
 
-![Native Timeline view showing dated findings from a synthetic case](assets/screenshots/timeline.png)
+![Atlas Focus Timeline design showing illustrative dated findings](assets/design/atlas-focus/timeline.png)
 
 A filesystem modification time is a modification time. A supported database timestamp is labelled according to its reader. The interface does not turn either into an assumed deletion date.
 
@@ -93,7 +93,7 @@ A filesystem modification time is a modification time. A supported database time
 
 Follow relationships recorded by the engine, including identical file content and repeated masked candidates within a case. Select either endpoint to review its own source evidence.
 
-![Native Connections view showing recorded relationships and linked source artifacts](assets/screenshots/connections.png)
+![Atlas Focus Connections design showing evidence relationships and linked artifacts](assets/design/atlas-focus/connections.png)
 
 Links reflect implemented evidence rules. The decorative map guides add no findings or relationships, and a visual connection is not a claim that another application accessed a file.
 
@@ -101,15 +101,15 @@ Links reflect implemented evidence rules. The decorative map guides add no findi
 
 Choose an earlier case as the baseline and inspect **Added**, **Removed**, **Changed** and **Unchanged** groups. Findings removed from the current observation can still be inspected using their baseline evidence.
 
-![Native Compare view awaiting saved-case baseline selection](assets/screenshots/compare.png)
+![Atlas Focus Compare design awaiting saved-case baseline selection](assets/design/atlas-focus/compare.png)
 
-The capture shows the baseline-selection state before a comparison is loaded. Comparison describes the supplied snapshots; different dates, read limits or parser coverage can change the result. A missing finding does not establish that every copy was securely erased.
+The design shows the baseline-selection state before a comparison is loaded. Comparison describes the supplied snapshots; different dates, read limits or parser coverage can change the result. A missing finding does not establish that every copy was securely erased.
 
 ### Modules — coverage belongs next to the results
 
 See **Ready**, **Experimental**, **Planned** and **Unavailable** states for the active source, alongside skipped-file counters and inspection notes.
 
-![Native Modules view with reader states and source coverage notes](assets/screenshots/modules.png)
+![Atlas Focus Modules design with reader states and source coverage notes](assets/design/atlas-focus/modules.png)
 
 These states describe the actual reader and supplied format. An unsupported schema stays visible as a limitation; it does not silently become a successful empty inspection.
 
