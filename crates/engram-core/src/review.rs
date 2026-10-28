@@ -64,7 +64,9 @@ pub fn validate_review(
         } else {
             annotation.note.clone()
         };
-        if annotation.bookmarked || annotation.status != ReviewStatus::Unreviewed || !note.is_empty()
+        if annotation.bookmarked
+            || annotation.status != ReviewStatus::Unreviewed
+            || !note.is_empty()
         {
             normalized.insert(
                 identity.clone(),
