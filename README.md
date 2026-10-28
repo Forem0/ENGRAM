@@ -17,11 +17,11 @@
 
 ENGRAM examines the offline sources you choose and turns their readable contents into a navigable case. Find media and documents, inspect masked secret candidates, follow exact-copy relationships, and compare observations over time.
 
-The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
+The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. The current **0.4.0** source implements the **Atlas Focus** graphite-and-cobalt interface, with a compact workspace header, readable file relationships and a persistent inspector. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
 ![Atlas Focus interface design with the Trace map and evidence inspector](assets/design/atlas-focus/workspace.png)
 
-The gallery presents **Atlas Focus**, the selected interface design using illustrative synthetic data. Its implementation is a separate update; the **0.3.0** packages retain their released interface. [Actual native application captures and verification](assets/screenshots/README.md) remain available alongside the [design gallery](assets/design/atlas-focus/README.md).
+The gallery presents the selected **Atlas Focus** design using illustrative synthetic data. The current source implements this visual direction; download links and native capture evidence follow verified release artifacts. The **0.3.0** packages retain their released interface. [Actual native application captures and verification](assets/screenshots/README.md) remain available alongside the [design gallery](assets/design/atlas-focus/README.md).
 
 | Start with a question | Follow the evidence |
 | --- | --- |
