@@ -21,7 +21,7 @@ The **Trace desk** brings the map, findings, timeline, connections and evidence 
 
 ![ENGRAM Trace desk with the native application map and evidence inspector](assets/screenshots/workspace.png)
 
-The screenshots use synthetic files processed by the actual Rust engine. They show native application windows; capture details, source revision and verification are recorded in [screenshot provenance](assets/screenshots/README.md).
+The screenshots use synthetic files processed by the actual Rust engine. All six native views were captured in the [passing cross-platform and native Tauri/IPC checks](https://github.com/Forem0/ENGRAM/actions/runs/40591718267), from [source d9a559b](https://github.com/Forem0/ENGRAM/commit/d9a559b2768b02582051c79584d4f95df9ebc42f). Details are recorded in [screenshot provenance](assets/screenshots/README.md).
 
 | Start with a question | Follow the evidence |
 | --- | --- |
@@ -101,9 +101,9 @@ Links reflect implemented evidence rules. The decorative map guides add no findi
 
 Choose an earlier case as the baseline and inspect **Added**, **Removed**, **Changed** and **Unchanged** groups. Findings removed from the current observation can still be inspected using their baseline evidence.
 
-![Native Compare view for saved-case baseline selection and snapshot differences](assets/screenshots/compare.png)
+![Native Compare view awaiting saved-case baseline selection](assets/screenshots/compare.png)
 
-Comparison describes the supplied snapshots. Different dates, read limits or parser coverage can change the result. A missing finding does not establish that every copy was securely erased.
+The capture shows the baseline-selection state before a comparison is loaded. Comparison describes the supplied snapshots; different dates, read limits or parser coverage can change the result. A missing finding does not establish that every copy was securely erased.
 
 ### Modules — coverage belongs next to the results
 
@@ -276,7 +276,7 @@ The Tauri CLI starts the frontend and native Rust process together. For a produc
 npm run tauri -- build --ci -- --locked
 ```
 
-`npm run dev` alone starts a browser-only synthetic layout preview. Real source dialogs, case persistence and baseline selection require the native app. Browser captures are separate from native execution evidence.
+`npm run dev` alone starts a browser-only synthetic layout demonstration. Real source dialogs, case persistence and baseline selection require the native app. Browser captures are separate from native execution evidence.
 
 ### Development checks
 
