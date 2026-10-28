@@ -22,7 +22,7 @@ jobs:
           - os: windows-latest
             name: windows
             suffix: .exe
-          - os: macos-latest
+          - os: macos-15
             name: macos
             suffix: ''
     runs-on: ${{ matrix.os }}
