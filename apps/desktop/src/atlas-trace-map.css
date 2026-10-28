@@ -1,0 +1,151 @@
+.atlas-map-panel {
+  min-width: 0;
+  border: 1px solid var(--line, #26394d);
+  border-radius: 10px;
+  background: #0d1722;
+  overflow: hidden;
+}
+.atlas-map-canvas {
+  width: 100%;
+  min-width: 0;
+}
+.atlas-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-ui, 'Segoe UI', sans-serif);
+}
+.atlas-group-surface {
+  fill: #101c2980;
+  stroke: #26394d;
+  stroke-width: 1;
+}
+.atlas-group-heading {
+  fill: #142231;
+  stroke: #2e435b;
+  stroke-width: 1;
+}
+.atlas-group-label {
+  cursor: pointer;
+  outline: none;
+}
+.atlas-group-label text {
+  fill: #e7eef9;
+  font-size: 18px;
+  font-weight: 600;
+}
+.atlas-group-count {
+  fill: #a1b1c7;
+  font-weight: 400;
+}
+.atlas-group-label:hover .atlas-group-heading,
+.atlas-group-label:focus-visible .atlas-group-heading {
+  fill: #1b3047;
+  stroke: #66aaff;
+  stroke-width: 2;
+}
+.atlas-group-label:focus-visible text {
+  fill: #fff;
+}
+.atlas-map-group.is-muted .atlas-group-surface {
+  stroke-dasharray: 4 5;
+  fill: #101c2930;
+}
+.atlas-group-empty {
+  fill: #92a5be;
+  font-size: 16px;
+}
+.atlas-map-lines path {
+  fill: none;
+  stroke-width: 1.7;
+  opacity: 0.6;
+}
+.atlas-map-lines path.is-active {
+  stroke-width: 2.5;
+  opacity: 1;
+}
+.atlas-map-node {
+  cursor: pointer;
+  outline: none;
+}
+.atlas-node-hit {
+  fill: #0e1925;
+  fill-opacity: 0.93;
+  stroke: transparent;
+  stroke-width: 1.5;
+}
+.atlas-node-icon {
+  fill: #142536;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+.atlas-node-name {
+  fill: #e7eef9;
+  font-size: 17px;
+  font-weight: 500;
+}
+.atlas-node-kind {
+  fill: #a1b1c7;
+  font-size: 15px;
+}
+.atlas-map-node.is-selected .atlas-node-hit {
+  fill: #102b58;
+  stroke: #2584ff;
+  stroke-width: 2.5;
+}
+.atlas-map-node.is-selected .atlas-node-icon {
+  fill: #123e7b;
+  stroke: #3991ff;
+}
+.atlas-map-node.is-selected .atlas-node-name {
+  fill: #fff;
+  font-size: 18px;
+  font-weight: 600;
+}
+.atlas-map-node:hover .atlas-node-hit,
+.atlas-map-node:focus-visible .atlas-node-hit {
+  stroke: #8cbeff;
+  fill: #18334f;
+}
+.atlas-map-node:focus-visible .atlas-node-hit {
+  stroke-width: 3;
+}
+.atlas-map-node.is-context .atlas-node-hit {
+  stroke-dasharray: 5 4;
+}
+.atlas-no-links {
+  fill: #9aacc3;
+  font-size: 15px;
+}
+.atlas-no-matches {
+  fill: #c0ccdd;
+  font-size: 18px;
+}
+.atlas-map-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 7px 14px 4px;
+  border-top: 1px solid #203347;
+  color: #a1b1c7;
+  font-size: 12px;
+}
+.atlas-map-footer strong {
+  color: #e7eef9;
+}
+.atlas-map-note {
+  padding: 0 14px 9px;
+  margin: 0;
+  color: #92a5be;
+  font-size: 12px;
+  line-height: 1.4;
+}
+@media (max-width: 800px) {
+  .atlas-map-canvas {
+    overflow-x: auto;
+  }
+  .atlas-map {
+    min-width: 660px;
+  }
+}

@@ -62,13 +62,13 @@ export interface RuntimeInfo {
 }
 
 export const CATEGORIES: { id: Category; label: string; color: string; short: string }[] = [
-  { id: 'media', label: 'Media', color: '#246BFE', short: 'ME' },
-  { id: 'secret', label: 'Secrets', color: '#BB5C4B', short: 'SE' },
-  { id: 'document', label: 'Documents', color: '#6B73AD', short: 'DO' },
-  { id: 'browser', label: 'Browser', color: '#397A93', short: 'BR' },
-  { id: 'message', label: 'Messages', color: '#8560AD', short: 'MS' },
-  { id: 'location', label: 'Location', color: '#708694', short: 'LO' },
-  { id: 'database', label: 'Databases', color: '#5C667A', short: 'DB' },
+  { id: 'media', label: 'Media', color: '#19C5C7', short: 'ME' },
+  { id: 'secret', label: 'Secrets', color: '#F4AA36', short: 'SE' },
+  { id: 'document', label: 'Documents', color: '#A879F7', short: 'DO' },
+  { id: 'browser', label: 'Browser', color: '#318BFF', short: 'BR' },
+  { id: 'message', label: 'Messages', color: '#E770C5', short: 'MS' },
+  { id: 'location', label: 'Location', color: '#8D9AB6', short: 'LO' },
+  { id: 'database', label: 'Databases', color: '#F2D66B', short: 'DB' },
 ];
 
 export const VIEWS: { id: View; name: string; subtitle: string; description: string }[] = [

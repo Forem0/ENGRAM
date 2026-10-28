@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import * as bridge from './bridge';
+import { AtlasTraceMap } from './AtlasTraceMap';
 import {
   bytesLabel,
   chronological,
@@ -43,14 +44,16 @@ type IconName =
   | 'copy'
   | 'check';
 const paths: Record<IconName, string[]> = {
-  map: ['M13 2 5 13h6l-1 9 9-13h-7l1-7Z'],
+  map: [
+    'M6 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM22 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM6 21a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM22 21a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM6 6l4 4M18 6l-4 4M6 19l4-5M18 19l-4-5',
+  ],
   findings: ['M5 4h14v16H5zM8 8h8M8 12h8M8 16h5'],
-  timeline: ['M6 3v18M3 6h6M3 12h6M3 18h6M12 6h8M12 12h5M12 18h8'],
+  timeline: ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM12 6v6l4 2'],
   connections: [
     'M5 6h.01M19 6h.01M12 18h.01M6 7l5 9M18 7l-5 9M7 6h10',
     'M7 6a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM21 6a2 2 0 1 0-4 0 2 2 0 0 0 4 0ZM14 18a2 2 0 1 0-4 0 2 2 0 0 0 4 0Z',
   ],
-  compare: ['M3 5h7v14H3zM14 5h7v14h-7zM6 9h1M17 9h1M6 13h1M17 13h1'],
+  compare: ['M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4'],
   modules: ['M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
   folder: ['M3 6h7l2 2h9v12H3zM3 6V4h7l2 2'],
   open: ['M3 20V6h7l2 2h9v3M3 20l4-9h15l-4 9H3Z'],
@@ -165,7 +168,7 @@ function FilterBar({
           <Icon name="search" />
           <input
             aria-label="Search findings"
-            placeholder="Search a name, path or rule…"
+            placeholder="Search findings"
             value={filters.query}
             onChange={(event) => setFilters({ ...filters, query: event.target.value })}
           />
@@ -227,236 +230,42 @@ function FilterBar({
   );
 }
 
-const clusterPositions: Record<Category, [number, number, number, number]> = {
-  media: [150, 145, 150, 78],
-  secret: [550, 145, 550, 78],
-  document: [150, 345, 150, 414],
-  browser: [350, 365, 350, 434],
-  message: [550, 345, 550, 414],
-  location: [350, 105, 350, 38],
-  database: [350, 245, 350, 311],
-};
-
-function jitter(id: string, salt: number): number {
-  let value = salt;
-  for (let index = 0; index < id.length; index += 1)
-    value = ((value << 5) - value + id.charCodeAt(index)) | 0;
-  return ((value >>> 0) % 1000) / 1000;
+function CategoryGlyph({ category, size = 20 }: { category: Category; size?: number }) {
+  const info = categoryInfo(category);
+  const symbols: Record<Category, string[]> = {
+    media: ['M4 4h16v16H4zM4 16l5-5 4 4 3-3 4 4', 'M9 8h.01'],
+    secret: ['M8 11V8a4 4 0 0 1 8 0v3M6 11h12v10H6zM12 15v2'],
+    document: ['M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h6'],
+    browser: ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z'],
+    message: ['M4 4h16v13H9l-5 4V4ZM8 8h8M8 12h5'],
+    location: ['M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0ZM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
+    database: [
+      'M20 6c0 2-4 3-8 3S4 8 4 6s4-3 8-3 8 1 8 3ZM4 6v12c0 2 4 3 8 3s8-1 8-3V6M4 12c0 2 4 3 8 3s8-1 8-3',
+    ],
+  };
+  return (
+    <span className={`category-mark category-${category}`} style={{ color: info.color }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {symbols[category].map((path, index) => (
+          <path d={path} key={index} />
+        ))}
+      </svg>
+    </span>
+  );
 }
 
-function TraceMap({
-  caseData,
-  edges,
-  visible,
-  selected,
-  onSelect,
-  onCategory,
-}: {
-  caseData: Case;
-  edges: [string, string][];
-  visible: Finding[];
-  selected: Finding | null;
-  onSelect: (finding: Finding) => void;
-  onCategory: (category: Category) => void;
-}) {
-  const data = useMemo(() => {
-    const points = new Map<string, { x: number; y: number; finding: Finding }>();
-    const groups = CATEGORIES.map((category) => {
-      const findings = caseData.findings.filter((finding) => finding.category === category.id);
-      const [x, y] = clusterPositions[category.id];
-      const sampled = findings.slice(0, 9);
-      if (
-        selected?.category === category.id &&
-        !sampled.some((finding) => finding.id === selected.id) &&
-        findings.some((finding) => finding.id === selected.id)
-      )
-        sampled[sampled.length - 1] = selected;
-      sampled.forEach((finding, index) => {
-        const angle = index * 2.39996;
-        const radius = index === 0 ? 0 : 12 + 13 * Math.sqrt(index);
-        points.set(finding.id, {
-          finding,
-          x: x + Math.cos(angle) * radius + jitter(finding.id, 13) * 6,
-          y: y + Math.sin(angle) * radius + jitter(finding.id, 17) * 6,
-        });
-      });
-      return { ...category, findings };
-    });
-    return { points, groups };
-  }, [caseData, selected]);
-  const visibleIds = useMemo(() => new Set(visible.map((finding) => finding.id)), [visible]);
-  const visibleEdges = edges.filter(([a, b]) => data.points.has(a) && data.points.has(b));
-  const selectedEdges = selected ? new Set(selected.related_ids) : new Set<string>();
-  return (
-    <section className="panel map-panel" aria-label="Evidence trace map">
-      <div className="panel-heading">
-        <div>
-          <span className="eyebrow">TRACE MAP / LOCAL EVIDENCE</span>
-          <p>Seven categories. Follow their recorded connections.</p>
-        </div>
-        <span className="map-status">
-          <span className="status-dot" />
-          Evidence mapped
-        </span>
-      </div>
-      <svg
-        className="trace-map"
-        viewBox="0 0 700 485"
-        role="group"
-        aria-label={`Interactive map of ${caseData.findings.length} findings. Select a category or a finding.`}
-      >
-        <defs>
-          <pattern id="map-grid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-            <path d="M1 0v4M0 1h4" stroke="#bcc2cc" strokeWidth=".6" opacity=".4" />
-          </pattern>
-        </defs>
-        <rect x="5" y="5" width="690" height="475" fill="url(#map-grid)" />
-        <g aria-hidden="true" className="signal-guides">
-          <path className="signal-bolt" d="M386 56 266 245h73l-45 185 149-220h-78l21-154Z" />
-          <path className="signal-rule" d="M28 145h644M28 345h644M150 64v360M550 64v360" />
-          <path
-            className="signal-register"
-            d="M48 35H23v25M652 35h25v25M23 421v25h25M677 421v25h-25"
-          />
-          <text className="signal-reference" x="28" y="240">
-            SOURCE
-          </text>
-          <text className="signal-reference" x="672" y="240" textAnchor="end">
-            LOCAL / 01
-          </text>
-        </g>
-        <g aria-hidden="true">
-          {visibleEdges.map(([a, b]) => {
-            const first = data.points.get(a)!;
-            const second = data.points.get(b)!;
-            const active = selected?.id === a || selected?.id === b;
-            return (
-              <path
-                key={JSON.stringify([a, b])}
-                className={`evidence-line ${active ? 'selected' : ''}`}
-                d={`M${first.x},${first.y}H${(first.x + second.x) / 2}V${second.y}H${second.x}`}
-              />
-            );
-          })}
-        </g>
-        {data.groups.map((category) => {
-          const [x, y, labelX, labelY] = clusterPositions[category.id];
-          const active = category.findings.some((finding) => visibleIds.has(finding.id));
-          return (
-            <g
-              key={category.id}
-              className={`map-cluster ${active ? '' : 'dimmed'} ${selected?.category === category.id ? 'current' : ''}`}
-            >
-              <rect
-                className="cluster-halo"
-                x={x - 47}
-                y={y - 44}
-                width="94"
-                height="88"
-                fill={category.color}
-              />
-              <g
-                role="button"
-                tabIndex={0}
-                className="category-map-label"
-                aria-label={`${category.label}, ${category.findings.length} findings. Filter category.`}
-                onClick={() => onCategory(category.id)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    onCategory(category.id);
-                  }
-                }}
-              >
-                <rect
-                  x={labelX - 58}
-                  y={labelY - 13}
-                  width="116"
-                  height="32"
-                  rx="0"
-                  fill="transparent"
-                />
-                <text x={labelX} y={labelY} textAnchor="middle">
-                  {category.label}
-                  <tspan className="map-count" dx="6">
-                    {category.findings.length}
-                  </tspan>
-                </text>
-                <line
-                  x1={labelX}
-                  y1={labelY + 8}
-                  x2={labelX}
-                  y2={labelY + 15}
-                  stroke={category.color}
-                />
-              </g>
-            </g>
-          );
-        })}
-        {[...data.points.entries()].map(([id, point]) => {
-          const info = categoryInfo(point.finding.category);
-          const active = selected?.id === id;
-          const linked = selectedEdges.has(id);
-          return (
-            <g
-              key={id}
-              role="button"
-              tabIndex={0}
-              className={`map-node ${active ? 'selected' : ''} ${visibleIds.has(id) ? '' : 'dimmed'}`}
-              aria-label={`Inspect ${point.finding.title}`}
-              aria-pressed={active}
-              onClick={() => onSelect(point.finding)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  onSelect(point.finding);
-                }
-              }}
-            >
-              <title>{point.finding.title}</title>
-              <circle className="node-hit" cx={point.x} cy={point.y} r="11" fill="transparent" />
-              {(active || linked) && (
-                <rect
-                  x={point.x - (active ? 9 : 7)}
-                  y={point.y - (active ? 9 : 7)}
-                  width={active ? 18 : 14}
-                  height={active ? 18 : 14}
-                  transform={`rotate(45 ${point.x} ${point.y})`}
-                  fill="none"
-                  stroke={active ? '#246BFE' : info.color}
-                  strokeWidth="1.5"
-                />
-              )}
-              <rect
-                className="node-core"
-                x={point.x - 3.5}
-                y={point.y - 3.5}
-                width="7"
-                height="7"
-                transform={`rotate(45 ${point.x} ${point.y})`}
-                fill={info.color}
-              />
-            </g>
-          );
-        })}
-        <text x="350" y="475" textAnchor="middle" className="map-caption">
-          OBSERVED ARTIFACTS · RECORDED RELATIONSHIPS
-        </text>
-      </svg>
-      <div className="map-foot">
-        <span>
-          <strong>{visible.length.toLocaleString('en')}</strong> findings match your filters
-        </span>
-        <span>
-          {data.points.size} representative nodes · {edges.length} total links
-        </span>
-      </div>
-      <p className="map-note">
-        Select a node to inspect its evidence. Large sources show a bounded sample; category counts
-        include every finding.
-      </p>
-    </section>
-  );
+function findingTitle(finding: Finding) {
+  return finding.title.replace(/^(SQLite database|Media file|Document or archive):\s*/, '');
 }
 
 function FindingsTable({
@@ -464,64 +273,97 @@ function FindingsTable({
   selected,
   onSelect,
   label = 'Findings',
+  compact = false,
+  onViewAll,
 }: {
   findings: Finding[];
   selected: Finding | null;
   onSelect: (finding: Finding) => void;
   label?: string;
+  compact?: boolean;
+  onViewAll?: () => void;
 }) {
   const [page, setPage] = useState(0);
+  const size = compact ? 3 : 10;
   useEffect(() => setPage(0), [findings]);
-  const currentPage = Math.min(page, Math.max(0, Math.ceil(findings.length / 50) - 1));
+  const currentPage = Math.min(page, Math.max(0, Math.ceil(findings.length / size) - 1));
   if (!findings.length)
     return (
       <Empty title="No findings match">
-        Try another category, confidence label or search term. Missing results describe this view,
-        not complete device coverage.
+        Try another category, confidence label or search term. Results describe the supplied source.
       </Empty>
     );
   return (
-    <section className="panel findings-panel" aria-label={label}>
+    <section
+      className={`panel findings-panel ${compact ? 'compact-findings' : ''}`}
+      aria-label={label}
+    >
       <div className="table-heading">
-        <span className="eyebrow">{label.toUpperCase()}</span>
-        <span>{findings.length.toLocaleString('en')} records</span>
+        <h2>
+          {label} <span>({findings.length.toLocaleString('en')})</span>
+        </h2>
+        {compact ? (
+          <span>Artifacts matching your filters.</span>
+        ) : (
+          <span>Every row retains its source evidence.</span>
+        )}
+        {compact && onViewAll && (
+          <button className="button text small" onClick={onViewAll}>
+            View all <Icon name="arrow" size={14} />
+          </button>
+        )}
       </div>
       <div className="finding-table" role="table" aria-label={label}>
         <div className="finding-table-head" role="row">
-          <span role="columnheader">Artifact / source</span>
+          <span role="columnheader">Name</span>
           <span role="columnheader">Category</span>
+          <span role="columnheader" className="path-cell">
+            Source
+          </span>
           <span role="columnheader">Confidence</span>
+          <span role="columnheader" className="links-cell">
+            Links
+          </span>
         </div>
-        {findings.slice(currentPage * 50, currentPage * 50 + 50).map((finding) => (
-          <button
-            role="row"
-            key={finding.id}
-            className={`finding-row ${selected?.id === finding.id ? 'selected' : ''}`}
-            onClick={() => onSelect(finding)}
-            aria-label={`Inspect ${finding.title}`}
-          >
-            <span role="cell" className="artifact-cell">
-              <span
-                className="category-mark"
-                style={{ color: categoryInfo(finding.category).color }}
-              >
-                {categoryInfo(finding.category).short}
+        {findings
+          .slice(compact ? 0 : currentPage * size, compact ? size : currentPage * size + size)
+          .map((finding) => (
+            <button
+              role="row"
+              key={finding.id}
+              className={`finding-row ${selected?.id === finding.id ? 'selected' : ''}`}
+              onClick={() => onSelect(finding)}
+              aria-label={`Inspect ${finding.title}`}
+            >
+              <span role="cell" className="artifact-cell">
+                <CategoryGlyph category={finding.category} />
+                <span>
+                  <strong title={finding.title}>{findingTitle(finding)}</strong>
+                  <small title={finding.path}>{finding.path}</small>
+                </span>
               </span>
-              <span>
-                <strong>{finding.title}</strong>
-                <small title={finding.path}>{finding.path}</small>
+              <span role="cell" className="category-cell">
+                <span
+                  className="dot"
+                  style={{ background: categoryInfo(finding.category).color }}
+                />
+                {categoryInfo(finding.category).label}
               </span>
-            </span>
-            <span role="cell" className="category-cell">
-              {categoryInfo(finding.category).label}
-            </span>
-            <span role="cell">
-              <Tag state={finding.confidence}>{finding.confidence}</Tag>
-            </span>
-          </button>
-        ))}
+              <span role="cell" className="path-cell mono" title={finding.path}>
+                {finding.path}
+              </span>
+              <span role="cell">
+                <Tag state={finding.confidence}>{finding.confidence}</Tag>
+              </span>
+              <span role="cell" className="links-cell">
+                {finding.related_ids.length}
+              </span>
+            </button>
+          ))}
       </div>
-      <Pager count={findings.length} page={currentPage} setPage={setPage} />
+      {!compact && (
+        <Pager count={findings.length} page={currentPage} setPage={setPage} size={size} />
+      )}
     </section>
   );
 }
@@ -712,55 +554,79 @@ function Compare({
     () => (comparison ? diffFindings(comparison.diff, change, comparison.before, caseData) : []),
     [comparison, change, caseData],
   );
+  const changes = [
+    { id: 'added', label: 'Added', description: 'Present in current only' },
+    { id: 'removed', label: 'Removed', description: 'Present in baseline only' },
+    { id: 'changed', label: 'Changed', description: 'Different between cases' },
+    { id: 'unchanged', label: 'Unchanged', description: 'Same in both cases' },
+  ] as const;
   return (
     <div className="compare-view">
-      <section className="panel comparison-intro">
-        <div className="comparison-glyph">
-          <Icon name="compare" size={30} />
+      <section className="comparison-sources" aria-label="Comparison sources">
+        <div className="panel source-observation current-observation">
+          <span className="eyebrow">
+            <span className="status-dot" />
+            Current observation
+          </span>
+          <div className="observation-title">
+            <Icon name="folder" size={30} />
+            <div>
+              <h2>{caseData.title}</h2>
+              <p>{sourceLabel(caseData.source_kind)}</p>
+            </div>
+          </div>
+          <div className="observation-counts">
+            <span>
+              <strong>{caseData.findings.length}</strong> findings
+            </span>
+            <span>
+              <strong>{caseData.stats.files_examined}</strong> files
+            </span>
+          </div>
         </div>
-        <div>
-          <span className="eyebrow">TWO OBSERVATIONS</span>
-          <h2>A before. An after. The evidence between.</h2>
-          <p>
-            Choose a saved case as the baseline. The open case is the current observation. Existing
-            case files stay unchanged.
-          </p>
+        <span className="comparison-glyph" aria-hidden="true">
+          <Icon name="compare" size={25} />
+        </span>
+        <div className="panel source-observation">
+          <span className="eyebrow">
+            <span className="status-dot muted-dot" />
+            Baseline
+          </span>
+          <div className="observation-title">
+            <Icon name="folder" size={30} />
+            <div>
+              <h2>{comparison?.before.title ?? 'No case selected'}</h2>
+              <p>
+                {comparison
+                  ? dateLabel(comparison.before.completed_at)
+                  : 'Choose a saved case to compare.'}
+              </p>
+            </div>
+          </div>
+          <button
+            className="button primary"
+            disabled={!bridge.native || busy}
+            title={!bridge.native ? 'Case selection is available in the desktop app.' : undefined}
+            onClick={onCompare}
+          >
+            <Icon name="open" />
+            {comparison ? 'Change baseline' : 'Choose baseline'}
+          </button>
         </div>
-        <button
-          className="button primary"
-          disabled={!bridge.native || busy}
-          title={!bridge.native ? 'Case selection is available in the desktop app.' : undefined}
-          onClick={onCompare}
-        >
-          <Icon name="open" />
-          {comparison ? 'Change baseline' : 'Choose baseline'}
-        </button>
       </section>
       {comparison ? (
         <>
-          <div className="comparison-sources">
-            <div>
-              <span className="eyebrow">BASELINE</span>
-              <strong>{comparison.before.title}</strong>
-              <small>{dateLabel(comparison.before.completed_at)}</small>
-            </div>
-            <span aria-hidden="true">→</span>
-            <div>
-              <span className="eyebrow">CURRENT</span>
-              <strong>{caseData.title}</strong>
-              <small>{dateLabel(caseData.completed_at)}</small>
-            </div>
-          </div>
           <div className="diff-tabs">
-            {(['added', 'removed', 'changed', 'unchanged'] as const).map((kind) => (
+            {changes.map((item) => (
               <button
-                key={kind}
-                aria-pressed={change === kind}
-                onClick={() => setChange(kind)}
-                className={change === kind ? 'active' : ''}
+                key={item.id}
+                aria-pressed={change === item.id}
+                onClick={() => setChange(item.id)}
+                className={change === item.id ? 'active' : ''}
               >
-                <span>{kind}</span>
-                <strong>{comparison.diff[kind].length}</strong>
+                <span>{item.label}</span>
+                <strong>{comparison.diff[item.id].length}</strong>
+                <small>{item.description}</small>
               </button>
             ))}
           </div>
@@ -771,62 +637,94 @@ function Compare({
             label={`${change} findings`}
           />
           <p className="view-note">
-            Absent from a snapshot does not establish secure deletion. Scan bounds, source dates and
-            reader coverage can differ.
+            Comparison describes these snapshots. Source dates, read limits and supported readers
+            can differ.
           </p>
         </>
       ) : (
-        <Empty
-          title={
-            bridge.native
+        <section className="panel baseline-empty">
+          <div className="baseline-illustration" aria-hidden="true">
+            <Icon name="findings" size={54} />
+            <Icon name="compare" size={24} />
+            <Icon name="findings" size={54} />
+          </div>
+          <h2>
+            {bridge.native
               ? 'Choose your first baseline'
-              : 'Comparison is available in the desktop app'
-          }
-        >
-          {bridge.native
-            ? 'Choose a saved case to compare it with the current observation.'
-            : 'Saved cases are compared by the Rust engine in the desktop app.'}
-        </Empty>
+              : 'Comparison is available in the desktop app'}
+          </h2>
+          <p>
+            {bridge.native
+              ? 'Choose a saved case to compare it with the current observation.'
+              : 'Saved cases are compared by the Rust engine in the desktop app.'}
+          </p>
+          <div className="change-legend">
+            {changes.map((item) => (
+              <div key={item.id} className={item.id}>
+                <span className="dot" />
+                <strong>{item.label}</strong>
+                <span>{item.description}</span>
+              </div>
+            ))}
+          </div>
+          <p className="view-note">
+            <Icon name="shield" size={16} />
+            Comparison describes the supplied snapshots. Existing case files stay unchanged.
+          </p>
+        </section>
       )}
     </div>
   );
 }
 
 function Modules({ caseData }: { caseData: Case }) {
+  const groups = [
+    { state: 'ready', title: 'Implemented modules' },
+    { state: 'experimental', title: 'Experimental modules' },
+    { state: 'planned', title: 'Planned modules' },
+    { state: 'unavailable', title: 'Unavailable for this source' },
+  ] as const;
   return (
     <div className="modules-view">
-      <section className="coverage-summary">
-        <Icon name="shield" size={28} />
-        <div>
-          <span className="eyebrow">COVERAGE, MADE VISIBLE</span>
-          <h2>Every source has its limits.</h2>
-          <p>
-            Ready describes the implemented reader. Experimental coverage depends on the supplied
-            format and version.
-          </p>
-        </div>
-      </section>
-      <div className="module-grid">
-        {caseData.modules.map((module, index) => (
-          <article className="panel module-card" key={`${module.name}-${index}`}>
-            <div>
-              <span className="module-index">{String(index + 1).padStart(2, '0')}</span>
-              <Tag state={module.state}>{module.state}</Tag>
+      {groups.map((group) => {
+        const items = caseData.modules.filter((module) => module.state === group.state);
+        if (!items.length) return null;
+        return (
+          <section className="module-group" key={group.state}>
+            <h2>
+              {group.title} <span>({items.length})</span>
+            </h2>
+            <div className="module-grid">
+              {items.map((module, index) => (
+                <article className="panel module-card" key={`${module.name}-${index}`}>
+                  <div className={`module-symbol ${module.state}`}>
+                    <Icon name={group.state === 'planned' ? 'modules' : 'shield'} size={24} />
+                  </div>
+                  <div className="module-description">
+                    <div>
+                      <h3>{module.name}</h3>
+                      <Tag state={module.state}>{module.state}</Tag>
+                    </div>
+                    <p>{module.detail}</p>
+                  </div>
+                </article>
+              ))}
             </div>
-            <h3>{module.name}</h3>
-            <p>{module.detail}</p>
-          </article>
-        ))}
-      </div>
+          </section>
+        );
+      })}
       <section className="panel coverage-panel">
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">INSPECTION NOTES</span>
+            <h2>
+              Inspection notes <span>({caseData.warnings.length})</span>
+            </h2>
             <p>
-              {caseData.stats.skipped_files} files skipped · {caseData.warnings.length} coverage
-              notes
+              {caseData.stats.skipped_files} files skipped · coverage depends on the supplied format
+              and version.
             </p>
           </div>
+          <Icon name="shield" size={20} />
         </div>
         {caseData.warnings.length ? (
           <ul>
@@ -835,10 +733,7 @@ function Modules({ caseData }: { caseData: Case }) {
             ))}
           </ul>
         ) : (
-          <p className="no-warnings">
-            No coverage warnings were reported for this run. This does not establish complete device
-            coverage.
-          </p>
+          <p className="no-warnings">No coverage warnings were reported for this source.</p>
         )}
       </section>
     </div>
@@ -880,7 +775,7 @@ function Inspector({
       aria-label="Evidence inspector"
     >
       <div className="inspector-label">
-        <span className="eyebrow">EVIDENCE INSPECTOR</span>
+        <h2>Evidence inspector</h2>
         {finding && (
           <button
             className="icon-button mobile-close"
@@ -894,19 +789,20 @@ function Inspector({
       {finding ? (
         <>
           <div className="inspector-intro">
-            <div className="inspector-tags">
-              <Tag state={finding.category}>{categoryInfo(finding.category).label}</Tag>
-              {source === 'baseline' && <Tag>Baseline</Tag>}
+            <CategoryGlyph category={finding.category} size={30} />
+            <div className="inspector-title">
+              <h3 title={finding.title}>{findingTitle(finding)}</h3>
+              <div className="inspector-tags">
+                <Tag state={finding.category}>{categoryInfo(finding.category).label}</Tag>
+                <Tag state={finding.confidence}>{finding.confidence}</Tag>
+                {source === 'baseline' && <Tag>Baseline</Tag>}
+                {finding.sensitive && <Tag state="sensitive">Sensitive metadata</Tag>}
+              </div>
             </div>
-            <h2>{finding.title}</h2>
-            <p>{finding.summary}</p>
           </div>
           <div className="inspector-section">
-            <span className="eyebrow">CLASSIFICATION</span>
-            <div className="classification">
-              <Tag state={finding.confidence}>{finding.confidence}</Tag>
-              {finding.sensitive && <Tag state="sensitive">Sensitive metadata</Tag>}
-            </div>
+            <span className="eyebrow">ABOUT THIS FINDING</span>
+            <p className="classification-summary">{finding.summary}</p>
           </div>
           <div className="inspector-section">
             <span className="eyebrow">SOURCE FILE</span>
@@ -953,15 +849,14 @@ function Inspector({
             </div>
           )}
           <div className="inspector-section related-section">
-            <span className="eyebrow">RELATED TRACES / {finding.related_ids.length}</span>
+            <h3>
+              Related findings <span>({related.length})</span>
+            </h3>
             {related.length ? (
               related.map((other) => (
                 <button key={other.id} className="related-item" onClick={() => onSelect(other)}>
-                  <span
-                    className="dot"
-                    style={{ background: categoryInfo(other.category).color }}
-                  />
-                  <span>{other.title}</span>
+                  <CategoryGlyph category={other.category} size={16} />
+                  <span title={other.title}>{findingTitle(other)}</span>
                   <Icon name="arrow" size={14} />
                 </button>
               ))
@@ -977,7 +872,7 @@ function Inspector({
       ) : (
         <div className="inspector-empty">
           <Icon name="findings" size={34} />
-          <h3>Every trace has a story.</h3>
+          <h3>Select a finding</h3>
           <p>Select a finding or a node to inspect its source, rule and recorded evidence.</p>
         </div>
       )}
@@ -1130,9 +1025,11 @@ export function App() {
     <div className="app-shell" data-view={view}>
       <aside className="sidebar">
         <div className="brand">
-          <img src="/mascot.png" alt="ENGRAM cobalt lightning creature" />
-          <span>ENGRAM</span>
-          <small>TRACE DESK / {runtime?.version ?? '0.3.0'}</small>
+          <img src="/mascot-atlas.png" alt="ENGRAM cobalt lightning creature" />
+          <div>
+            <span>ENGRAM</span>
+            <small>Find what remains.</small>
+          </div>
         </div>
         <nav className="main-nav" aria-label="Workspace views">
           {VIEWS.map((item, index) => (
@@ -1142,9 +1039,9 @@ export function App() {
               aria-current={view === item.id ? 'page' : undefined}
               onClick={() => setView(item.id)}
             >
+              <Icon name={item.id} size={22} />
+              <span className="nav-label">{item.name}</span>
               <span className="nav-number">{String(index + 1).padStart(2, '0')}</span>
-              <Icon name={item.id} size={17} />
-              <span>{item.name}</span>
               {item.id === 'findings' && caseData && <small>{caseData.findings.length}</small>}
             </button>
           ))}
@@ -1185,17 +1082,46 @@ export function App() {
             </div>
           </div>
           <span className="sidebar-version">
-            {bridge.native ? 'DESKTOP APPLICATION' : 'BROWSER DEMONSTRATION'}
+            {bridge.native ? 'Desktop application' : 'Browser demonstration'} ·{' '}
+            {runtime?.version ?? '0.4.0'}
           </span>
         </div>
       </aside>
       <div className="workspace">
         <header className="topbar">
-          <div className="breadcrumb">
-            <span>ENGRAM</span>
-            <i>/</i>
-            <strong>Trace desk</strong>
+          <div className="source-heading">
+            <span className="source-heading-icon">
+              <Icon name="folder" size={24} />
+            </span>
+            <div>
+              <strong title={caseData?.title}>{caseData?.title ?? 'Trace desk'}</strong>
+              <span>
+                {bridge.native ? 'Local workspace' : 'Browser demonstration'}
+                {caseData?.source_kind === 'demo' ? ' · Synthetic demo' : ''}
+              </span>
+            </div>
           </div>
+          {caseData && (
+            <section className="stats-strip" aria-label="Case overview">
+              <div>
+                <strong>{caseData.findings.length.toLocaleString('en')}</strong>
+                <span>findings</span>
+              </div>
+              <div>
+                <strong>{caseData.stats.files_examined.toLocaleString('en')}</strong>
+                <span>files</span>
+              </div>
+              <div>
+                <strong>{edges.length.toLocaleString('en')}</strong>
+                <span>connections</span>
+              </div>
+              <div>
+                <strong>{caseData.warnings.length.toLocaleString('en')}</strong>
+                <span>notes</span>
+              </div>
+            </section>
+          )}
+
           <div className="top-actions">
             <Tag state={bridge.native ? 'offline' : 'demo'}>
               {bridge.native ? 'Local workspace' : 'Browser demo · synthetic data'}
@@ -1225,17 +1151,22 @@ export function App() {
         </header>
         <div className="workspace-body">
           <main className="main-content" id="main-content">
-            <div className="view-heading">
-              <div>
-                <span className="eyebrow">YOUR DIGITAL EVIDENCE</span>
-                <h1>{activeView.subtitle}</h1>
+            <div
+              className={`view-heading ${['map', 'findings', 'timeline', 'connections'].includes(view) ? 'with-filters' : ''}`}
+            >
+              <div className="view-heading-copy">
+                <h1>{activeView.name}</h1>
                 <p>{activeView.description}</p>
               </div>
-              <span className="view-number">
-                {String(VIEWS.findIndex((item) => item.id === view) + 1).padStart(2, '0')}
-                <small>/ 06</small>
-              </span>
+              {caseData &&
+                (view === 'map' ||
+                  view === 'findings' ||
+                  view === 'timeline' ||
+                  view === 'connections') && (
+                  <FilterBar filters={filters} setFilters={setFilters} />
+                )}
             </div>
+
             {notice && (
               <div
                 className={`notice ${notice.kind}`}
@@ -1261,45 +1192,9 @@ export function App() {
             )}
             {caseData ? (
               <>
-                <section className="stats-strip" aria-label="Case overview">
-                  <div>
-                    <span className="eyebrow">TRACES RECORDED</span>
-                    <strong>{caseData.findings.length.toLocaleString('en')}</strong>
-                    <small>
-                      Across{' '}
-                      {
-                        CATEGORIES.filter((category) =>
-                          caseData.findings.some((finding) => finding.category === category.id),
-                        ).length
-                      }{' '}
-                      categories
-                    </small>
-                  </div>
-                  <div>
-                    <span className="eyebrow">FILES EXAMINED</span>
-                    <strong>{caseData.stats.files_examined.toLocaleString('en')}</strong>
-                    <small>{bytesLabel(caseData.stats.bytes_examined)} inspected</small>
-                  </div>
-                  <div>
-                    <span className="eyebrow">CONNECTIONS</span>
-                    <strong>{edges.length.toLocaleString('en')}</strong>
-                    <small>Unique evidence links</small>
-                  </div>
-                  <div>
-                    <span className="eyebrow">COVERAGE NOTES</span>
-                    <strong>{caseData.warnings.length.toLocaleString('en')}</strong>
-                    <small>{caseData.stats.skipped_files} files skipped</small>
-                  </div>
-                </section>
-                {(view === 'map' ||
-                  view === 'findings' ||
-                  view === 'timeline' ||
-                  view === 'connections') && (
-                  <FilterBar filters={filters} setFilters={setFilters} />
-                )}
                 {view === 'map' && (
                   <>
-                    <TraceMap
+                    <AtlasTraceMap
                       caseData={caseData}
                       edges={edges}
                       visible={filtered}
@@ -1307,15 +1202,13 @@ export function App() {
                       onSelect={select}
                       onCategory={categorySelect}
                     />
-                    <div className="desk-bottom">
-                      <div>
-                        <span className="eyebrow">FIELD NOTE / 001</span>
-                        <p>A remaining copy is a finding. Its history still needs evidence.</p>
-                      </div>
-                      <button className="button text" onClick={() => setView('modules')}>
-                        Inspect coverage <Icon name="arrow" size={15} />
-                      </button>
-                    </div>
+                    <FindingsTable
+                      findings={filtered}
+                      selected={selected}
+                      onSelect={select}
+                      compact
+                      onViewAll={() => setView('findings')}
+                    />
                   </>
                 )}
                 {view === 'findings' && (
