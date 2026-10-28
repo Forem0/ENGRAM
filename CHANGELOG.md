@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0 — Review workspace — 2026-10-28
+
+- Add finding bookmarks, Unreviewed / Needs review / Reviewed states, and plain-text analyst notes in the persistent inspector.
+- Persist validated, bounded annotations in an optional schema-1 `review` map when saving a new case; older schema-1 cases open with an empty review.
+- Add bookmark/review filters and case-level review totals without changing the engine's confidence labels or source evidence.
+- Add literal structured search with quoted phrases, exclusions, field operators and note/review predicates.
+- Implement bounded map pan and zoom, modifier-wheel zoom, fit-selection controls and keyboard navigation.
+- Add search/workspace shortcuts and unsaved-review prompts before case replacement or desktop close. Cancelled or failed saves keep the review dirty.
+- Keep baseline review annotations read-only and evidence comparison independent of review-only edits.
+
+The 0.5.0 source has frontend verification; native execution, package availability and fresh screenshots are recorded only after their own completed verification. Existing 0.4.0 captures remain labelled as 0.4.0 until they are replaced with verified 0.5.0 native captures. Analyst notes are plaintext metadata in the saved case.
+
 ## [0.4.0 — Atlas Focus interface](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) — 2026-10-28
 
 - Implement the selected graphite-and-cobalt Atlas Focus visual direction across the six native workspace views.

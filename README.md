@@ -17,11 +17,11 @@
 
 ENGRAM examines the offline sources you choose and turns their readable contents into a navigable case. Find media and documents, inspect masked secret candidates, follow exact-copy relationships, and compare observations over time.
 
-The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. **ENGRAM 0.4.0** implements the **Atlas Focus** graphite-and-cobalt interface, with a compact workspace header, readable file relationships and a persistent inspector. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
+The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. The current **0.5.0 source** builds on the **Atlas Focus** workspace with finding bookmarks, review states, plain-text notes, structured search and a pannable, zoomable evidence map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
 ![Native Atlas Focus Trace map with the evidence inspector](assets/screenshots/workspace.png)
 
-These six views were captured on Linux from the actual **0.4.0** Tauri application, using synthetic files processed by the shared Rust engine. The [passing cross-platform and native Tauri/IPC checks](https://github.com/Forem0/ENGRAM/actions/runs/40694985190) verify [source b7e7e9f](https://github.com/Forem0/ENGRAM/commit/b7e7e9fb4e4fbd3234ed2955b39f58c128566e60); [capture provenance](assets/screenshots/README.md) records the images and execution evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
+The six images currently shown below are verified **0.4.0 Atlas Focus native captures**, using synthetic files processed by the shared Rust engine. They retain their [0.4.0 verification](https://github.com/Forem0/ENGRAM/actions/runs/40694985190) and [capture provenance](assets/screenshots/README.md); they are not execution evidence for the 0.5.0 source. New native images and 0.5.0 downloads follow their own completed verification. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
 
 | Start with a question | Follow the evidence |
 | --- | --- |
@@ -30,6 +30,7 @@ These six views were captured on Linux from the actual **0.4.0** Tauri applicati
 | Did text exports retain secret-like values? | Review fully masked candidates and the detector that identified them. |
 | What changed between observations? | Load a baseline case and inspect added, removed or changed findings. |
 | How much of this source was covered? | Read module states, file counters and coverage notes together. |
+| What needs another look? | Bookmark findings, mark review states and keep plain-text notes with the saved case. |
 
 ## Get started
 
@@ -61,15 +62,62 @@ Select a category on the Trace map or use the category tabs. Search by name, pat
 
 ### 5. Read the context
 
-Check the source locator, evidence fields and rule in the inspector. Switch to **Modules** to see which readers ran, what they support and which files were skipped. A partial inspection remains useful when its limits are visible.
+Check the source locator, evidence fields and rule in the inspector. Use **Your review** to bookmark the current finding, choose **Unreviewed**, **Needs review** or **Reviewed**, and add a plain-text note. Review status is your annotation; **Observed**, **Linked** and **Candidate** remain the engine's confidence labels.
+
+Switch to **Modules** to see which readers ran, what they support and which files were skipped. A partial inspection remains useful when its limits are visible.
 
 ### 6. Save the observation
 
-Use **Save case** and choose a new filename outside the inspected source. Cases are local JSON files. Existing outputs are not overwritten; choose a new name for the next observation.
+Use **Save case** and choose a new filename outside the inspected source. Cases are local JSON files. Bookmarks, review states and notes are kept with the saved case. Existing outputs are not overwritten; choose a new name for the next observation.
+
+The **Unsaved review** indicator stays visible until the changed review is saved. Before switching the open case or closing the desktop, the app offers to save, continue without saving or keep working. Cancelling or failing a save keeps the review unsaved. In the browser demonstration, review changes stay in the current tab and do not become a saved case.
 
 ### 7. Compare a later case
 
 Inspect the source again or open a newer saved case. Go to **Compare**, select **Choose baseline**, and pick the earlier case. The open case is the current observation; the selected file is the baseline.
+
+## Review, search and navigate
+
+### Keep your review with the evidence
+
+Select a finding and use **Your review** in the inspector. Bookmarks are independent of the review state, so a bookmarked finding can be **Unreviewed**, **Needs review** or **Reviewed**. **Add a note** edits the current finding's plain-text note. Use **Bookmarks** and the review-state filter to focus the queue; the toolbar's review totals describe the complete open case.
+
+These annotations stay separate from recorded source evidence. They do not change a finding's confidence, hash, relationship or snapshot-difference result. Notes and marks from a comparison baseline can be inspected but are read-only; editing applies to the open current case.
+
+Use **Save case** to persist the review in a new local case file. There is no automatic browser storage or cloud synchronization.
+
+### Search with phrases, fields and exclusions
+
+Every term must match. Put a phrase in double quotes and prefix a term with `-` to exclude it. Search is literal and case-insensitive; unknown operators and unsupported values remain literal text rather than becoming query-built regular expressions.
+
+| Query | Meaning |
+| --- | --- |
+| `category:media -path:cache` | Media findings whose source path does not contain `cache`. |
+| `confidence:candidate is:bookmarked` | Bookmarked candidate findings. |
+| `note:"previous config" -is:reviewed` | The phrase appears in your note and the finding is not marked reviewed. |
+| `has:note is:needs_review` | Findings with a note that you marked for further review. |
+| `rule:secret origin:fixture` | Both supported literal field tests must match. |
+
+Supported fields are `category`, `confidence`, `path`, `rule`, `origin` and `note`. Review predicates are `is:bookmarked`, `is:reviewed`, `is:needs_review`, `is:unreviewed` and `has:note`. Category values use the singular internal names `media`, `secret`, `document`, `browser`, `message`, `location` and `database`. Ordinary text also searches your notes. An incomplete quoted phrase shows a query error until it is closed.
+
+Queries are bounded to 2,048 characters and 128 terms.
+
+### Move around the Trace map
+
+Drag the map background to pan. Use **+** and **−**, or **Ctrl/⌘ + scroll**, to zoom between 60% and 250%. The percentage button resets the map to 100%; **Fit selection** brings the selected finding into view. Ordinary scrolling remains page scrolling.
+
+With the map focused, the arrow keys pan, **+ / −** zoom, and **0** or **Home** reset the view. Selecting a finding from the map, table or related-items list keeps the evidence inspector on that actual record. Map navigation changes the viewport and adds no evidence links.
+
+| Shortcut | Action |
+| --- | --- |
+| **Ctrl/⌘ K** | Focus the shared search field. |
+| **Ctrl/⌘ S** | Save a new case in the desktop app. |
+| **B** | Toggle the selected current finding's bookmark. |
+| **R** | Toggle Reviewed / Unreviewed for the selected current finding. |
+| **1–6** | Switch workspace views. |
+| **?** | Open Search & shortcuts. |
+
+Letter shortcuts stay inactive while typing. Saved-case selection and persistence use the native desktop application.
 
 ## A tour of the app
 
@@ -225,7 +273,11 @@ A case records the source type, inspection times, counters, reader states, warni
 | **Linked** | An implemented evidence rule established a relationship. |
 | **Candidate** | A pattern or incomplete association needs review. |
 
-Case schema 1 is shared by the desktop and CLI. Opening a case validates its structure without probing the source paths stored inside it. Comparison follows exported observations and relationships; case-local secret fingerprints do not establish the continuity or validity of a secret across scans.
+Case schema 1 is shared by the desktop and CLI. The optional `review` map stores bookmarks, review states and notes by known finding ID. Cases created before review annotations existed still open with an empty review. Each annotation is validated against the case's actual findings; empty defaults are omitted from the saved representation.
+
+Review limits are 2,048 annotations, 4,096 UTF-8 bytes per note and 1 MiB of note text per case. Opening a case validates its structure without probing the source paths stored inside it. Older releases may ignore the optional review field; use 0.5.0 or later when saving annotations you intend to retain.
+
+Comparison follows exported observations and relationships. Review edits alone do not become evidence changes; case-local secret fingerprints do not establish the continuity or validity of a secret across scans.
 
 ## Local by design
 
@@ -233,7 +285,7 @@ Analysis does not contact a model, credential endpoint, breach database or telem
 
 Source readers do not intentionally alter the selected evidence. Symlinks and Windows reparse points do not broaden the selection. SQLite readers parse working copies. The app does not attach to a live browser, bypass device protections or delete data from a phone.
 
-Saved cases are plaintext JSON and remain sensitive: paths, website origins, filenames, dates and relationships can reveal personal activity even when candidate values are masked. Keep them private and use generated fixtures in public bug reports. Read the [privacy boundaries](docs/PRIVACY.md).
+Saved cases are plaintext JSON and remain sensitive: paths, website origins, filenames, dates, relationships and your notes can reveal personal activity even when candidate values are masked. Analyst notes are stored as the plain text you enter; they are not automatically redacted by the secret detector. Keep cases private, avoid writing credentials into notes and use generated fixtures in public bug reports. Read the [privacy boundaries](docs/PRIVACY.md).
 
 ## How it fits together
 
@@ -253,8 +305,8 @@ flowchart LR
 | Layer | Responsibility |
 | --- | --- |
 | Rust core | source classification, bounded readers, evidence, masking, relationships and case validation |
-| Rust Tauri backend | native dialogs, active-case session, guarded background operations and persistence |
-| React / TypeScript | six workspace views, shared filters, navigation and evidence presentation |
+| Rust Tauri backend | native dialogs, active-case session, validated review snapshots, guarded background operations and persistence |
+| React / TypeScript | six workspace views, review controls, structured search, map navigation and evidence presentation |
 | CLI | explicit source commands, repeatable workflows and structured output |
 
 The renderer is not given a general filesystem or shell API. A cancelled dialog leaves the open case in place; a failed operation reports its error without quietly replacing the case with a demo. See [architecture](docs/ARCHITECTURE.md).
@@ -300,7 +352,7 @@ Tests use synthetic sources. CI checks the Rust workspace on Windows, macOS and 
 
 ## Next work
 
-The current app already supports the folder-to-case workflow, local persistence and comparison. Next priorities are broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, keyboard/accessibility refinements, and platform signing and notarization.
+The current source supports the folder-to-case workflow, local persistence, review annotations, structured search, map navigation and comparison. Next priorities are broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, continued accessibility checks, and platform signing and notarization.
 
 Deleted-record reconstruction, owner-unlocked encrypted backups and optional local OCR remain research items. They need reproducible evidence and explicit support boundaries before moving into the working capability matrix. See the [roadmap](docs/ROADMAP.md).
 
