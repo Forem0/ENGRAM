@@ -80,10 +80,7 @@ impl ReportWriter {
     }
 }
 
-fn selection<'a>(
-    case: &'a Case,
-    options: &ReportOptions,
-) -> Result<Vec<&'a Finding>, EngramError> {
+fn selection<'a>(case: &'a Case, options: &ReportOptions) -> Result<Vec<&'a Finding>, EngramError> {
     if options.finding_ids.is_empty() || options.finding_ids.len() > MAX_REPORT_FINDINGS {
         return Err(EngramError::Input(format!(
             "Select between 1 and {MAX_REPORT_FINDINGS} findings for a report."
@@ -103,7 +100,8 @@ fn selection<'a>(
             || !selected.insert(id.as_str())
         {
             return Err(EngramError::Input(
-                "Report selection contains an invalid, unknown or duplicate finding identity.".into(),
+                "Report selection contains an invalid, unknown or duplicate finding identity."
+                    .into(),
             ));
         }
     }
@@ -264,11 +262,7 @@ fn status_label(status: ReviewStatus) -> &'static str {
     }
 }
 
-fn markdown_field(
-    writer: &mut ReportWriter,
-    label: &str,
-    value: &str,
-) -> Result<(), EngramError> {
+fn markdown_field(writer: &mut ReportWriter, label: &str, value: &str) -> Result<(), EngramError> {
     let label = markdown_text(label);
     writer.push(&format!("- **{label}:** {}\n", markdown_text(value)))
 }
@@ -369,7 +363,10 @@ fn markdown(
             ("Path", path_text(&finding.path, options)),
             (
                 "SHA-256",
-                finding.sha256.clone().unwrap_or_else(|| "Not recorded".into()),
+                finding
+                    .sha256
+                    .clone()
+                    .unwrap_or_else(|| "Not recorded".into()),
             ),
             (
                 "Source timestamp",
@@ -393,11 +390,7 @@ fn markdown(
             markdown_field(writer, "Summary", &finding.summary)?;
             markdown_field(writer, "Locator", &path_text(&finding.locator, options))?;
             for fact in &finding.evidence {
-                markdown_field(
-                    writer,
-                    &format!("Evidence — {}", fact.label),
-                    &fact.value,
-                )?;
+                markdown_field(writer, &format!("Evidence — {}", fact.label), &fact.value)?;
             }
         }
     }
@@ -408,9 +401,7 @@ fn formula_like(value: &str) -> bool {
     matches!(
         value
             .trim_start_matches(|character: char| {
-                character.is_whitespace()
-                    || character.is_control()
-                    || invisible_format(character)
+                character.is_whitespace() || character.is_control() || invisible_format(character)
             })
             .chars()
             .next(),
