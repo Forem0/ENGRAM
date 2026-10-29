@@ -126,7 +126,10 @@ fn jpeg_exif_orientation_is_baked_into_preview_pixels_without_changing_source() 
     let preview = access.preview(&case.findings[0].id).unwrap();
     assert_eq!((preview.source_width, preview.source_height), (32, 48));
     assert_eq!((preview.width, preview.height), (32, 48));
-    assert_eq!(preview.source_sha256, format!("{:x}", Sha256::digest(&tagged)));
+    assert_eq!(
+        preview.source_sha256,
+        format!("{:x}", Sha256::digest(&tagged))
+    );
     let output = STANDARD
         .decode(
             preview
