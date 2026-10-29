@@ -1,0 +1,53 @@
+{
+  "version": "0.7.0",
+  "platform": "Linux/X11/Tauri/WebKitGTK",
+  "synthetic_data_only": true,
+  "actual_checkout": "0290a23bfbb7457e00d8bf67b3171cd26aeb6686",
+  "checkout_tree": "d05cfd901a4a4c2b6c68f55e945641175fdc2892",
+  "pull_request_head": "616b6b59235b262f854e3352f8510e7513272176",
+  "run_id": 40926563689,
+  "native_job_id": 123633731128,
+  "artifact_id": 12920103527,
+  "artifact_sha256": "d2b4df02443a8e0bb63d538e0bc5e7a68d4878cf07dfbe2265e81886dfd93ffe",
+  "images": [
+    {
+      "path": "gallery-v07.png",
+      "sha256": "49c01cb27630cd8b61c6cb85e603eef46f97ea1f44ff711d3f26fc3b77ce4788",
+      "dimensions": [
+        1440,
+        940
+      ]
+    },
+    {
+      "path": "backup-wizard-v07.png",
+      "sha256": "31febc4fde5d7671d25fb6b242a81d40e5f7c02fbcf02917398feb299fde6908",
+      "dimensions": [
+        1440,
+        940
+      ]
+    }
+  ],
+  "unedited_artifact_copies": true,
+  "all_103_artifact_entries_crc_checked": true,
+  "visual_review_completed": true,
+  "source_fixture": {
+    "kind": "generated unencrypted iPhone-style backup",
+    "indexed_files": 7,
+    "findings": 15,
+    "image_dimensions": [
+      640,
+      400
+    ],
+    "image_label": "DEMO",
+    "source_names_and_bytes_unchanged": true
+  },
+  "native_saved_case_matches_cli": true,
+  "case_unchanged_after_preview": true,
+  "scope": "Actual native folder selection, preflight, explicit scan and image preview. Captures establish the listed checkout and exercised state; current source validation is recorded in PR #8 checks.",
+  "not_exercised": [
+    "real personal backups",
+    "live devices",
+    "Windows/macOS GUI interaction"
+  ],
+  "verification": "https://github.com/Forem0/ENGRAM/pull/8/checks"
+}
