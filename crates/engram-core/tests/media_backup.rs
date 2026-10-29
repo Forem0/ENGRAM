@@ -99,6 +99,52 @@ fn jpeg_input_is_reencoded_as_png() {
 }
 
 #[test]
+fn jpeg_exif_orientation_is_baked_into_preview_pixels_without_changing_source() {
+    let folder = tempfile::tempdir().unwrap();
+    let source = folder.path().join("portrait.jpg");
+    let image = RgbImage::from_fn(48, 32, |x, y| {
+        image::Rgb([(x * 5) as u8, (y * 7) as u8, ((x + 2 * y) * 2) as u8])
+    });
+    let mut jpeg = Vec::new();
+    DynamicImage::ImageRgb8(image)
+        .write_to(&mut Cursor::new(&mut jpeg), ImageFormat::Jpeg)
+        .unwrap();
+    let original_pixels = image::load_from_memory(&jpeg).unwrap().to_rgba8();
+
+    // JPEG APP1: Exif header, little-endian TIFF and one IFD0 SHORT entry.
+    // Orientation 6 means rotate the encoded pixels 90 degrees clockwise.
+    let exif = b"Exif\0\0II\x2a\0\x08\0\0\0\x01\0\
+        \x12\x01\x03\0\x01\0\0\0\x06\0\0\0\0\0\0\0";
+    let mut tagged = jpeg[..2].to_vec();
+    tagged.extend_from_slice(&[0xff, 0xe1]);
+    tagged.extend_from_slice(&u16::try_from(exif.len() + 2).unwrap().to_be_bytes());
+    tagged.extend_from_slice(exif);
+    tagged.extend_from_slice(&jpeg[2..]);
+    fs::write(&source, &tagged).unwrap();
+
+    let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
+    let preview = access.preview(&case.findings[0].id).unwrap();
+    assert_eq!((preview.source_width, preview.source_height), (32, 48));
+    assert_eq!((preview.width, preview.height), (32, 48));
+    assert_eq!(preview.source_sha256, format!("{:x}", Sha256::digest(&tagged)));
+    let output = STANDARD
+        .decode(
+            preview
+                .data_url
+                .strip_prefix("data:image/png;base64,")
+                .unwrap(),
+        )
+        .unwrap();
+    let oriented = image::load_from_memory(&output).unwrap().to_rgba8();
+    assert_eq!(oriented.dimensions(), (32, 48));
+    for (x, y, expected) in original_pixels.enumerate_pixels() {
+        assert_eq!(oriented.get_pixel(31 - y, x), expected);
+    }
+    assert!(!output.windows(6).any(|window| window == b"Exif\0\0"));
+    assert_eq!(fs::read(&source).unwrap(), tagged);
+}
+
+#[test]
 fn changed_content_is_rejected_even_when_length_is_unchanged() {
     let folder = tempfile::tempdir().unwrap();
     let source = folder.path().join("image.png");
