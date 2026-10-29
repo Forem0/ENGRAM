@@ -36,7 +36,11 @@ fn report_case(count: usize) -> Case {
 fn options(case: &Case, format: ReportFormat) -> ReportOptions {
     ReportOptions {
         format,
-        finding_ids: case.findings.iter().map(|finding| finding.id.clone()).collect(),
+        finding_ids: case
+            .findings
+            .iter()
+            .map(|finding| finding.id.clone())
+            .collect(),
         include_notes: false,
         include_paths: false,
         include_details: false,
@@ -61,17 +65,30 @@ fn report_options_fail_closed_and_default_optional_content_to_omitted() {
 #[test]
 fn default_exports_omit_notes_details_parent_paths_and_source_root() {
     let mut case = report_case(1);
-    case.review.insert(case.findings[0].id.clone(), ReviewAnnotation {
-        bookmarked: true,
-        status: ReviewStatus::NeedsReview,
-        note: "ANALYST_PRIVATE note".into(),
-    });
+    case.review.insert(
+        case.findings[0].id.clone(),
+        ReviewAnnotation {
+            bookmarked: true,
+            status: ReviewStatus::NeedsReview,
+            note: "ANALYST_PRIVATE note".into(),
+        },
+    );
     for format in [ReportFormat::Markdown, ReportFormat::Csv] {
         let report = render_report(&case, &options(&case, format)).unwrap();
         assert_eq!(report.finding_count, 1);
         assert!(report.content.contains("artifact"));
-        for absent in ["ANALYST_PRIVATE", "DETAILS_PRIVATE", "private-parent", "private-origin-parent", "private-locator-parent", "PRIVATE_SOURCE_ROOT"] {
-            assert!(!report.content.contains(absent), "unexpected field: {absent}");
+        for absent in [
+            "ANALYST_PRIVATE",
+            "DETAILS_PRIVATE",
+            "private-parent",
+            "private-origin-parent",
+            "private-locator-parent",
+            "PRIVATE_SOURCE_ROOT",
+        ] {
+            assert!(
+                !report.content.contains(absent),
+                "unexpected field: {absent}"
+            );
         }
         assert!(report.content.contains(match format {
             ReportFormat::Markdown => "needs\\_review",
@@ -84,18 +101,31 @@ fn default_exports_omit_notes_details_parent_paths_and_source_root() {
 #[test]
 fn explicit_content_options_include_current_notes_and_original_path_fields() {
     let mut case = report_case(1);
-    case.review.insert(case.findings[0].id.clone(), ReviewAnnotation {
-        bookmarked: false,
-        status: ReviewStatus::Reviewed,
-        note: "ANALYST_PRIVATE note".into(),
-    });
+    case.review.insert(
+        case.findings[0].id.clone(),
+        ReviewAnnotation {
+            bookmarked: false,
+            status: ReviewStatus::Reviewed,
+            note: "ANALYST_PRIVATE note".into(),
+        },
+    );
     let mut selected = options(&case, ReportFormat::Csv);
     selected.include_notes = true;
     selected.include_paths = true;
     selected.include_details = true;
     let report = render_report(&case, &selected).unwrap();
-    for present in ["ANALYST_PRIVATE", "DETAILS_PRIVATE", "private-parent/nested/", "private-origin-parent/origin.txt", "private-locator-parent/locator.txt", "synthetic://PRIVATE_SOURCE_ROOT"] {
-        assert!(report.content.contains(present), "missing opted-in field: {present}");
+    for present in [
+        "ANALYST_PRIVATE",
+        "DETAILS_PRIVATE",
+        "private-parent/nested/",
+        "private-origin-parent/origin.txt",
+        "private-locator-parent/locator.txt",
+        "synthetic://PRIVATE_SOURCE_ROOT",
+    ] {
+        assert!(
+            report.content.contains(present),
+            "missing opted-in field: {present}"
+        );
     }
 }
 
@@ -106,11 +136,14 @@ fn arbitrary_inert_source_roots_cannot_rewrite_identity_hash_labels_or_notes() {
     case.findings[0].id = "finding-d1".into();
     case.findings[0].confidence = engram_core::Confidence::Observed;
     case.findings[0].sha256 = Some("d1".repeat(32));
-    case.review.insert("finding-d1".into(), ReviewAnnotation {
-        bookmarked: true,
-        status: ReviewStatus::Reviewed,
-        note: "Analyst d1: preserve 1 and Observed exactly.".into(),
-    });
+    case.review.insert(
+        "finding-d1".into(),
+        ReviewAnnotation {
+            bookmarked: true,
+            status: ReviewStatus::Reviewed,
+            note: "Analyst d1: preserve 1 and Observed exactly.".into(),
+        },
+    );
     for format in [ReportFormat::Markdown, ReportFormat::Csv] {
         let mut selected = options(&case, format);
         selected.include_notes = true;
@@ -118,7 +151,10 @@ fn arbitrary_inert_source_roots_cannot_rewrite_identity_hash_labels_or_notes() {
         for root in ["Observed", "d", "1", "case", "true"] {
             case.source_root = root.into();
             let actual = render_report(&case, &selected).unwrap();
-            assert_eq!(actual.content, expected.content, "source root changed report: {root}");
+            assert_eq!(
+                actual.content, expected.content,
+                "source root changed report: {root}"
+            );
             assert_eq!(actual.sha256, expected.sha256);
         }
     }
@@ -131,11 +167,14 @@ fn unicode_format_characters_do_not_collapse_identities_or_rewrite_opted_in_note
     case.findings[0].id = "f\u{200b}a".into();
     case.findings[1].id = "f a".into();
     let note = "Analyst 👩‍💻 note with a zero\u{200b}width separator.";
-    case.review.insert(case.findings[0].id.clone(), ReviewAnnotation {
-        bookmarked: true,
-        status: ReviewStatus::Reviewed,
-        note: note.into(),
-    });
+    case.review.insert(
+        case.findings[0].id.clone(),
+        ReviewAnnotation {
+            bookmarked: true,
+            status: ReviewStatus::Reviewed,
+            note: note.into(),
+        },
+    );
     let mut selected = options(&case, ReportFormat::Csv);
     selected.include_notes = true;
     let report = render_report(&case, &selected).unwrap();
@@ -165,7 +204,10 @@ fn csv_rejects_formula_like_identities_instead_of_collapsing_distinct_references
     assert!(report.content.contains("**ID:** \\'\\=x\n"));
     selected.format = ReportFormat::Csv;
     selected.finding_ids = vec![case.findings[1].id.clone()];
-    assert!(render_report(&case, &selected).is_ok(), "unselected identities are not exported");
+    assert!(
+        render_report(&case, &selected).is_ok(),
+        "unselected identities are not exported"
+    );
     for identity in ["=case", " +case", "\u{feff}\u{200b}@case", "\u{202e}-case"] {
         case.id = identity.into();
         assert!(render_report(&case, &selected).is_err());
@@ -203,8 +245,14 @@ fn reports_preserve_engine_order_and_are_deterministic_for_the_same_snapshot() {
     assert_eq!(first.content, second.content);
     assert_eq!(first.sha256, second.sha256);
     assert_eq!(first.bytes, first.content.len());
-    assert_eq!(first.sha256, format!("{:x}", Sha256::digest(first.content.as_bytes())));
-    assert!(first.content.find("Selected observation 0").unwrap() < first.content.find("Selected observation 2").unwrap());
+    assert_eq!(
+        first.sha256,
+        format!("{:x}", Sha256::digest(first.content.as_bytes()))
+    );
+    assert!(
+        first.content.find("Selected observation 0").unwrap()
+            < first.content.find("Selected observation 2").unwrap()
+    );
     assert!(!first.content.contains("Selected observation 1"));
     assert_eq!(first.finding_count, 2);
 }
@@ -248,19 +296,26 @@ fn direct_case_callers_are_subject_to_shape_review_and_identity_validation() {
     one_selected.finding_ids.truncate(1);
     assert!(render_report(&invalid, &one_selected).is_err());
     invalid = original.clone();
-    invalid.review.insert("missing".into(), ReviewAnnotation::default());
+    invalid
+        .review
+        .insert("missing".into(), ReviewAnnotation::default());
     assert!(render_report(&invalid, &selected).is_err());
     invalid = original.clone();
-    invalid.review.insert(invalid.findings[0].id.clone(), ReviewAnnotation {
-        note: "invalid\0note".into(), ..ReviewAnnotation::default()
-    });
+    invalid.review.insert(
+        invalid.findings[0].id.clone(),
+        ReviewAnnotation {
+            note: "invalid\0note".into(),
+            ..ReviewAnnotation::default()
+        },
+    );
     assert!(render_report(&invalid, &selected).is_err());
 }
 
 #[test]
 fn markdown_values_cannot_create_html_links_fences_or_extra_headings() {
     let mut case = report_case(1);
-    case.findings[0].title = "<script>alert(1)</script>\n# forged\n![pixel](https://example.test/a) ```".into();
+    case.findings[0].title =
+        "<script>alert(1)</script>\n# forged\n![pixel](https://example.test/a) ```".into();
     case.findings[0].summary = "https://example.test/x?click=yes".into();
     let mut selected = options(&case, ReportFormat::Markdown);
     selected.include_details = true;
@@ -279,17 +334,32 @@ fn markdown_values_cannot_create_html_links_fences_or_extra_headings() {
 fn csv_is_utf8_rfc4180_and_neutralizes_formula_and_invisible_prefixes() {
     let mut case = report_case(1);
     let selected = options(&case, ReportFormat::Csv);
-    for payload in ["=SUM(1,2)", "+SUM(1,2)", "-SUM(1,2)", "@SUM(1,2)", " \t=SUM(1,2)", "\r\n+SUM(1,2)", "\u{feff}\u{200b}=SUM(1,2)", "\u{202e}=SUM(1,2)", "\0=SUM(1,2)"] {
+    for payload in [
+        "=SUM(1,2)",
+        "+SUM(1,2)",
+        "-SUM(1,2)",
+        "@SUM(1,2)",
+        " \t=SUM(1,2)",
+        "\r\n+SUM(1,2)",
+        "\u{feff}\u{200b}=SUM(1,2)",
+        "\u{202e}=SUM(1,2)",
+        "\0=SUM(1,2)",
+    ] {
         case.findings[0].title = payload.into();
         let report = render_report(&case, &selected).unwrap();
         assert!(report.content.starts_with('\u{feff}'));
         assert!(report.content.ends_with("\r\n"));
-        assert!(report.content.contains(",\"'"), "unprotected formula: {payload:?}");
+        assert!(
+            report.content.contains(",\"'"),
+            "unprotected formula: {payload:?}"
+        );
         assert!(!report.content.contains('\0'));
     }
     case.findings[0].title = "Quoted \"value\", next\nline".into();
     let report = render_report(&case, &selected).unwrap();
-    assert!(report.content.contains("\"Quoted \"\"value\"\", next\nline\""));
+    assert!(report
+        .content
+        .contains("\"Quoted \"\"value\"\", next\nline\""));
 }
 
 #[test]
@@ -304,10 +374,12 @@ fn selected_count_limit_accepts_its_exact_boundary() {
 fn oversized_render_fails_before_creating_any_output_directory() {
     let mut case = report_case(5);
     for finding in &mut case.findings {
-        finding.evidence = (0..100).map(|index| Evidence {
-            label: format!("Fact {index}"),
-            value: "&".repeat(8192),
-        }).collect();
+        finding.evidence = (0..100)
+            .map(|index| Evidence {
+                label: format!("Fact {index}"),
+                value: "&".repeat(8192),
+            })
+            .collect();
     }
     let mut selected = options(&case, ReportFormat::Markdown);
     selected.include_details = true;
@@ -359,7 +431,10 @@ fn output_inside_source_traversal_and_control_names_are_rejected_without_writes(
         assert!(write_report(&case, &selected, &output).is_err());
         assert!(!output.exists());
     }
-    assert_eq!(fs::read(&evidence).unwrap(), b"synthetic evidence must remain unchanged");
+    assert_eq!(
+        fs::read(&evidence).unwrap(),
+        b"synthetic evidence must remain unchanged"
+    );
 }
 
 #[cfg(unix)]
@@ -390,7 +465,9 @@ fn existing_output_symlinks_and_non_unicode_destinations_are_rejected() {
     std::os::unix::fs::symlink(&target, &alias).unwrap();
     assert!(write_report(&case, &selected, &alias).is_err());
     assert_eq!(fs::read(&target).unwrap(), b"retain this synthetic file");
-    let invalid = directory.path().join(std::ffi::OsString::from_vec(vec![0xff]));
+    let invalid = directory
+        .path()
+        .join(std::ffi::OsString::from_vec(vec![0xff]));
     assert!(write_report(&case, &selected, &invalid).is_err());
     assert!(!invalid.exists());
 }
