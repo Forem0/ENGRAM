@@ -206,11 +206,24 @@ xdotool getwindowgeometry --shell "$picker" > "$out/backup-folder-picker-geometr
 import -window "$picker" "$out/backup-folder-picker.png"
 xdotool windowfocus --sync "$picker"
 xdotool key --clearmodifiers ctrl+l
-xdotool type --clearmodifiers --delay 8 "$source"
+xdotool type --clearmodifiers --delay 8 "$source/"
+sleep 1
 import -window "$picker" "$out/backup-folder-picker-filled.png"
 xdotool key --clearmodifiers Return
-# One Return only. If GTK navigates rather than submitting, retain its actual
-# screenshot and fail for review instead of acting blindly on a different UI.
+# Folder selection has a navigation phase. The actual first-run GTK capture
+# showed Return completing a path rather than submitting the chooser. Supplying
+# its slash up front avoids that extra completion. If the same chooser remains,
+# use its separately observed Select button, never a blind second Return.
+sleep 1
+if visible_window "$picker"; then
+  import -window "$picker" "$out/backup-folder-after-navigation.png"
+  eval "$(xdotool getwindowgeometry --shell "$picker")"
+  [[ "$WIDTH" == 1096 && "$HEIGHT" == 822 ]] || {
+    echo 'Folder picker dimensions differ from the observed Select button layout.' >&2
+    exit 1
+  }
+  xdotool mousemove --window "$picker" 1047 799 click 1
+fi
 if ! wait_gone "$picker"; then
   import -window "$picker" "$out/backup-folder-picker-not-closed.png" 2>/dev/null || true
   exit 1
