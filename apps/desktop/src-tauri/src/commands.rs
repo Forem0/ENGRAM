@@ -366,10 +366,12 @@ mod tests {
             include_paths: false,
             include_details: false,
         };
-        let snapshot = prepare_report_snapshot(&state.session, &original.id, review, &options).unwrap();
+        let snapshot =
+            prepare_report_snapshot(&state.session, &original.id, review, &options).unwrap();
         let directory = tempfile::tempdir().unwrap();
         let output = directory.path().join("report.csv");
-        let receipt = persist_report_snapshot(&state.session, &snapshot, &options, &output).unwrap();
+        let receipt =
+            persist_report_snapshot(&state.session, &snapshot, &options, &output).unwrap();
         let content = std::fs::read_to_string(&output).unwrap();
         assert!(content.contains("Checked this source observation."));
         assert_eq!(receipt.finding_count, 1);
@@ -393,7 +395,13 @@ mod tests {
             include_details: false,
         };
         let operation = state.session.begin().unwrap();
-        let snapshot = prepare_report_snapshot(&operation.session, &original.id, reviewed_metadata(&original), &options).unwrap();
+        let snapshot = prepare_report_snapshot(
+            &operation.session,
+            &original.id,
+            reviewed_metadata(&original),
+            &options,
+        )
+        .unwrap();
         assert!(snapshot.case().review[&original.findings[0].id].bookmarked);
         drop(snapshot);
         drop(operation);
@@ -413,9 +421,21 @@ mod tests {
             include_paths: false,
             include_details: false,
         };
-        assert!(prepare_report_snapshot(&state.session, &original.id, reviewed_metadata(&original), &options).is_err());
+        assert!(prepare_report_snapshot(
+            &state.session,
+            &original.id,
+            reviewed_metadata(&original),
+            &options
+        )
+        .is_err());
         options.finding_ids = vec![original.findings[0].id.clone()];
-        assert!(prepare_report_snapshot(&state.session, "stale-case", reviewed_metadata(&original), &options).is_err());
+        assert!(prepare_report_snapshot(
+            &state.session,
+            "stale-case",
+            reviewed_metadata(&original),
+            &options
+        )
+        .is_err());
         let mut review = reviewed_metadata(&original);
         review.get_mut(&original.findings[0].id).unwrap().note = "invalid\0note".into();
         assert!(prepare_report_snapshot(&state.session, &original.id, review, &options).is_err());
@@ -434,7 +454,13 @@ mod tests {
             include_paths: false,
             include_details: false,
         };
-        let snapshot = prepare_report_snapshot(&state.session, &original.id, reviewed_metadata(&original), &options).unwrap();
+        let snapshot = prepare_report_snapshot(
+            &state.session,
+            &original.id,
+            reviewed_metadata(&original),
+            &options,
+        )
+        .unwrap();
         let mut replacement = original.clone();
         replacement.title = "A replacement with the same imported case ID".into();
         state.session.replace_case(replacement.clone()).unwrap();
@@ -442,8 +468,14 @@ mod tests {
         let output = directory.path().join("must-not-be-written.md");
         assert!(persist_report_snapshot(&state.session, &snapshot, &options, &output).is_err());
         assert!(!output.exists());
-        assert_eq!(state.session.active_case().unwrap().title, replacement.title);
-        assert_eq!(state.session.active_case().unwrap().review, replacement.review);
+        assert_eq!(
+            state.session.active_case().unwrap().title,
+            replacement.title
+        );
+        assert_eq!(
+            state.session.active_case().unwrap().review,
+            replacement.review
+        );
     }
 
     #[test]
@@ -458,12 +490,21 @@ mod tests {
             include_paths: false,
             include_details: false,
         };
-        let snapshot = prepare_report_snapshot(&state.session, &original.id, reviewed_metadata(&original), &options).unwrap();
+        let snapshot = prepare_report_snapshot(
+            &state.session,
+            &original.id,
+            reviewed_metadata(&original),
+            &options,
+        )
+        .unwrap();
         let directory = tempfile::tempdir().unwrap();
         let output = directory.path().join("existing.md");
         std::fs::write(&output, "Existing output must remain unchanged.").unwrap();
         assert!(persist_report_snapshot(&state.session, &snapshot, &options, &output).is_err());
-        assert_eq!(std::fs::read_to_string(&output).unwrap(), "Existing output must remain unchanged.");
+        assert_eq!(
+            std::fs::read_to_string(&output).unwrap(),
+            "Existing output must remain unchanged."
+        );
         assert_eq!(state.session.active_case().unwrap().review, original.review);
         assert!(state.session.require_current_snapshot(&snapshot).is_ok());
     }
