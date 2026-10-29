@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0 — Media gallery and guided backups (unreleased)
+
+- Add a seventh workspace view for recorded media files, thumbnail-path evidence, Photos catalogue rows and unmatched associations.
+- Preview selected PNG/JPEG files through native-owned source access captured during an explicit scan. Check the source SHA-256 and generate a metadata-stripped PNG with bounded input, dimensions and output.
+- Keep previews transient. Opening a saved case or demonstration does not restore source-read access, even when an imported case reuses a previous ID.
+- Add a three-step iPhone backup workflow: native folder selection, bounded index/encryption inspection and explicit analysis. Index counts and actual reader coverage stay separate.
+- Require explicit unencrypted metadata; keep encrypted, malformed and unsupported backups unavailable. Cancelled or failed operations retain the current observation and review.
+- Add `engram fixture DEST --iphone-backup` for reproducible, clearly synthetic backup tests.
+- Preserve schema-1 cases, review annotations and Markdown/CSV reports. OCR and encrypted-backup reading remain separate work.
+
+The 0.7 changes are source development; the current published download remains 0.6.0. Verification records will be added after the new native workflows pass.
+
 ## [0.6.0 — Evidence reports](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0) — 2026-10-29
 
 - Add selected-finding Markdown reports and spreadsheet-safe CSV tables through the shared Rust core.

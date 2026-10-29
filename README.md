@@ -186,6 +186,14 @@ These states describe the actual reader and supplied format. An unsupported sche
 
 ## Supported data
 
+### Media gallery and guided iPhone inspection — 0.7 source development
+
+The 0.7 source adds **Media gallery**, a seventh workspace view for recorded media files, thumbnail-path evidence and Photos catalogue rows. Filter the gallery, select a finding and request **Preview image** for supported PNG or JPEG bytes from a source explicitly scanned in the current desktop session. The native engine verifies the recorded SHA-256 and generates a bounded, metadata-stripped PNG. Images are kept in memory and are not embedded in case files or reports.
+
+**Inspect iPhone backup** opens a guided workflow: choose a backup folder through the native picker, review its encryption state and supported index, then explicitly start analysis. Listed category counts describe the index, while the resulting **Modules** view reports actual reader coverage. Cancelling the picker or wizard keeps the current case and review.
+
+These additions are in the 0.7 source branch; the published **0.6.0** downloads linked above retain their original features and verification. Read the [media and backup workflow](docs/MEDIA.md) for formats, bounds, source authorization and synthetic testing. OCR and encrypted-backup reading remain separate research items.
+
 ### Files, archives and local exports
 
 Choose an accessible folder to inventory eligible media, documents and databases. Files that can be read within the configured bounds can contribute content hashes and exact-copy relationships. Archives should be extracted into a separate folder before selection; ENGRAM does not promise to unpack arbitrary container formats.
