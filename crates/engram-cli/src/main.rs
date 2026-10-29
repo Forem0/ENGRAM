@@ -4,9 +4,9 @@ use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use engram_core::{
-    compare_cases, create_demo_backup_fixture, create_demo_fixture, demo_case, read_case, scan_path,
-    write_case, write_report, Case, Category, Confidence, EngramError, ReportFormat, ReportOptions,
-    ScanOptions, SourceKind,
+    compare_cases, create_demo_backup_fixture, create_demo_fixture, demo_case, read_case,
+    scan_path, write_case, write_report, Case, Category, Confidence, EngramError, ReportFormat,
+    ReportOptions, ScanOptions, SourceKind,
 };
 use serde_json::json;
 
@@ -332,7 +332,10 @@ fn run(cli: Cli) -> Result<(), EngramError> {
                 println!("\nDoctor did not inspect personal data or connect to a device.");
             }
         }
-        Command::Fixture { destination, iphone_backup } => {
+        Command::Fixture {
+            destination,
+            iphone_backup,
+        } => {
             if iphone_backup {
                 create_demo_backup_fixture(&destination)?;
             } else {
