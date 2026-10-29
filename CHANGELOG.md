@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0 — Media gallery and guided backups (unreleased)
+## [0.7.0 — Media gallery and guided backups](https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0) — 2026-10-29
 
 - Add a seventh workspace view for recorded media files, thumbnail-path evidence, Photos catalogue rows and unmatched associations.
 - Preview selected PNG/JPEG files through native-owned source access captured during an explicit scan. Check the source SHA-256 and generate a metadata-stripped PNG with bounded input, dimensions and output.
@@ -11,7 +11,7 @@
 - Add `engram fixture DEST --iphone-backup` for reproducible, clearly synthetic backup tests.
 - Preserve schema-1 cases, review annotations and Markdown/CSV reports. OCR and encrypted-backup reading remain separate work.
 
-The 0.7 changes are source development; the current published download remains 0.6.0. The [locked-source verification](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) passed all seven checks for [03bb2f7](https://github.com/Forem0/ENGRAM/commit/03bb2f72004b4d5bb0c5af0829662de5fcc957b0): 100 frontend tests, production assets, Rust formatting, core/CLI/backend tests and Clippy on Linux, Windows and macOS Intel, plus an Apple Silicon compile/link check. The actual Linux native exercise selected the synthetic backup through the real folder picker, checked compatibility, scanned and visibly previewed a generated DEMO image. Its saved case matches the CLI; source files and saved case bytes remain unchanged after preview. Windows/macOS GUI interaction and ARM64 runtime execution are separate from these checks. [Capture provenance](assets/screenshots/README.md#07-media-workflow-captures) retains the exact revision of each image; later updates only record verification and documentation.
+The [locked-source verification](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) passed all seven checks for [03bb2f7](https://github.com/Forem0/ENGRAM/commit/03bb2f72004b4d5bb0c5af0829662de5fcc957b0): 100 frontend tests, production assets, Rust formatting, core/CLI/backend tests and Clippy on Linux, Windows and macOS Intel, plus an Apple Silicon compile/link check. The actual Linux native exercise selected the synthetic backup through the real folder picker, checked compatibility, scanned and visibly previewed a generated DEMO image. Its saved case matches the CLI; source files and saved case bytes remain unchanged after preview. Windows/macOS GUI interaction and ARM64 runtime execution are separate from these checks. [Capture provenance](assets/screenshots/README.md#07-media-workflow-captures) retains the exact revision of each image; later updates only record verification, distribution and documentation. Platform archives carry their own checksums and build provenance in the [0.7.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0). Packages are unsigned; the cross-built Apple Silicon app is not notarized.
 
 ## [0.6.0 — Evidence reports](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0) — 2026-10-29
 

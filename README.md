@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0"><img alt="Desktop app 0.6.0" src="https://img.shields.io/badge/version-0.6.0-246BFE?style=flat-square&labelColor=171B24" /></a>
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0"><img alt="Desktop app 0.7.0" src="https://img.shields.io/badge/version-0.7.0-246BFE?style=flat-square&labelColor=171B24" /></a>
   <img alt="Windows, macOS and Linux" src="https://img.shields.io/badge/desktop-Windows_%C2%B7_macOS_%C2%B7_Linux-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-F4F0E5?style=flat-square&labelColor=171B24" />
@@ -11,23 +11,25 @@
 
 <p align="center"><strong>Find what remains.</strong><br/>A local desktop app for the traces preserved in your files and backups.</p>
 
-<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
 ## Your files have a history. Follow it.
 
 ENGRAM examines the offline sources you choose and turns their readable contents into a navigable case. Find media and documents, inspect masked secret candidates, follow exact-copy relationships, and compare observations over time.
 
-The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. **ENGRAM 0.6.0** extends the **Atlas Focus** review workspace with Markdown and CSV evidence reports. Keep finding bookmarks, review states and plain-text notes beside the evidence, search with structured queries, and navigate the pannable, zoomable map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
+The **Trace desk** brings seven workspace views and a persistent evidence inspector into one native application. **ENGRAM 0.7.0** adds a **Media gallery** with explicitly requested PNG/JPEG previews and a guided iPhone backup workflow. Keep finding bookmarks, review states and plain-text notes beside the evidence, search with structured queries, and navigate the pannable, zoomable map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
 Export the complete filtered queue, bookmarked findings or the entire case. Choose Markdown or CSV, opt in to notes, recorded paths and source details independently, and keep a SHA-256 receipt for the report. Exporting preserves the open case and its unsaved review.
 
-![Native Atlas Focus Trace map with the evidence inspector](assets/screenshots/workspace.png)
+![Native 0.7 Media gallery showing a verified synthetic calibration image](assets/screenshots/gallery-v07.png)
 
-The six workspace views and report screens were captured on Linux from the actual **0.6.0** Tauri application, using synthetic files processed by the shared Rust engine. The [successful native Tauri/IPC job](https://github.com/Forem0/ENGRAM/actions/runs/40874129225/job/123451027724) exercised [source 9c7d9c3](https://github.com/Forem0/ENGRAM/commit/9c7d9c3e1e65b9ce95d597b3f59dc41a885afeaa); the [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records all seven passing checks. [Capture provenance](assets/screenshots/README.md) records the exact images, checkout and report evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
+This unedited Linux Tauri capture shows a generated, unencrypted iPhone-style backup and its visibly labelled **DEMO** image. [Capture provenance](assets/screenshots/v07-captures.json) identifies its exact checkout and artifact; the [completed 0.7 source checks](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) record subsequent validation separately. Older workspace and report images below retain their original **0.6.0** provenance. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
 
 | Start with a question | Follow the evidence |
 | --- | --- |
 | What is in this folder or backup? | Browse categories and inspect each finding's source path and rule. |
+| What image does this finding contain? | Select a media file and explicitly request a source-verified PNG/JPEG preview. |
+| Can this iPhone backup be inspected? | Use the guided index and encryption check before starting analysis. |
 | Are there matching copies? | Open recorded relationships and compare exact-content evidence. |
 | Did text exports retain secret-like values? | Review fully masked candidates and the detector that identified them. |
 | What changed between observations? | Load a baseline case and inspect added, removed or changed findings. |
@@ -39,7 +41,7 @@ The six workspace views and report screens were captured on Linux from the actua
 
 ### 1. Download the app
 
-Download [ENGRAM 0.6.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0) for your platform. Each package contains the native desktop app and the `engram` CLI.
+Download [ENGRAM 0.7.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0) for your platform. Each package contains the native desktop app and the CLI.
 
 | Platform | Package | Runtime |
 | --- | --- | --- |
@@ -47,7 +49,7 @@ Download [ENGRAM 0.6.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0) fo
 | macOS Apple Silicon | Archive containing `ENGRAM.app` and CLI | macOS on arm64 |
 | Linux x64 | Binary tar archive with desktop and CLI | Graphical session, GTK 3 and WebKitGTK 4.1 |
 
-Extract the archive before opening the application. Packages include SHA-256 checksums and build provenance. Current distribution packages are unsigned; the macOS app is not notarized. See [platform requirements and building](docs/BUILDING.md) for details.
+Extract the archive before opening the application. Packages include SHA-256 checksums and build provenance. Current distribution packages are unsigned; the macOS app is not notarized. The Apple Silicon package is cross-built on an Intel macOS host; ARM64 runtime execution and Windows/macOS GUI interaction are outside the recorded verification. See [platform requirements and building](docs/BUILDING.md) for details.
 
 ### 2. Open the Trace desk
 
@@ -55,9 +57,9 @@ Launch `engram-desktop.exe` on Windows, `ENGRAM.app` on macOS, or `engram-deskto
 
 ### 3. Choose a source
 
-Select **Choose source** and pick a folder in the native dialog. Use an ordinary directory, a local export, or a supported unencrypted iPhone backup directory. The app inspects that selection and replaces the demonstration with its resulting case.
+For a folder or local export, select **Choose source** and pick its directory in the native dialog. For an iPhone backup, use **Inspect iPhone backup**: choose the local backup folder, review its encryption state and index coverage, then select **Start analysis**. A successful inspection opens a new observation; cancelled or failed operations retain the current case.
 
-For an existing ENGRAM case, use **Open case** instead. Reopening a case validates its saved data; it does not read the original source again.
+For an existing ENGRAM case, use **Open case** instead. Reopening a case validates its saved data; it does not read the original source again or grant access to image bytes. Image viewing requires an explicit source scan in the current session.
 
 ### 4. Narrow the view
 
@@ -68,6 +70,8 @@ Select a category on the Trace map or use the category tabs. Search by name, pat
 Check the source locator, evidence fields and rule in the inspector. Use **Your review** to bookmark the current finding, choose **Unreviewed**, **Needs review** or **Reviewed**, and add a plain-text note. Review status is your annotation; **Observed**, **Linked** and **Candidate** remain the engine's confidence labels.
 
 Switch to **Modules** to see which readers ran, what they support and which files were skipped. A partial inspection remains useful when its limits are visible.
+
+In **Media gallery**, select a file and choose **Preview image** to view a supported PNG/JPEG from the scanned source. Its recorded hash is checked before a bounded, metadata-stripped image is returned. Catalogue rows remain records; follow their recorded relationships to inspect an available file. Preview pixels stay out of saved cases and reports.
 
 ### 6. Save the observation
 
@@ -121,7 +125,7 @@ With the map focused, the arrow keys pan, **+ / −** zoom, and **0** or **Home*
 | **Ctrl/⌘ S** | Save a new case in the desktop app. |
 | **B** | Toggle the selected current finding's bookmark. |
 | **R** | Toggle Reviewed / Unreviewed for the selected current finding. |
-| **1–6** | Switch workspace views; **7** opens Media gallery in the 0.7 source. |
+| **1–7** | Switch workspace views; **7** opens Media gallery. |
 | **?** | Open Search & shortcuts. |
 
 Letter shortcuts stay inactive while typing. Saved-case selection and persistence use the native desktop application.
@@ -140,9 +144,17 @@ Select **Choose destination & export** to open the native save dialog for a new 
 
 Markdown is escaped as report text, and CSV uses UTF-8 with a BOM, quoted fields and CRLF records. Spreadsheet formula prefixes in text cells are neutralized. CSV refuses provenance identifiers that would require formula rewriting; choose Markdown for those cases. Both formats preserve the engine's confidence labels and describe the selected observation; neither format is a restorable ENGRAM case or evidence of secure deletion. Reports contain at most 10,000 selected findings and 16 MiB of output, with an explicit error rather than truncation when a bound is exceeded.
 
-The browser demonstration can show export options against the synthetic case. Writing a report requires the native application. The [Linux native report exercise](https://github.com/Forem0/ENGRAM/actions/runs/40874129225/job/123451027724) used real destination pickers, cancelled one export, and wrote Markdown and CSV reports matching the CLI output for the same saved synthetic case. The receipt above shows that actual Markdown output; the broader evidence scope is recorded in [building and verification](docs/BUILDING.md#native-report-interaction).
+The browser demonstration can show export options against the synthetic case. Writing a report requires the native application. The two report images above retain their **0.6.0** capture provenance: the [Linux native report exercise](https://github.com/Forem0/ENGRAM/actions/runs/40874129225/job/123451027724) used real destination pickers, cancelled one export, and wrote Markdown and CSV reports matching the CLI output for the same saved synthetic case. The receipt shows that actual Markdown output; the broader evidence scope is recorded in [building and verification](docs/BUILDING.md#native-report-interaction).
 
 ## A tour of the app
+
+### Trace map — follow the recorded relationships
+
+Select a representative finding or category, pan and zoom the map, and keep the underlying record visible in the evidence inspector. The map presents recorded findings and relationships; it does not add evidence links.
+
+![Native Atlas Focus Trace map with the evidence inspector, captured in 0.6.0](assets/screenshots/workspace.png)
+
+The six workspace views and report screens were captured on Linux from the actual **0.6.0** Tauri application, using synthetic files processed by the shared Rust engine. The [successful native Tauri/IPC job](https://github.com/Forem0/ENGRAM/actions/runs/40874129225/job/123451027724) exercised [source 9c7d9c3](https://github.com/Forem0/ENGRAM/commit/9c7d9c3e1e65b9ce95d597b3f59dc41a885afeaa); the [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records all seven passing checks. [Capture provenance](assets/screenshots/README.md) records the exact images, checkout and report evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
 
 ### Findings — a source behind every row
 
@@ -186,19 +198,19 @@ These states describe the actual reader and supplied format. An unsupported sche
 
 ## Supported data
 
-### Media gallery and guided iPhone inspection — 0.7 source development
+### Media gallery and guided iPhone inspection
 
-The 0.7 source adds **Media gallery**, a seventh workspace view for recorded media files, thumbnail-path evidence and Photos catalogue rows. Filter the gallery, select a finding and request **Preview image** for supported PNG or JPEG bytes from a source explicitly scanned in the current desktop session. The native engine verifies the recorded SHA-256 and generates a bounded, metadata-stripped PNG. Images are kept in memory and are not embedded in case files or reports.
+**Media gallery** is the seventh workspace view for recorded media files, thumbnail-path evidence and Photos catalogue rows. Filter the gallery, select a finding and request **Preview image** for supported PNG or JPEG bytes from a source explicitly scanned in the current desktop session. The native engine verifies the recorded SHA-256, applies supported image orientation and generates a bounded, metadata-stripped PNG. Images are kept in memory and are not embedded in case files or reports. A relationship can select a media finding outside the current filters while leaving those filters intact.
 
-![Native 0.7 Media gallery showing a verified synthetic calibration image](assets/screenshots/gallery-v07.png)
+Previews accept at most 8 MiB of source bytes and 16 million source pixels, produce at most 1024 pixels per edge without upscaling, and return at most 4 MiB of newly encoded PNG. HEIC/HEIF, video and other inventory formats do not gain image previews through this feature.
 
 **Inspect iPhone backup** opens a guided workflow: choose a backup folder through the native picker, review its encryption state and supported index, then explicitly start analysis. Listed category counts describe the index, while the resulting **Modules** view reports actual reader coverage. Cancelling the picker or wizard keeps the current case and review.
 
 ![Native 0.7 iPhone backup compatibility inspection before starting analysis](assets/screenshots/backup-wizard-v07.png)
 
-These two unedited Linux Tauri captures show a generated, unencrypted iPhone-style backup with a visibly labelled **DEMO** image. The native folder picker, explicit analysis and image preview ran through the application's normal commands. [Capture provenance](assets/screenshots/v07-captures.json) identifies the exact checkout and artifact. The [final locked-source verification](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) passed all seven checks for [03bb2f7](https://github.com/Forem0/ENGRAM/commit/03bb2f72004b4d5bb0c5af0829662de5fcc957b0), including a fresh native workflow exercise and 100 frontend tests. The six-view tour and report captures above retain their separate 0.6.0 provenance.
+The gallery capture at the top and compatibility capture here are unedited Linux Tauri windows showing a generated, unencrypted iPhone-style backup with a visibly labelled **DEMO** image. The native folder picker, explicit analysis and image preview ran through the application's normal commands. [Capture provenance](assets/screenshots/v07-captures.json) identifies their exact checkout and artifact; the [completed 0.7 source checks](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) record later validation separately. The six-view tour and report captures retain their separate 0.6.0 provenance.
 
-These additions are in the 0.7 source branch; the published **0.6.0** downloads linked above retain their original features and verification. Read the [media and backup workflow](docs/MEDIA.md) for formats, bounds, source authorization and synthetic testing. OCR and encrypted-backup reading remain separate research items.
+Read the [media and backup workflow](docs/MEDIA.md) for formats, bounds, source authorization and synthetic testing. Encrypted backups remain unavailable, and an unmatched thumbnail is not proof of a deleted original. OCR, deleted-record reconstruction and encrypted-backup reading remain separate research items. Previous releases retain their original features and verification.
 
 ### Files, archives and local exports
 
@@ -232,6 +244,8 @@ Readers work from temporary database copies and available supported sidecars. A 
 | Secret candidates | **Ready** | supported text patterns, fully masked values and within-case matching |
 | Duplicate relationships | **Ready** | exact-content relationships for eligible readable files |
 | Cases and comparison | **Ready** | local JSON persistence, reopening and snapshot differences |
+| Media gallery and previews | **Ready** | selected, source-verified PNG/JPEG previews from a current-session scan; bounded output and transient pixels |
+| Guided backup inspection | **Ready** | explicit native selection, bounded index/encryption check and a separate analysis action; reader states below still apply |
 | iPhone backup index | **Experimental** | supported unencrypted `Manifest.db` mapping |
 | Photos association | **Experimental** | supported catalogue rows and best-effort filename/path links |
 | Browser activity | **Experimental** | supported Chromium and Safari schemas; website origins only |
@@ -353,10 +367,10 @@ flowchart LR
 
 | Layer | Responsibility |
 | --- | --- |
-| Rust core | source classification, bounded readers, evidence, masking, relationships, case validation and report rendering |
-| Rust Tauri backend | native dialogs, active-case session, validated review snapshots, guarded persistence and report export |
-| React / TypeScript | six workspace views in 0.6, plus Media gallery and guided backup inspection in the 0.7 source; review controls, search, map navigation, evidence presentation and export options |
-| CLI | explicit source commands, repeatable workflows and structured output |
+| Rust core | source classification, bounded readers, evidence, masking, relationships, case validation, report rendering, backup preflight and bounded image decoding |
+| Rust Tauri backend | native dialogs, active-case session, transient image authority, staged backup selections, validated review snapshots, guarded persistence and report export |
+| React / TypeScript | seven workspace views, guided backup inspection, review controls, search, map navigation, evidence presentation and export options |
+| CLI | explicit source commands, repeatable workflows, synthetic folder/backup fixtures and structured output |
 
 The renderer is not given a general filesystem or shell API. A cancelled dialog leaves the open case in place; a failed operation reports its error without quietly replacing the case with a demo. See [architecture](docs/ARCHITECTURE.md).
 
@@ -397,11 +411,11 @@ cargo test -p engram-desktop --features engram-desktop/custom-protocol --locked
 cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
 ```
 
-Tests use synthetic sources. The [0.6.0 verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records Rust checks on Windows, macOS and Linux, frontend validation, and actual Tauri/WebKit startup and report-export interaction on Linux. The native report exercise uses the real XDG/GTK save picker, checks cancellation, and compares both exported formats byte for byte with the CLI rendering of the same saved synthetic case. Native build and capture evidence belongs with the release it describes; platform packaging is recorded by the [Build artifacts workflow](https://github.com/Forem0/ENGRAM/actions/workflows/build-artifacts.yml). See [building and verification](docs/BUILDING.md) for the evidence scope.
+Tests use synthetic sources. The [completed 0.7 locked-source verification](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) records 100 frontend tests, production assets, Rust formatting, core/CLI/native backend tests and Clippy on Linux, Windows and macOS Intel, plus Apple Silicon compilation and linking. Its actual Linux Tauri exercise uses the real folder picker, checks backup compatibility, explicitly starts analysis and previews a generated image; the report exercise also uses real save pickers and compares Markdown/CSV with the CLI. These checks do not establish Windows/macOS GUI behavior or ARM64 runtime execution. Native captures retain their exact recorded source; platform archives carry their own build provenance. See [building and verification](docs/BUILDING.md) for the evidence scope.
 
 ## Next work
 
-ENGRAM supports the folder-to-case workflow, local persistence, review annotations, structured search, map navigation, comparison and selected-finding report export. Next priorities are broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, continued accessibility checks, native interaction coverage across platforms, and platform signing and notarization.
+ENGRAM supports the folder-to-case workflow, guided iPhone backup inspection, source-verified PNG/JPEG previews, local persistence, review annotations, structured search, map navigation, comparison and selected-finding report export. Next priorities are broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, continued accessibility checks, native interaction coverage across platforms, and platform signing and notarization.
 
 Deleted-record reconstruction, owner-unlocked encrypted backups and optional local OCR remain research items. They need reproducible evidence and explicit support boundaries before moving into the working capability matrix. See the [roadmap](docs/ROADMAP.md).
 
