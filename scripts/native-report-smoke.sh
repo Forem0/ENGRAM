@@ -157,27 +157,15 @@ fill_save_picker() {
   xdotool getwindowgeometry --shell "$picker" > "$out/$stem-picker-geometry.txt"
   import -window "$picker" "$out/$stem-picker.png"
   xdotool windowfocus --sync "$picker"
-  # Navigate to an existing directory first. GTK's initial Name selection can
-  # exclude the extension; typing a full filename directly previously produced
-  # export-case.engram.json.json. Explicit Ctrl+A is required in both fields.
-  xdotool key --clearmodifiers ctrl+l
-  xdotool key --clearmodifiers ctrl+a
-  xdotool type --clearmodifiers --delay 5 "$folder"
-  xdotool key --clearmodifiers Return
-  sleep 0.8
-  if ! visible_window "$picker"; then
-    echo 'Picker closed unexpectedly while navigating to an existing folder.' >&2
-    capture_app "$stem-unexpected-folder-close"
-    diagnose_chosen_files
-    return 1
-  fi
-  import -window "$picker" "$out/$stem-picker-folder.png"
-  # Actual GTK 1096x822 picker capture verified Name field x64..1085,y11..42.
+  # GTK's Save-mode Ctrl+L focuses Name rather than changing the directory.
+  # Replace the entire Name with the absolute destination. The initial partial
+  # selection preserves .json; Ctrl+A prevents that duplicate suffix. Actual
+  # GTK 1096x822 picker capture verified Name field x64..1085,y11..42.
   xdotool mousemove --window "$picker" 300 27 click 1
   xdotool key --clearmodifiers ctrl+a
-  xdotool type --clearmodifiers --delay 10 "$filename"
+  xdotool type --clearmodifiers --delay 10 "$destination"
   import -window "$picker" "$out/$stem-picker-filled.png"
-  echo "Saving exact Name '$filename' in '$folder' through the actual picker."
+  echo "Saving exact absolute Name '$destination' through the actual picker."
   xdotool key --clearmodifiers Return
   # Never issue a blind second Return: if the dialog closed, it would act on
   # another native/renderer window. A still-open picker is a diagnostic failure.
