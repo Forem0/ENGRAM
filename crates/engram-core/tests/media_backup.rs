@@ -1,7 +1,8 @@
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use engram_core::{
-    create_demo_backup_fixture, create_demo_fixture, inspect_backup, scan_path, scan_path_with_media,
-    BackupInspectionState, Category, ScanOptions, SourceKind, MAX_MEDIA_INPUT_BYTES,
+    create_demo_backup_fixture, create_demo_fixture, inspect_backup, scan_path,
+    scan_path_with_media, BackupInspectionState, Category, ScanOptions, SourceKind,
+    MAX_MEDIA_INPUT_BYTES,
 };
 use image::{DynamicImage, ImageFormat, RgbImage};
 use rusqlite::Connection;
@@ -9,21 +10,31 @@ use sha2::{Digest, Sha256};
 use std::{fs, io::Cursor, path::Path};
 
 fn png(path: &Path, width: u32, height: u32) {
-    let image = RgbImage::from_fn(width, height, |x, y| image::Rgb([
-        (x % 255) as u8, (y % 255) as u8, ((x + y) % 255) as u8,
-    ]));
-    DynamicImage::ImageRgb8(image).save_with_format(path, ImageFormat::Png).unwrap();
+    let image = RgbImage::from_fn(width, height, |x, y| {
+        image::Rgb([(x % 255) as u8, (y % 255) as u8, ((x + y) % 255) as u8])
+    });
+    DynamicImage::ImageRgb8(image)
+        .save_with_format(path, ImageFormat::Png)
+        .unwrap();
 }
 
 fn metadata(root: &Path, encrypted: Option<plist::Value>) {
     let mut values = plist::Dictionary::new();
-    if let Some(value) = encrypted { values.insert("IsEncrypted".into(), value); }
-    plist::Value::Dictionary(values).to_file_xml(root.join("Manifest.plist")).unwrap();
+    if let Some(value) = encrypted {
+        values.insert("IsEncrypted".into(), value);
+    }
+    plist::Value::Dictionary(values)
+        .to_file_xml(root.join("Manifest.plist"))
+        .unwrap();
 }
 
 fn index(root: &Path) -> Connection {
     let database = Connection::open(root.join("Manifest.db")).unwrap();
-    database.execute_batch("CREATE TABLE Files(fileID TEXT, domain TEXT, relativePath TEXT, flags INTEGER);").unwrap();
+    database
+        .execute_batch(
+            "CREATE TABLE Files(fileID TEXT, domain TEXT, relativePath TEXT, flags INTEGER);",
+        )
+        .unwrap();
     database
 }
 
@@ -35,13 +46,27 @@ fn preview_is_generated_from_scanned_bytes_without_modifying_the_source() {
     let original = fs::read(&source).unwrap();
     let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
     assert_eq!(access.case_id(), case.id);
-    let finding = case.findings.iter().find(|finding| finding.rule_id == "file.media").unwrap();
+    let finding = case
+        .findings
+        .iter()
+        .find(|finding| finding.rule_id == "file.media")
+        .unwrap();
     let preview = access.preview(&finding.id).unwrap();
     assert_eq!(preview.finding_id, finding.id);
     assert_eq!((preview.source_width, preview.source_height), (120, 80));
     assert_eq!((preview.width, preview.height), (120, 80));
-    assert_eq!(preview.source_sha256, format!("{:x}", Sha256::digest(&original)));
-    let rendered = STANDARD.decode(preview.data_url.strip_prefix("data:image/png;base64,").unwrap()).unwrap();
+    assert_eq!(
+        preview.source_sha256,
+        format!("{:x}", Sha256::digest(&original))
+    );
+    let rendered = STANDARD
+        .decode(
+            preview
+                .data_url
+                .strip_prefix("data:image/png;base64,")
+                .unwrap(),
+        )
+        .unwrap();
     let decoded = image::load_from_memory(&rendered).unwrap();
     assert_eq!((decoded.width(), decoded.height()), (120, 80));
     assert_eq!(fs::read(&source).unwrap(), original);
@@ -64,7 +89,9 @@ fn oversized_image_is_resized_to_a_bounded_preview() {
 fn jpeg_input_is_reencoded_as_png() {
     let folder = tempfile::tempdir().unwrap();
     let image = DynamicImage::ImageRgb8(RgbImage::new(30, 20));
-    image.save_with_format(folder.path().join("photo.jpg"), ImageFormat::Jpeg).unwrap();
+    image
+        .save_with_format(folder.path().join("photo.jpg"), ImageFormat::Jpeg)
+        .unwrap();
     let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
     let preview = access.preview(&case.findings[0].id).unwrap();
     assert!(preview.data_url.starts_with("data:image/png;base64,"));
@@ -81,7 +108,11 @@ fn changed_content_is_rejected_even_when_length_is_unchanged() {
     let position = changed.len() / 2;
     changed[position] ^= 1;
     fs::write(&source, changed).unwrap();
-    assert!(access.preview(&case.findings[0].id).unwrap_err().to_string().contains("changed"));
+    assert!(access
+        .preview(&case.findings[0].id)
+        .unwrap_err()
+        .to_string()
+        .contains("changed"));
 }
 
 #[test]
@@ -90,7 +121,11 @@ fn unknown_ids_and_database_catalogue_records_do_not_grant_file_access() {
     create_demo_fixture(folder.path()).unwrap();
     let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
     assert!(access.preview("../../outside.png").is_err());
-    for finding in case.findings.iter().filter(|finding| finding.rule_id != "file.media") {
+    for finding in case
+        .findings
+        .iter()
+        .filter(|finding| finding.rule_id != "file.media")
+    {
         assert!(access.preview(&finding.id).is_err());
     }
 }
@@ -99,8 +134,15 @@ fn unknown_ids_and_database_catalogue_records_do_not_grant_file_access() {
 fn file_bytes_outside_preview_budget_are_not_authorized() {
     let folder = tempfile::tempdir().unwrap();
     let path = folder.path().join("too-large.png");
-    fs::File::create(&path).unwrap().set_len(MAX_MEDIA_INPUT_BYTES + 1).unwrap();
-    let options = ScanOptions { max_file_bytes: MAX_MEDIA_INPUT_BYTES + 1, max_total_bytes: MAX_MEDIA_INPUT_BYTES + 1, ..ScanOptions::default() };
+    fs::File::create(&path)
+        .unwrap()
+        .set_len(MAX_MEDIA_INPUT_BYTES + 1)
+        .unwrap();
+    let options = ScanOptions {
+        max_file_bytes: MAX_MEDIA_INPUT_BYTES + 1,
+        max_total_bytes: MAX_MEDIA_INPUT_BYTES + 1,
+        ..ScanOptions::default()
+    };
     let (case, access) = scan_path_with_media(folder.path(), &options).unwrap();
     assert!(case.findings[0].sha256.is_some());
     assert!(access.preview(&case.findings[0].id).is_err());
@@ -108,7 +150,10 @@ fn file_bytes_outside_preview_budget_are_not_authorized() {
 
 #[test]
 fn unsupported_content_cannot_be_returned_as_a_renderable_image() {
-    for bytes in [b"<svg xmlns='http://www.w3.org/2000/svg'><script>alert(1)</script></svg>".as_slice(), b"GIF89a\x01\0\x01\0".as_slice()] {
+    for bytes in [
+        b"<svg xmlns='http://www.w3.org/2000/svg'><script>alert(1)</script></svg>".as_slice(),
+        b"GIF89a\x01\0\x01\0".as_slice(),
+    ] {
         let folder = tempfile::tempdir().unwrap();
         fs::write(folder.path().join("disguised.png"), bytes).unwrap();
         let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
@@ -122,9 +167,15 @@ fn excessive_source_pixels_are_rejected_before_full_decode() {
     // Encoding a flat image is compact on disk; its dimensions exceed the
     // independent 16-million-pixel decode bound despite fitting the byte limit.
     let image = DynamicImage::ImageRgb8(RgbImage::new(4001, 4000));
-    image.save_with_format(folder.path().join("pixel-limit.png"), ImageFormat::Png).unwrap();
+    image
+        .save_with_format(folder.path().join("pixel-limit.png"), ImageFormat::Png)
+        .unwrap();
     let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
-    assert!(access.preview(&case.findings[0].id).unwrap_err().to_string().contains("16 million"));
+    assert!(access
+        .preview(&case.findings[0].id)
+        .unwrap_err()
+        .to_string()
+        .contains("16 million"));
 }
 
 #[test]
@@ -135,13 +186,38 @@ fn backup_preflight_counts_index_paths_and_reads_optional_device_metadata() {
     assert_eq!(inspection.state, BackupInspectionState::Ready);
     assert_eq!(inspection.encrypted, Some(false));
     assert_eq!(inspection.indexed_files, 7);
-    assert_eq!(inspection.categories.iter().map(|category| category.count).sum::<u64>(), 7);
-    assert_eq!(inspection.categories.iter().find(|category| category.id == "media").unwrap().count, 3);
-    assert_eq!(inspection.device_name.as_deref(), Some("ENGRAM synthetic fixture"));
-    assert!(inspection.warnings.iter().any(|warning| warning.contains("not verified media")));
+    assert_eq!(
+        inspection
+            .categories
+            .iter()
+            .map(|category| category.count)
+            .sum::<u64>(),
+        7
+    );
+    assert_eq!(
+        inspection
+            .categories
+            .iter()
+            .find(|category| category.id == "media")
+            .unwrap()
+            .count,
+        3
+    );
+    assert_eq!(
+        inspection.device_name.as_deref(),
+        Some("ENGRAM synthetic fixture")
+    );
+    assert!(inspection
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("not verified media")));
     let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
     assert_eq!(case.source_kind, SourceKind::IosBackup);
-    let media = case.findings.iter().find(|finding| finding.category == Category::Media && finding.rule_id == "file.media").unwrap();
+    let media = case
+        .findings
+        .iter()
+        .find(|finding| finding.category == Category::Media && finding.rule_id == "file.media")
+        .unwrap();
     assert!(access.preview(&media.id).is_ok());
 }
 
@@ -151,8 +227,13 @@ fn blank_or_control_only_optional_device_metadata_is_absent() {
     create_demo_backup_fixture(folder.path()).unwrap();
     let mut info = plist::Dictionary::new();
     info.insert("Device Name".into(), plist::Value::String(" \t\n ".into()));
-    info.insert("Product Version".into(), plist::Value::String(" \r\n ".into()));
-    plist::Value::Dictionary(info).to_file_xml(folder.path().join("Info.plist")).unwrap();
+    info.insert(
+        "Product Version".into(),
+        plist::Value::String(" \r\n ".into()),
+    );
+    plist::Value::Dictionary(info)
+        .to_file_xml(folder.path().join("Info.plist"))
+        .unwrap();
     let inspection = inspect_backup(folder.path()).unwrap();
     assert_eq!(inspection.state, BackupInspectionState::Ready);
     assert_eq!(inspection.device_name, None);
@@ -172,7 +253,11 @@ fn blank_backup_directory_label_uses_a_nonempty_fallback() {
 
 #[test]
 fn encrypted_missing_and_unknown_encryption_states_remain_unavailable() {
-    for encrypted in [Some(plist::Value::Boolean(true)), None, Some(plist::Value::String("false".into()))] {
+    for encrypted in [
+        Some(plist::Value::Boolean(true)),
+        None,
+        Some(plist::Value::String("false".into())),
+    ] {
         let folder = tempfile::tempdir().unwrap();
         metadata(folder.path(), encrypted);
         drop(index(folder.path()));
@@ -187,14 +272,23 @@ fn encrypted_missing_and_unknown_encryption_states_remain_unavailable() {
 #[test]
 fn ordinary_folder_and_malformed_plist_are_not_empty_successful_backups() {
     let folder = tempfile::tempdir().unwrap();
-    assert_eq!(inspect_backup(folder.path()).unwrap().state, BackupInspectionState::Unavailable);
+    assert_eq!(
+        inspect_backup(folder.path()).unwrap().state,
+        BackupInspectionState::Unavailable
+    );
     fs::write(folder.path().join("Manifest.plist"), b"not a property list").unwrap();
-    assert_eq!(inspect_backup(folder.path()).unwrap().state, BackupInspectionState::Unavailable);
+    assert_eq!(
+        inspect_backup(folder.path()).unwrap().state,
+        BackupInspectionState::Unavailable
+    );
 }
 
 #[test]
 fn unsupported_files_schema_and_familiar_looking_views_are_rejected() {
-    for schema in ["CREATE TABLE Files(wrong TEXT)", "CREATE VIEW Files AS SELECT 'a' AS fileID, 'b' AS domain, 'c' AS relativePath, 1 AS flags"] {
+    for schema in [
+        "CREATE TABLE Files(wrong TEXT)",
+        "CREATE VIEW Files AS SELECT 'a' AS fileID, 'b' AS domain, 'c' AS relativePath, 1 AS flags",
+    ] {
         let folder = tempfile::tempdir().unwrap();
         metadata(folder.path(), Some(plist::Value::Boolean(false)));
         let database = Connection::open(folder.path().join("Manifest.db")).unwrap();
@@ -221,14 +315,32 @@ fn invalid_index_identifiers_and_parent_paths_are_excluded_and_reported() {
     let folder = tempfile::tempdir().unwrap();
     metadata(folder.path(), Some(plist::Value::Boolean(false)));
     let database = index(folder.path());
-    database.execute("INSERT INTO Files VALUES (?1, 'HomeDomain', '../outside.png', 1)", ["a".repeat(40)]).unwrap();
-    database.execute("INSERT INTO Files VALUES ('invalid', 'HomeDomain', 'good.png', 1)", []).unwrap();
-    database.execute("INSERT INTO Files VALUES (?1, 'HomeDomain', 'good.png', 1)", ["b".repeat(40)]).unwrap();
+    database
+        .execute(
+            "INSERT INTO Files VALUES (?1, 'HomeDomain', '../outside.png', 1)",
+            ["a".repeat(40)],
+        )
+        .unwrap();
+    database
+        .execute(
+            "INSERT INTO Files VALUES ('invalid', 'HomeDomain', 'good.png', 1)",
+            [],
+        )
+        .unwrap();
+    database
+        .execute(
+            "INSERT INTO Files VALUES (?1, 'HomeDomain', 'good.png', 1)",
+            ["b".repeat(40)],
+        )
+        .unwrap();
     drop(database);
     let inspection = inspect_backup(folder.path()).unwrap();
     assert_eq!(inspection.state, BackupInspectionState::Ready);
     assert_eq!(inspection.indexed_files, 1);
-    assert!(inspection.warnings.iter().any(|warning| warning.contains("Excluded 2")));
+    assert!(inspection
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("Excluded 2")));
 }
 
 #[test]
@@ -236,15 +348,25 @@ fn preflight_reads_available_wal_without_modifying_original_database_files() {
     let folder = tempfile::tempdir().unwrap();
     metadata(folder.path(), Some(plist::Value::Boolean(false)));
     let database = index(folder.path());
-    database.execute_batch("PRAGMA journal_mode=WAL; PRAGMA wal_autocheckpoint=0;").unwrap();
-    database.execute("INSERT INTO Files VALUES (?1, 'HomeDomain', 'wal-note.txt', 1)", ["c".repeat(40)]).unwrap();
+    database
+        .execute_batch("PRAGMA journal_mode=WAL; PRAGMA wal_autocheckpoint=0;")
+        .unwrap();
+    database
+        .execute(
+            "INSERT INTO Files VALUES (?1, 'HomeDomain', 'wal-note.txt', 1)",
+            ["c".repeat(40)],
+        )
+        .unwrap();
     let before = fs::read(folder.path().join("Manifest.db")).unwrap();
     let wal_before = fs::read(folder.path().join("Manifest.db-wal")).unwrap();
     let inspection = inspect_backup(folder.path()).unwrap();
     assert_eq!(inspection.state, BackupInspectionState::Ready);
     assert_eq!(inspection.indexed_files, 1);
     assert_eq!(fs::read(folder.path().join("Manifest.db")).unwrap(), before);
-    assert_eq!(fs::read(folder.path().join("Manifest.db-wal")).unwrap(), wal_before);
+    assert_eq!(
+        fs::read(folder.path().join("Manifest.db-wal")).unwrap(),
+        wal_before
+    );
     drop(database);
 }
 
@@ -260,13 +382,27 @@ fn synthetic_backup_fixture_never_overwrites_an_existing_directory() {
 fn oversized_index_and_ill_typed_records_are_unavailable() {
     let folder = tempfile::tempdir().unwrap();
     metadata(folder.path(), Some(plist::Value::Boolean(false)));
-    fs::File::create(folder.path().join("Manifest.db")).unwrap().set_len(8 * 1024 * 1024 + 1).unwrap();
-    assert_eq!(inspect_backup(folder.path()).unwrap().state, BackupInspectionState::Unavailable);
+    fs::File::create(folder.path().join("Manifest.db"))
+        .unwrap()
+        .set_len(8 * 1024 * 1024 + 1)
+        .unwrap();
+    assert_eq!(
+        inspect_backup(folder.path()).unwrap().state,
+        BackupInspectionState::Unavailable
+    );
     fs::remove_file(folder.path().join("Manifest.db")).unwrap();
     let database = index(folder.path());
-    database.execute("INSERT INTO Files VALUES (NULL, 'HomeDomain', 'missing.png', 1)", []).unwrap();
+    database
+        .execute(
+            "INSERT INTO Files VALUES (NULL, 'HomeDomain', 'missing.png', 1)",
+            [],
+        )
+        .unwrap();
     drop(database);
-    assert_eq!(inspect_backup(folder.path()).unwrap().state, BackupInspectionState::Unavailable);
+    assert_eq!(
+        inspect_backup(folder.path()).unwrap().state,
+        BackupInspectionState::Unavailable
+    );
 }
 
 #[cfg(unix)]
@@ -296,7 +432,9 @@ fn metadata_is_removed_when_preview_pixels_are_reencoded() {
     let source = folder.path().join("tagged.jpg");
     let image = DynamicImage::ImageRgb8(RgbImage::new(12, 8));
     let mut bytes = Vec::new();
-    image.write_to(&mut Cursor::new(&mut bytes), ImageFormat::Jpeg).unwrap();
+    image
+        .write_to(&mut Cursor::new(&mut bytes), ImageFormat::Jpeg)
+        .unwrap();
     let marker = b"SYNTHETIC_METADATA_SHOULD_NOT_BE_COPIED";
     let mut tagged = bytes[..2].to_vec();
     tagged.extend_from_slice(&[0xff, 0xfe]);
@@ -306,6 +444,13 @@ fn metadata_is_removed_when_preview_pixels_are_reencoded() {
     fs::write(&source, tagged).unwrap();
     let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
     let preview = access.preview(&case.findings[0].id).unwrap();
-    let output = STANDARD.decode(preview.data_url.strip_prefix("data:image/png;base64,").unwrap()).unwrap();
+    let output = STANDARD
+        .decode(
+            preview
+                .data_url
+                .strip_prefix("data:image/png;base64,")
+                .unwrap(),
+        )
+        .unwrap();
     assert!(!output.windows(marker.len()).any(|window| window == marker));
 }
