@@ -196,7 +196,7 @@ The 0.7 source adds **Media gallery**, a seventh workspace view for recorded med
 
 ![Native 0.7 iPhone backup compatibility inspection before starting analysis](assets/screenshots/backup-wizard-v07.png)
 
-These two unedited Linux Tauri captures show a generated, unencrypted iPhone-style backup with a visibly labelled **DEMO** image. The native folder picker, explicit analysis and image preview ran through the application's normal commands. [Capture provenance](assets/screenshots/v07-captures.json) identifies the exact checkout and artifact; [PR #8 checks](https://github.com/Forem0/ENGRAM/pull/8/checks) record validation of the current source. The six-view tour and report captures above retain their separate 0.6.0 provenance.
+These two unedited Linux Tauri captures show a generated, unencrypted iPhone-style backup with a visibly labelled **DEMO** image. The native folder picker, explicit analysis and image preview ran through the application's normal commands. [Capture provenance](assets/screenshots/v07-captures.json) identifies the exact checkout and artifact. The [final locked-source verification](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) passed all seven checks for [03bb2f7](https://github.com/Forem0/ENGRAM/commit/03bb2f72004b4d5bb0c5af0829662de5fcc957b0), including a fresh native workflow exercise and 100 frontend tests. The six-view tour and report captures above retain their separate 0.6.0 provenance.
 
 These additions are in the 0.7 source branch; the published **0.6.0** downloads linked above retain their original features and verification. Read the [media and backup workflow](docs/MEDIA.md) for formats, bounds, source authorization and synthetic testing. OCR and encrypted-backup reading remain separate research items.
 
