@@ -84,7 +84,13 @@ fn selected_markdown_report_defaults_to_minimal_fields_and_preserves_the_case() 
     let id = case["findings"][0]["id"].as_str().unwrap();
     let output = temporary.path().join("selected.report.md");
     let receipt = successful_json(&[
-        "export", text(&input), "--out", text(&output), "--finding", id, "--json",
+        "export",
+        text(&input),
+        "--out",
+        text(&output),
+        "--finding",
+        id,
+        "--json",
     ]);
     let report = fs::read_to_string(&output).unwrap();
     assert_eq!(receipt["format"], "markdown");
@@ -112,8 +118,14 @@ fn bookmarked_csv_contains_only_saved_bookmarks_and_neutralizes_formula_cells() 
     fs::write(&input, serde_json::to_vec_pretty(&case).unwrap()).unwrap();
     let output = temporary.path().join("bookmarks.csv");
     let receipt = successful_json(&[
-        "export", text(&input), "--out", text(&output), "--format", "csv",
-        "--bookmarked", "--json",
+        "export",
+        text(&input),
+        "--out",
+        text(&output),
+        "--format",
+        "csv",
+        "--bookmarked",
+        "--json",
     ]);
     assert_eq!(receipt["format"], "csv");
     assert_eq!(receipt["finding_count"], 1);
@@ -140,8 +152,15 @@ fn notes_paths_and_evidence_require_explicit_opt_ins() {
     reviewed_case(&input);
     let output = temporary.path().join("detailed.report.md");
     successful_json(&[
-        "export", text(&input), "--out", text(&output), "--bookmarked",
-        "--include-notes", "--include-paths", "--include-details", "--json",
+        "export",
+        text(&input),
+        "--out",
+        text(&output),
+        "--bookmarked",
+        "--include-notes",
+        "--include-paths",
+        "--include-details",
+        "--json",
     ]);
     let report = fs::read_to_string(output).unwrap();
     assert!(report.contains("Optional analyst annotation"));
@@ -160,12 +179,22 @@ fn opted_in_csv_notes_roundtrip_unicode_quotes_commas_and_newlines() {
     fs::write(&input, serde_json::to_vec_pretty(&case).unwrap()).unwrap();
     let output = temporary.path().join("notes.csv");
     successful_json(&[
-        "export", text(&input), "--out", text(&output), "--format", "csv",
-        "--bookmarked", "--include-notes", "--json",
+        "export",
+        text(&input),
+        "--out",
+        text(&output),
+        "--format",
+        "csv",
+        "--bookmarked",
+        "--include-notes",
+        "--json",
     ]);
     let rows = csv_rows(&fs::read_to_string(output).unwrap());
     assert_eq!(rows.len(), 2);
-    let note_column = rows[0].iter().position(|cell| cell == "analyst_note").unwrap();
+    let note_column = rows[0]
+        .iter()
+        .position(|cell| cell == "analyst_note")
+        .unwrap();
     assert_eq!(rows[1][note_column], note);
 }
 
@@ -176,18 +205,41 @@ fn empty_bookmarks_unknown_ids_and_duplicate_ids_never_fall_back_to_all_findings
     let case = successful_json(&["demo", "--out", text(&input), "--json"]);
     let id = case["findings"][0]["id"].as_str().unwrap();
     let empty = temporary.path().join("empty.md");
-    assert!(!engram(&["export", text(&input), "--out", text(&empty), "--bookmarked"])
-        .status.success());
+    assert!(!engram(&[
+        "export",
+        text(&input),
+        "--out",
+        text(&empty),
+        "--bookmarked"
+    ])
+    .status
+    .success());
     assert!(!empty.exists());
     let unknown = temporary.path().join("unknown.md");
     assert!(!engram(&[
-        "export", text(&input), "--out", text(&unknown), "--finding", "unknown-synthetic-id",
-    ]).status.success());
+        "export",
+        text(&input),
+        "--out",
+        text(&unknown),
+        "--finding",
+        "unknown-synthetic-id",
+    ])
+    .status
+    .success());
     assert!(!unknown.exists());
     let duplicate = temporary.path().join("duplicate.md");
     assert!(!engram(&[
-        "export", text(&input), "--out", text(&duplicate), "--finding", id, "--finding", id,
-    ]).status.success());
+        "export",
+        text(&input),
+        "--out",
+        text(&duplicate),
+        "--finding",
+        id,
+        "--finding",
+        id,
+    ])
+    .status
+    .success());
     assert!(!duplicate.exists());
 }
 
@@ -217,17 +269,31 @@ fn export_does_not_overwrite_the_case_existing_outputs_or_recorded_source() {
     let mut case = reviewed_case(&input);
     let source = temporary.path().join("source");
     fs::create_dir(&source).unwrap();
-    case["source_root"] = source.canonicalize().unwrap().to_string_lossy().into_owned().into();
+    case["source_root"] = source
+        .canonicalize()
+        .unwrap()
+        .to_string_lossy()
+        .into_owned()
+        .into();
     fs::write(&input, serde_json::to_vec_pretty(&case).unwrap()).unwrap();
     let original = fs::read(&input).unwrap();
-    assert!(!engram(&["export", text(&input), "--out", text(&input)]).status.success());
+    assert!(!engram(&["export", text(&input), "--out", text(&input)])
+        .status
+        .success());
     assert_eq!(fs::read(&input).unwrap(), original);
     let existing = temporary.path().join("existing.md");
     fs::write(&existing, "preserve this output").unwrap();
-    assert!(!engram(&["export", text(&input), "--out", text(&existing)]).status.success());
-    assert_eq!(fs::read_to_string(existing).unwrap(), "preserve this output");
+    assert!(!engram(&["export", text(&input), "--out", text(&existing)])
+        .status
+        .success());
+    assert_eq!(
+        fs::read_to_string(existing).unwrap(),
+        "preserve this output"
+    );
     let inside = source.join("new/report.md");
-    assert!(!engram(&["export", text(&input), "--out", text(&inside)]).status.success());
+    assert!(!engram(&["export", text(&input), "--out", text(&inside)])
+        .status
+        .success());
     assert!(!source.join("new").exists());
     assert_eq!(fs::read_dir(source).unwrap().count(), 0);
 }
