@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml"><img alt="Build and tests" src="https://github.com/Forem0/ENGRAM/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0"><img alt="Desktop app 0.5.0" src="https://img.shields.io/badge/version-0.5.0-246BFE?style=flat-square&labelColor=171B24" /></a>
+  <a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0"><img alt="Desktop app 0.6.0" src="https://img.shields.io/badge/version-0.6.0-246BFE?style=flat-square&labelColor=171B24" /></a>
   <img alt="Windows, macOS and Linux" src="https://img.shields.io/badge/desktop-Windows_%C2%B7_macOS_%C2%B7_Linux-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Rust analysis engine" src="https://img.shields.io/badge/engine-Rust-F4F0E5?style=flat-square&labelColor=171B24" />
   <img alt="Offline analysis" src="https://img.shields.io/badge/analysis-offline-F4F0E5?style=flat-square&labelColor=171B24" />
@@ -11,19 +11,19 @@
 
 <p align="center"><strong>Find what remains.</strong><br/>A local desktop app for the traces preserved in your files and backups.</p>
 
-<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
+<p align="center"><a href="https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0">Get ENGRAM</a> · <a href="#get-started">Get started</a> · <a href="#a-tour-of-the-app">App tour</a> · <a href="#supported-data">Supported data</a> · <a href="docs/COMMANDS.md">CLI</a> · <a href="docs/PRIVACY.md">Privacy</a></p>
 
 ## Your files have a history. Follow it.
 
 ENGRAM examines the offline sources you choose and turns their readable contents into a navigable case. Find media and documents, inspect masked secret candidates, follow exact-copy relationships, and compare observations over time.
 
-The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. **ENGRAM 0.5.0** builds on the **Atlas Focus** workspace with finding bookmarks, review states, plain-text notes, structured search and a pannable, zoomable evidence map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
+The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. **ENGRAM 0.6.0** extends the **Atlas Focus** review workspace with Markdown and CSV evidence reports. Keep finding bookmarks, review states and plain-text notes beside the evidence, search with structured queries, and navigate the pannable, zoomable map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
-This checkout prepares **ENGRAM 0.6.0** with selected-finding reports in Markdown and CSV. The published download and native gallery below remain **0.5.0**. Regression tests accompany the report workflow; Rust/native execution and platform packages for 0.6.0 must be verified before its release. The 0.5.0 download does not include the new export command.
+Export the complete filtered queue, bookmarked findings or the entire case. Choose Markdown or CSV, opt in to notes, recorded paths and source details independently, and keep a SHA-256 receipt for the report. Exporting preserves the open case and its unsaved review.
 
 ![Native Atlas Focus Trace map with the evidence inspector](assets/screenshots/workspace.png)
 
-These six views were captured on Linux from the actual **0.5.0** Tauri application, using synthetic files processed by the shared Rust engine. The [successful native Tauri/IPC capture job](https://github.com/Forem0/ENGRAM/actions/runs/40766085166/job/123090713655) exercised [source 023d641](https://github.com/Forem0/ENGRAM/commit/023d64122c28e35fd8d84fcea9477d8f4f21710c); the [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40768086711) records the platform checks. [Capture provenance](assets/screenshots/README.md) records the exact images and execution evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
+The six workspace views and report screens were captured on Linux from the actual **0.6.0** Tauri application, using synthetic files processed by the shared Rust engine. The [successful native Tauri/IPC job](https://github.com/Forem0/ENGRAM/actions/runs/40874129225/job/123451027724) exercised [source 9c7d9c3](https://github.com/Forem0/ENGRAM/commit/9c7d9c3e1e65b9ce95d597b3f59dc41a885afeaa); the [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records all seven passing checks. [Capture provenance](assets/screenshots/README.md) records the exact images, checkout and report evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
 
 | Start with a question | Follow the evidence |
 | --- | --- |
@@ -33,12 +33,13 @@ These six views were captured on Linux from the actual **0.5.0** Tauri applicati
 | What changed between observations? | Load a baseline case and inspect added, removed or changed findings. |
 | How much of this source was covered? | Read module states, file counters and coverage notes together. |
 | What needs another look? | Bookmark findings, mark review states and keep plain-text notes with the saved case. |
+| How can I share selected observations? | Export the current queue, bookmarks or the entire case with independent privacy options and a checksum receipt. |
 
 ## Get started
 
 ### 1. Download the app
 
-Download [ENGRAM 0.5.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) for your platform. Each package contains the native desktop app and the `engram` CLI.
+Download [ENGRAM 0.6.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0) for your platform. Each package contains the native desktop app and the `engram` CLI.
 
 | Platform | Package | Runtime |
 | --- | --- | --- |
@@ -77,6 +78,10 @@ The **Unsaved review** indicator stays visible until the changed review is saved
 ### 7. Compare a later case
 
 Inspect the source again or open a newer saved case. Go to **Compare**, select **Choose baseline**, and pick the earlier case. The open case is the current observation; the selected file is the baseline.
+
+### 8. Export selected findings
+
+Use **Export report**, choose **Current results**, **Bookmarked** or **Entire case**, then select Markdown or CSV. Review the finding count and optional fields before choosing a new destination outside the source folder. The completed export shows a SHA-256 receipt. Use **Save case** separately to keep a restorable observation and any review changes.
 
 ## Review, search and navigate
 
@@ -123,15 +128,19 @@ Letter shortcuts stay inactive while typing. Saved-case selection and persistenc
 
 ## Export findings from a case
 
-The 0.6.0 source adds **Export report** to the Trace desk. In **Export investigation**, choose **Current results**, **Bookmarked** or **Entire case**, then select **Markdown report** or **CSV table**. Current results include the full filtered queue, rather than only the visible page or representative map nodes. An empty scope cannot silently become an export of the whole case.
+Use **Export report** in the Trace desk. In **Export investigation**, choose **Current results**, **Bookmarked** or **Entire case**, then select **Markdown report** or **CSV table**. Current results include the full filtered queue, rather than only the visible page or representative map nodes. An empty scope cannot silently become an export of the whole case.
+
+![Actual native Export investigation dialog with scope, format and independent privacy options](assets/screenshots/report-export.png)
 
 The export starts with a minimal set of finding fields. The structured path field is reduced to a filename; the source root, analyst notes and source-derived detail fields are omitted. Opt in separately to full recorded paths, evidence details or notes. Path settings do not anonymize arbitrary source text: details can contain private text or paths, and notes are the plain text you entered without automatic redaction. Titles, filenames, dates, IDs and hashes can still identify activity, so a report remains a sensitive local artifact.
 
 Select **Choose destination & export** to open the native save dialog for a new file outside source evidence. A successful export returns its format, finding count, byte count and SHA-256 checksum. Cancelled or failed exports preserve the open case and its review. Export uses the current review in the desktop; it does **not** mark an unsaved review as saved. Use **Save case** to retain changes in a case you can reopen.
 
+![Actual native Markdown report receipt showing 33 synthetic findings and its SHA-256 checksum](assets/screenshots/report-receipt.png)
+
 Markdown is escaped as report text, and CSV uses UTF-8 with a BOM, quoted fields and CRLF records. Spreadsheet formula prefixes in text cells are neutralized. CSV refuses provenance identifiers that would require formula rewriting; choose Markdown for those cases. Both formats preserve the engine's confidence labels and describe the selected observation; neither format is a restorable ENGRAM case or evidence of secure deletion. Reports contain at most 10,000 selected findings and 16 MiB of output, with an explicit error rather than truncation when a bound is exceeded.
 
-The browser demonstration can show export options against the synthetic case. Writing a report requires the native application. The six native images below retain their actual 0.5.0 provenance and do not establish that the 0.6.0 export path ran.
+The browser demonstration can show export options against the synthetic case. Writing a report requires the native application. The [Linux native report exercise](https://github.com/Forem0/ENGRAM/actions/runs/40874129225/job/123451027724) used real destination pickers, cancelled one export, and wrote Markdown and CSV reports matching the CLI output for the same saved synthetic case. The receipt above shows that actual Markdown output; the broader evidence scope is recorded in [building and verification](docs/BUILDING.md#native-report-interaction).
 
 ## A tour of the app
 
@@ -265,7 +274,7 @@ engram compare ./before.engram.json ./after.engram.json \
 
 `--json` emits one structured value to stdout. Errors go to stderr with a nonzero exit status. `compare --out` writes a separate comparison document; it does not replace either input case.
 
-The 0.6.0 CLI source also exports reports from a saved case:
+The CLI also exports reports from a saved case:
 
 ```bash
 engram export ./after.engram.json --out ./findings.report.md
@@ -374,11 +383,11 @@ cargo test -p engram-desktop --features engram-desktop/custom-protocol --locked
 cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
 ```
 
-Tests use synthetic sources. CI checks the Rust workspace on Windows, macOS and Linux, verifies the frontend, and separately launches real Tauri/WebKit windows under a Linux display to exercise the renderer-to-Rust path. Native build and capture evidence belongs with the release it describes. The local 0.6.0 preparation has not been submitted to remote CI; its Rust/native tests and production packages require that later verification.
+Tests use synthetic sources. The [0.6.0 verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records Rust checks on Windows, macOS and Linux, frontend validation, and actual Tauri/WebKit startup and report-export interaction on Linux. The native report exercise uses the real XDG/GTK save picker, checks cancellation, and compares both exported formats byte for byte with the CLI rendering of the same saved synthetic case. Native build and capture evidence belongs with the release it describes; platform packaging is recorded by the [Build artifacts workflow](https://github.com/Forem0/ENGRAM/actions/workflows/build-artifacts.yml). See [building and verification](docs/BUILDING.md) for the evidence scope.
 
 ## Next work
 
-The current source supports the folder-to-case workflow, local persistence, review annotations, structured search, map navigation and comparison. The 0.6.0 preparation adds report export from selected findings. Next priorities are native report-workflow verification, broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, continued accessibility checks, and platform signing and notarization.
+ENGRAM supports the folder-to-case workflow, local persistence, review annotations, structured search, map navigation, comparison and selected-finding report export. Next priorities are broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, continued accessibility checks, native interaction coverage across platforms, and platform signing and notarization.
 
 Deleted-record reconstruction, owner-unlocked encrypted backups and optional local OCR remain research items. They need reproducible evidence and explicit support boundaries before moving into the working capability matrix. See the [roadmap](docs/ROADMAP.md).
 
