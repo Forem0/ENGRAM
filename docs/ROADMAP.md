@@ -23,6 +23,12 @@ Version 0.5.0 adds the review workflow to Atlas Focus: bookmarks and review stat
 
 Next interface work should strengthen reproducible native interaction coverage, accessibility across platforms, source-specific diagnostics and review ergonomics. Keep older schema-1 cases readable and preserve the bounds and provenance of optional review metadata.
 
+## 0.6.0 local preparation
+
+The next source revision adds evidence reports: select the current filtered queue, all findings or bookmarks; choose Markdown or CSV; opt in independently to notes, recorded paths and source-derived details; and save through the native dialog. The CLI uses the same Rust rendering and output rules. Exports preserve confidence and review state and return a content-checksum receipt. They do not replace Save case or expand the set of supported readers.
+
+The release gate is native report-workflow verification, including cancellation, stale snapshots, source preservation, output bounds and cross-platform builds. Frontend tests and a browser demonstration are supplementary evidence; new Rust/native code must not be called verified merely because tests were authored. The published 0.5.0 downloads and gallery remain separate until the new source is verified and released.
+
 ## Reader validation
 
 The next parser priority is reproducible fixtures across supported operating-system and application versions, with a published compatibility matrix. Unknown schemas must remain visible as unsupported or partial coverage.

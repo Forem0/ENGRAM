@@ -3,8 +3,8 @@
 The package is `engram-cli`; its binary is named `engram`.
 
 ```bash
-cargo run -p engram-cli -- --help
-cargo install --path crates/engram-cli
+cargo run -p engram-cli --locked -- --help
+cargo install --path crates/engram-cli --locked
 engram --help
 ```
 
@@ -67,6 +67,37 @@ engram inspect ./sample.engram.json --json
 Opens the saved case without rescanning its source. The human view shows coverage, category totals, candidates, module status, warnings and the first 30 findings. JSON includes the complete case.
 
 The CLI escapes terminal control characters when displaying untrusted paths or strings. JSON uses normal JSON string escaping.
+
+## Export
+
+The export command is added in the local **0.6.0 source preparation**. It is not available in the 0.5.0 download.
+
+```bash
+engram export ./sample.engram.json --out ./findings.report.md
+engram export ./sample.engram.json --out ./bookmarks.csv --format csv --bookmarked
+engram export ./sample.engram.json --out ./selection.report.md \
+  --finding <id> --finding <another-id> --json
+```
+
+Reads one explicitly supplied saved case and renders selected findings without reading its original source. Markdown is the default; `--format csv` creates a UTF-8 BOM-prefixed CSV table with CRLF records. The output must be new and outside source evidence. Existing case and report files are never overwritten.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `--out <file>` | required | new report destination |
+| `--format markdown\|csv` | `markdown` | report format, independent of the filename extension |
+| `--finding <id>` | all case findings | select a known ID; repeat for multiple IDs |
+| `--bookmarked` | off | select only bookmarks already saved in this case |
+| `--include-notes` | off | include entered analyst notes without automatic redaction |
+| `--include-paths` | off | include recorded paths and source root instead of filename-only path labels |
+| `--include-details` | off | include source-derived summaries and evidence detail fields |
+
+`--finding` and `--bookmarked` are mutually exclusive. Empty bookmarks, unknown IDs, duplicate IDs, more than 10,000 selected findings or more than 16 MiB of rendered output produce an error and no report. Selection retains case order. An invalid request never silently exports all findings instead.
+
+CSV refuses case IDs, selected finding IDs or selected rule IDs that could be interpreted as spreadsheet formulas, preserving their exact identity. Choose Markdown for those identifiers; unselected finding IDs do not block a subset export.
+
+The human response shows the destination, format, finding count, byte count and SHA-256 checksum. `--json` returns a receipt with `path`, `format`, `finding_count`, `bytes` and `sha256`; it does not write report content to stdout. Terminal control characters in displayed paths are escaped.
+
+Reports preserve the supplied observation and confidence labels. They are not restorable cases. CSV formula prefixes are neutralized and Markdown content is escaped, but included metadata can remain sensitive. Path settings affect structured path/source-root fields, not arbitrary source text. Notes are plain text, and the details opt-in can include private source-derived text or paths even when `--include-paths` is off. The command cannot see an unsaved review in another desktop process; use Save case there before exporting that review from the CLI.
 
 ## Compare
 
