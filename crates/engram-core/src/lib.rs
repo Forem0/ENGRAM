@@ -3,8 +3,10 @@
 //! Findings describe the supplied snapshot. A candidate is not proof of deletion,
 //! credential validity, application access, or complete device coverage.
 
+mod backup;
 mod database;
 mod demo;
+mod media;
 pub mod model;
 mod report;
 mod review;
@@ -12,7 +14,9 @@ mod scan;
 mod secrets;
 mod storage;
 
-pub use demo::{create_demo_fixture, demo_case};
+pub use demo::{create_demo_backup_fixture, create_demo_fixture, demo_case};
+pub use backup::{inspect_backup, BackupCategory, BackupInspection, BackupInspectionState};
+pub use media::{MediaAccess, MediaPreview, MAX_MEDIA_INPUT_BYTES, MAX_MEDIA_OUTPUT_BYTES, MAX_MEDIA_PIXELS, MAX_MEDIA_PREVIEW_EDGE};
 pub use model::*;
 pub use report::{
     render_report, write_report, RenderedReport, ReportFormat, ReportOptions, ReportReceipt,
@@ -21,7 +25,7 @@ pub use report::{
 pub use review::{
     validate_review, MAX_REVIEW_ANNOTATIONS, MAX_REVIEW_NOTE_BYTES, MAX_REVIEW_TOTAL_NOTE_BYTES,
 };
-pub use scan::scan_path;
+pub use scan::{scan_path, scan_path_with_media};
 pub use storage::{compare_cases, read_case, write_case};
 
 pub(crate) const MAX_FINDINGS: usize = 30_000;

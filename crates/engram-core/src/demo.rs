@@ -9,6 +9,11 @@ use std::{
 /// Write only a new or empty directory. All content is synthetic and intentionally
 /// contains obvious demo-shaped values, never working service credentials.
 pub fn create_demo_fixture(destination: &Path) -> Result<(), EngramError> {
+    prepare_demo_destination(destination)?;
+    populate_demo_fixture(destination)
+}
+
+fn prepare_demo_destination(destination: &Path) -> Result<(), EngramError> {
     if let Ok(metadata) = destination.symlink_metadata() {
         if !metadata.is_dir() || metadata.file_type().is_symlink() {
             return Err(EngramError::Input(
@@ -31,6 +36,10 @@ pub fn create_demo_fixture(destination: &Path) -> Result<(), EngramError> {
         }
     }
     fs::create_dir_all(destination)?;
+    Ok(())
+}
+
+fn populate_demo_fixture(destination: &Path) -> Result<(), EngramError> {
     let directories = [
         "documents",
         "archives",
@@ -155,6 +164,41 @@ pub fn create_demo_fixture(destination: &Path) -> Result<(), EngramError> {
             fs::FileTimes::new()
                 .set_modified(modified + Duration::from_secs(index as u64 * 86_400)),
         )?;
+    }
+    Ok(())
+}
+
+/// Generate a small, clearly synthetic, unencrypted iPhone-style backup for
+/// compatibility tests. Identifiers are invented; this never connects a device.
+pub fn create_demo_backup_fixture(destination: &Path) -> Result<(), EngramError> {
+    prepare_demo_destination(destination)?;
+    let fixture = tempfile::tempdir()?;
+    create_demo_fixture(fixture.path())?;
+    let mut manifest = plist::Dictionary::new();
+    manifest.insert("IsEncrypted".into(), plist::Value::Boolean(false));
+    plist::Value::Dictionary(manifest).to_file_xml(destination.join("Manifest.plist"))
+        .map_err(|_| EngramError::Input("Could not write synthetic backup metadata.".into()))?;
+    let mut info = plist::Dictionary::new();
+    info.insert("Device Name".into(), plist::Value::String("ENGRAM synthetic fixture".into()));
+    info.insert("Product Version".into(), plist::Value::String("Synthetic schema fixture".into()));
+    plist::Value::Dictionary(info).to_file_xml(destination.join("Info.plist"))
+        .map_err(|_| EngramError::Input("Could not write synthetic device metadata.".into()))?;
+    let index = Connection::open(destination.join("Manifest.db"))?;
+    index.execute_batch("CREATE TABLE Files (fileID TEXT PRIMARY KEY, domain TEXT, relativePath TEXT, flags INTEGER);")?;
+    for (source, domain, logical) in [
+        ("media/DCIM/100APPLE/IMG_0001.PNG", "CameraRollDomain", "Media/DCIM/100APPLE/IMG_0001.PNG"),
+        ("PhotoData/Thumbnails/V2/DCIM/100APPLE/IMG_0001.PNG", "CameraRollDomain", "Media/PhotoData/Thumbnails/V2/DCIM/100APPLE/IMG_0001.PNG"),
+        ("PhotoData/Thumbnails/V2/DCIM/100APPLE/UNMATCHED_0042.PNG", "CameraRollDomain", "Media/PhotoData/Thumbnails/V2/DCIM/100APPLE/UNMATCHED_0042.PNG"),
+        ("PhotoData/Photos.sqlite", "CameraRollDomain", "Media/PhotoData/Photos.sqlite"),
+        ("documents/research-notes.txt", "HomeDomain", "Documents/research-notes.txt"),
+        ("browser/safari/History.db", "HomeDomain", "Library/Safari/History.db"),
+        ("messages/sms.db", "HomeDomain", "Library/SMS/sms.db"),
+    ] {
+        let identifier = crate::digest(format!("synthetic:{domain}:{logical}").as_bytes())[..40].to_owned();
+        let directory = destination.join(&identifier[..2]);
+        fs::create_dir_all(&directory)?;
+        fs::copy(fixture.path().join(source), directory.join(&identifier))?;
+        index.execute("INSERT INTO Files VALUES (?1, ?2, ?3, 1)", params![identifier, domain, logical])?;
     }
     Ok(())
 }

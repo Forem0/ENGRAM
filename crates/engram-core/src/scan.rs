@@ -1,7 +1,7 @@
 use crate::{
     database::{self, PhotoAsset},
     digest, finding_id, secrets, time_from_system, Case, CaseStats, Category, Confidence,
-    EngramError, Evidence, Finding, ModuleState, ModuleStatus, ScanEvent, ScanOptions, SourceKind,
+    EngramError, Evidence, Finding, MediaAccess, ModuleState, ModuleStatus, ScanEvent, ScanOptions, SourceKind,
     MAX_FINDINGS,
 };
 use chrono::Utc;
@@ -42,6 +42,7 @@ struct Engine<'a> {
     finding_ids: HashSet<String>,
     photos: Vec<PhotoAsset>,
     inputs: Vec<InputFile>,
+    media_access: MediaAccess,
 }
 
 fn evidence(label: &str, value: impl ToString) -> Evidence {
@@ -77,16 +78,24 @@ fn modules() -> Vec<ModuleStatus> {
 }
 
 #[cfg(windows)]
-fn is_reparse(metadata: &fs::Metadata) -> bool {
+pub(crate) fn is_reparse(metadata: &fs::Metadata) -> bool {
     use std::os::windows::fs::MetadataExt;
     metadata.file_attributes() & 0x400 != 0
 }
 #[cfg(not(windows))]
-fn is_reparse(_metadata: &fs::Metadata) -> bool {
+pub(crate) fn is_reparse(_metadata: &fs::Metadata) -> bool {
     false
 }
 
-fn metadata_for(root: &Path, path: &Path) -> Result<fs::Metadata, EngramError> {
+pub(crate) fn metadata_for(root: &Path, path: &Path) -> Result<fs::Metadata, EngramError> {
+    let root_metadata = root.symlink_metadata()?;
+    if !root_metadata.is_dir()
+        || root_metadata.file_type().is_symlink()
+        || is_reparse(&root_metadata)
+        || root.canonicalize()?.as_path() != root
+    {
+        return Err(EngramError::Input("The selected source directory changed or became a link.".into()));
+    }
     let relative = path
         .strip_prefix(root)
         .map_err(|_| EngramError::Input("Source path escaped the selected directory.".into()))?;
@@ -171,6 +180,12 @@ fn allowed_entry(entry: &DirEntry, include_hidden: bool, excluded: &Cell<u64>) -
 }
 
 pub fn scan_path(path: &Path, options: &ScanOptions) -> Result<Case, EngramError> {
+    scan_path_with_media(path, options).map(|(case, _)| case)
+}
+
+/// Keep source access separate from serializable cases. Only a fresh, explicitly
+/// selected scan can grant access to the physical file behind a finding.
+pub fn scan_path_with_media(path: &Path, options: &ScanOptions) -> Result<(Case, MediaAccess), EngramError> {
     if options.max_files == 0
         || options.max_files > 1_000_000
         || options.max_file_bytes == 0
@@ -207,6 +222,7 @@ pub fn scan_path(path: &Path, options: &ScanOptions) -> Result<Case, EngramError
     let id = digest(format!("{now}-{}-{}", root.display(), digest(&case_key)).as_bytes())[..20]
         .to_owned();
     let mut engine = Engine {
+        media_access: MediaAccess::new(root.clone(), id.clone()),
         root: root.clone(), options, started: Instant::now(), case_key,
         case: Case { schema_version: 1, id, title, source_root: root.to_string_lossy().into_owned(), source_kind, created_at: now, completed_at: now, findings: Vec::new(), warnings: vec![
             "Results describe only the selected offline source at scan time; missing data does not establish secure deletion or complete device coverage.".into(),
@@ -248,7 +264,7 @@ pub fn scan_path(path: &Path, options: &ScanOptions) -> Result<Case, EngramError
         .as_millis()
         .try_into()
         .unwrap_or(u64::MAX);
-    Ok(engine.case)
+    Ok((engine.case, engine.media_access))
 }
 
 impl Engine<'_> {
@@ -380,11 +396,11 @@ impl Engine<'_> {
         let dictionary = metadata.as_dictionary().ok_or_else(|| {
             EngramError::Input("Manifest.plist does not contain a metadata dictionary.".into())
         })?;
-        if dictionary
+        let encrypted = dictionary
             .get("IsEncrypted")
             .and_then(plist::Value::as_boolean)
-            == Some(true)
-        {
+            .ok_or_else(|| EngramError::Input("Backup encryption is unknown. Manifest.plist must explicitly identify IsEncrypted as a boolean.".into()))?;
+        if encrypted {
             return Err(EngramError::Input("Encrypted iPhone backups are not supported. ENGRAM will not bypass encryption or request your device passcode.".into()));
         }
         let manifest = input_file(
@@ -704,6 +720,11 @@ impl Engine<'_> {
                 related_ids: Vec::new(),
             };
             if let Some(index) = self.push(item) {
+                if media {
+                    if let Some(hash) = &hash {
+                        self.media_access.register(self.case.findings[index].id.clone(), input.physical.clone(), input.bytes, hash.clone());
+                    }
+                }
                 if let Some(hash) = &hash {
                     self.file_groups
                         .entry(hash.clone())
