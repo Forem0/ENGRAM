@@ -5,9 +5,72 @@ import { reviewKey } from './review';
 
 const mocks = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke, isTauri: () => true }));
-import { compareCase, exportReport, loadDemo, openCase, saveCase, selectSource } from './bridge';
+import {
+  cancelBackup,
+  compareCase,
+  exportReport,
+  loadDemo,
+  openCase,
+  previewMedia,
+  saveCase,
+  scanBackup,
+  selectBackup,
+  selectSource,
+} from './bridge';
 
 beforeEach(() => mocks.invoke.mockReset());
+
+describe('media and backup native boundaries', () => {
+  const inspection = {
+    token: 'backup-0000000000000001',
+    name: 'Synthetic backup',
+    state: 'ready',
+    encrypted: false,
+    device_name: 'Synthetic fixture',
+    product_version: null,
+    indexed_files: 7,
+    categories: [{ id: 'media', label: 'Media paths', count: 3 }],
+    warnings: ['Index counts describe paths, not readable findings.'],
+  };
+  it('stages a picker selection without scanning and sends only its opaque token later', async () => {
+    mocks.invoke.mockResolvedValueOnce(inspection).mockResolvedValueOnce(demo);
+    expect(await selectBackup()).toEqual(inspection);
+    expect(mocks.invoke.mock.calls).toEqual([['select_backup']]);
+    expect(await scanBackup(inspection.token)).toEqual(demo);
+    expect(mocks.invoke.mock.calls[1]).toEqual(['scan_backup', { token: inspection.token }]);
+  });
+  it('keeps picker cancellation and staged selection cancellation explicit', async () => {
+    mocks.invoke.mockResolvedValueOnce(null).mockResolvedValueOnce(undefined);
+    expect(await selectBackup()).toBeNull();
+    await cancelBackup(inspection.token);
+    expect(mocks.invoke.mock.calls).toEqual([
+      ['select_backup'],
+      ['cancel_backup', { token: inspection.token }],
+    ]);
+  });
+  it('rejects malformed backup metadata and does not convert it into a ready source', async () => {
+    mocks.invoke.mockResolvedValueOnce({ ...inspection, encrypted: true });
+    await expect(selectBackup()).rejects.toThrow('invalid backup inspection');
+    await expect(scanBackup('')).rejects.toThrow('Select a backup again');
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+  });
+  it('passes only known media and case identities, never paths or renderer-owned bytes', async () => {
+    const finding = (demo as Case).findings.find((item) => item.rule_id === 'file.media')!;
+    mocks.invoke.mockRejectedValueOnce('Image bytes are not attached to this case.');
+    await expect(previewMedia(demo as Case, finding.id)).rejects.toBe(
+      'Image bytes are not attached to this case.',
+    );
+    expect(mocks.invoke.mock.calls).toEqual([
+      ['preview_media', { caseId: demo.id, findingId: finding.id }],
+    ]);
+  });
+  it('does not invoke image reading for unknown or non-media findings', async () => {
+    await expect(previewMedia(demo as Case, 'unknown')).rejects.toThrow('recorded media file');
+    const document = (demo as Case).findings.find((item) => item.category !== 'media')!;
+    await expect(previewMedia(demo as Case, document.id)).rejects.toThrow('recorded media file');
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
+});
 
 describe('native command boundary', () => {
   it('uses Rust-owned pickers without arbitrary frontend source or destination arguments', async () => {

@@ -162,6 +162,43 @@ fn demo_case_carries_an_explicit_synthetic_label() {
     assert!(!case["findings"].as_array().unwrap().is_empty());
 }
 
+#[test]
+fn iphone_backup_fixture_is_explicit_synthetic_and_scannable_without_source_writes() {
+    let temporary = tempfile::tempdir().unwrap();
+    let source = temporary.path().join("synthetic-backup");
+    let receipt = successful_json(&["fixture", text(&source), "--iphone-backup", "--json"]);
+    assert_eq!(receipt["synthetic"], true);
+    assert_eq!(receipt["format"], "iphone_backup");
+    assert!(source.join("Manifest.plist").is_file());
+    assert!(source.join("Manifest.db").is_file());
+    let inspection = engram_core::inspect_backup(&source).unwrap();
+    assert_eq!(inspection.state, engram_core::BackupInspectionState::Ready);
+    assert_eq!(inspection.indexed_files, 7);
+    let before = source_snapshot(&source);
+    let output = temporary.path().join("backup.engram.json");
+    let case = successful_json(&["scan", text(&source), "--out", text(&output), "--json"]);
+    assert_eq!(case["source_kind"], "ios_backup");
+    assert!(case["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|finding| finding["rule_id"] == "file.media"));
+    assert_eq!(source_snapshot(&source), before);
+    assert!(!engram(&["fixture", text(&source), "--iphone-backup"])
+        .status
+        .success());
+    assert_eq!(source_snapshot(&source), before);
+}
+
+#[test]
+fn fixture_help_describes_the_optional_iphone_backup_layout() {
+    let output = engram(&["fixture", "--help"]);
+    assert!(output.status.success());
+    let help = String::from_utf8_lossy(&output.stdout);
+    assert!(help.contains("--iphone-backup"));
+    assert!(help.contains("synthetic unencrypted iPhone-style backup"));
+}
+
 #[cfg(unix)]
 #[test]
 fn human_output_escapes_hostile_filename_control_characters() {

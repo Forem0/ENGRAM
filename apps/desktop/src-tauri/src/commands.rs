@@ -1,8 +1,10 @@
 use crate::session::{on_worker, Comparison, DesktopState, RuntimeInfo, SaveSnapshot, Session};
 use engram_core::{
-    compare_cases, demo_case, read_case, render_report, scan_path, write_case, write_report, Case,
-    CaseReview, ReportFormat, ReportOptions, ReportReceipt, ScanOptions, SourceKind,
+    compare_cases, demo_case, inspect_backup, read_case, render_report, scan_path_with_media,
+    write_case, write_report, BackupInspection, BackupInspectionState, Case, CaseReview,
+    MediaPreview, ReportFormat, ReportOptions, ReportReceipt, ScanOptions, SourceKind,
 };
+use serde::Serialize;
 use std::{io::Write, path::Path};
 use tauri::{AppHandle, State, WebviewWindow};
 
@@ -24,6 +26,29 @@ fn ensure_demo(case: &Case) -> Result<(), String> {
         return Err("The synthetic demonstration could not be generated. Choose a source or open a saved case.".into());
     }
     Ok(())
+}
+
+#[derive(Serialize)]
+pub(crate) struct BackupSelection {
+    token: String,
+    #[serde(flatten)]
+    inspection: BackupInspection,
+}
+
+fn scan_selected_backup(session: &Session, token: &str) -> Result<Case, String> {
+    let source = session.take_backup(token)?;
+    // Re-probe the native selection: the compatibility screen is not a promise
+    // that the directory or manifest remained unchanged while the user read it.
+    let inspection = inspect_backup(&source).map_err(|error| error.to_string())?;
+    if inspection.state != BackupInspectionState::Ready {
+        return Err("The selected backup is unavailable or changed. Choose it again and review its compatibility details.".into());
+    }
+    let (case, access) = scan_path_with_media(&source, &ScanOptions::default())
+        .map_err(|error| error.to_string())?;
+    if case.source_kind != SourceKind::IosBackup {
+        return Err("The selected directory no longer contains a supported iPhone backup.".into());
+    }
+    session.replace_scanned_case(case, access)
 }
 
 fn persist_review_snapshot(
@@ -110,9 +135,75 @@ pub(crate) async fn select_source(
     };
     let source = selection.path().to_owned();
     on_worker(operation, move |session| {
-        let case =
-            scan_path(&source, &ScanOptions::default()).map_err(|error| error.to_string())?;
-        session.replace_case(case).map(Some)
+        let (case, access) = scan_path_with_media(&source, &ScanOptions::default())
+            .map_err(|error| error.to_string())?;
+        session.replace_scanned_case(case, access).map(Some)
+    })
+    .await
+}
+
+#[tauri::command]
+pub(crate) async fn select_backup(
+    window: WebviewWindow,
+    state: State<'_, DesktopState>,
+) -> Result<Option<BackupSelection>, String> {
+    require_main(&window)?;
+    let operation = state.session.begin()?;
+    // A cancelled replacement picker must not leave an older selection usable.
+    operation.session.clear_pending_backup()?;
+    let Some(selection) = rfd::AsyncFileDialog::new()
+        .set_parent(&window)
+        .set_title("Choose the iPhone backup folder containing Manifest.db")
+        .pick_folder()
+        .await
+    else {
+        return Ok(None);
+    };
+    let source = selection.path().to_owned();
+    on_worker(operation, move |session| {
+        let inspection = inspect_backup(&source).map_err(|error| error.to_string())?;
+        let token = session.stage_backup(source)?;
+        Ok(Some(BackupSelection { token, inspection }))
+    })
+    .await
+}
+
+#[tauri::command]
+pub(crate) async fn scan_backup(
+    window: WebviewWindow,
+    state: State<'_, DesktopState>,
+    token: String,
+) -> Result<Case, String> {
+    require_main(&window)?;
+    let operation = state.session.begin()?;
+    on_worker(operation, move |session| {
+        scan_selected_backup(session, &token)
+    })
+    .await
+}
+
+#[tauri::command]
+pub(crate) fn cancel_backup(
+    window: WebviewWindow,
+    state: State<'_, DesktopState>,
+    token: String,
+) -> Result<(), String> {
+    require_main(&window)?;
+    let operation = state.session.begin()?;
+    operation.session.cancel_backup(&token)
+}
+
+#[tauri::command]
+pub(crate) async fn preview_media(
+    window: WebviewWindow,
+    state: State<'_, DesktopState>,
+    case_id: String,
+    finding_id: String,
+) -> Result<MediaPreview, String> {
+    require_main(&window)?;
+    let operation = state.session.begin()?;
+    on_worker(operation, move |session| {
+        session.preview_media(&case_id, &finding_id)
     })
     .await
 }
@@ -529,5 +620,76 @@ mod tests {
         let retained = state.session.active_case().unwrap();
         assert_eq!(retained.title, replacement.title);
         assert_eq!(retained.review, replacement.review);
+    }
+
+    #[test]
+    fn a_failed_backup_probe_retains_the_active_case_and_consumes_its_token() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let temporary = tempfile::tempdir().unwrap();
+        let token = state
+            .session
+            .stage_backup(temporary.path().to_owned())
+            .unwrap();
+        assert!(scan_selected_backup(&state.session, &token).is_err());
+        assert!(state.session.take_backup(&token).is_err());
+        assert_eq!(state.session.active_case().unwrap().id, original.id);
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+    }
+
+    #[test]
+    fn an_encrypted_backup_is_rejected_after_compatibility_selection() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let temporary = tempfile::tempdir().unwrap();
+        std::fs::write(temporary.path().join("Manifest.plist"), b"<?xml version=\"1.0\" encoding=\"UTF-8\"?><plist version=\"1.0\"><dict><key>IsEncrypted</key><true/></dict></plist>").unwrap();
+        std::fs::write(
+            temporary.path().join("Manifest.db"),
+            b"synthetic encrypted data",
+        )
+        .unwrap();
+        let token = state
+            .session
+            .stage_backup(temporary.path().to_owned())
+            .unwrap();
+        assert!(scan_selected_backup(&state.session, &token).is_err());
+        assert_eq!(state.session.active_case().unwrap().id, original.id);
+    }
+
+    #[test]
+    fn an_unknown_backup_token_never_reads_a_renderer_path_or_replaces_the_case() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        assert!(scan_selected_backup(&state.session, "not-a-native-selection").is_err());
+        assert_eq!(state.session.active_case().unwrap().id, original.id);
+    }
+
+    #[test]
+    fn a_successful_backup_scan_installs_only_its_captured_media_access() {
+        let state = DesktopState::new(Launch::default());
+        state.session.replace_case(demo_case()).unwrap();
+        let temporary = tempfile::tempdir().unwrap();
+        let source = temporary.path().join("synthetic-iphone-backup");
+        engram_core::create_demo_backup_fixture(&source).unwrap();
+        let inspection = inspect_backup(&source).unwrap();
+        assert_eq!(inspection.state, BackupInspectionState::Ready);
+        let token = state.session.stage_backup(source).unwrap();
+        let case = scan_selected_backup(&state.session, &token).unwrap();
+        assert_eq!(case.source_kind, SourceKind::IosBackup);
+        assert_eq!(state.session.active_case().unwrap().id, case.id);
+        assert!(state.session.take_backup(&token).is_err());
+        let image = case
+            .findings
+            .iter()
+            .find(|finding| {
+                finding.rule_id == "file.media" && finding.path.ends_with("IMG_0001.PNG")
+            })
+            .unwrap();
+        let preview = state.session.preview_media(&case.id, &image.id).unwrap();
+        assert_eq!(Some(preview.source_sha256), image.sha256);
+        assert!(preview.data_url.starts_with("data:image/png;base64,"));
     }
 }

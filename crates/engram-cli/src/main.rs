@@ -4,8 +4,9 @@ use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use engram_core::{
-    compare_cases, create_demo_fixture, demo_case, read_case, scan_path, write_case, write_report,
-    Case, Category, Confidence, EngramError, ReportFormat, ReportOptions, ScanOptions, SourceKind,
+    compare_cases, create_demo_backup_fixture, create_demo_fixture, demo_case, read_case,
+    scan_path, write_case, write_report, Case, Category, Confidence, EngramError, ReportFormat,
+    ReportOptions, ScanOptions, SourceKind,
 };
 use serde_json::json;
 
@@ -81,7 +82,13 @@ enum Command {
     /// Show this build's operating boundaries and default scan limits.
     Doctor,
     /// Generate synthetic files for reproducible local testing.
-    Fixture { destination: PathBuf },
+    Fixture {
+        /// New or empty destination directory. Existing contents are never overwritten.
+        destination: PathBuf,
+        /// Generate a synthetic unencrypted iPhone-style backup for the native backup wizard.
+        #[arg(long)]
+        iphone_backup: bool,
+    },
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -325,13 +332,20 @@ fn run(cli: Cli) -> Result<(), EngramError> {
                 println!("\nDoctor did not inspect personal data or connect to a device.");
             }
         }
-        Command::Fixture { destination } => {
-            create_demo_fixture(&destination)?;
+        Command::Fixture {
+            destination,
+            iphone_backup,
+        } => {
+            if iphone_backup {
+                create_demo_backup_fixture(&destination)?;
+            } else {
+                create_demo_fixture(&destination)?;
+            }
             if cli.json {
                 println!(
                     "{}",
                     serde_json::to_string_pretty(
-                        &json!({ "synthetic": true, "destination": destination, "next": "engram scan <destination> --out <case-file-outside-source>" })
+                        &json!({ "synthetic": true, "destination": destination, "format": if iphone_backup { "iphone_backup" } else { "folder" }, "next": "engram scan <destination> --out <case-file-outside-source>" })
                     )?
                 );
             } else {
@@ -340,6 +354,9 @@ fn run(cli: Cli) -> Result<(), EngramError> {
                     visible(&destination.display().to_string())
                 );
                 println!("Contains generated test data only. Analyze it with `engram scan <folder> --out <case-file-outside-source>`.");
+                if iphone_backup {
+                    println!("This is an invented unencrypted backup layout for testing. Open it with the desktop iPhone backup wizard; it contains no data from a device.");
+                }
             }
         }
     }

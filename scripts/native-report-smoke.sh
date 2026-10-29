@@ -30,6 +30,8 @@ done
 
 app=$(realpath "${ENGRAM_APP_BINARY:-target/debug/engram-desktop}")
 cli=$(realpath "${ENGRAM_CLI_BINARY:-target/debug/engram}")
+export ENGRAM_SMOKE_VERSION
+ENGRAM_SMOKE_VERSION=$(python3 -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("Cargo.toml").read_text(encoding="utf-8"))["workspace"]["package"]["version"])')
 [[ -x "$app" && -x "$cli" ]] || { echo 'Build the actual app and CLI first.' >&2; exit 2; }
 out=$(realpath -m "${1:-native-captures/report-smoke}")
 if [[ -e "$out" ]]; then
@@ -291,7 +293,7 @@ cmp "$out/expected.report.csv" "$out/actual.report.csv"
 # Independently hash exact native output bytes, compare shared-engine CLI
 # receipts, parse CSV as a consumer, and record honest scope of this exercise.
 python3 - "$out" <<'PY'
-import csv, hashlib, io, json, pathlib, sys
+import csv, hashlib, io, json, os, pathlib, sys
 out = pathlib.Path(sys.argv[1])
 case_path = out / 'export-case.engram.json'
 case_bytes = case_path.read_bytes()
@@ -320,12 +322,12 @@ assert len(rows) == len(case['findings'])
 assert [row['finding_id'] for row in rows] == [f['id'] for f in case['findings']]
 assert not {'source_root', 'analyst_note', 'summary', 'origin', 'locator', 'evidence'} & set(rows[0])
 for row, finding in zip(rows, case['findings']):
-    assert row['exporter_version'] == '0.6.0'
+    assert row['exporter_version'] == os.environ['ENGRAM_SMOKE_VERSION']
     assert row['details_included'] == 'false' and row['notes_included'] == 'false'
     assert row['path_fields'] == 'filename_only'
     expected = next((p for p in reversed(finding['path'].replace('\\', '/').split('/')) if p), '(unnamed file)')
     assert row['path'] == expected
-proof = {'native_report_e2e': 'passed', 'version': '0.6.0', 'platform': 'Linux/X11/WebKitGTK',
+proof = {'native_report_e2e': 'passed', 'version': os.environ['ENGRAM_SMOKE_VERSION'], 'platform': 'Linux/X11/WebKitGTK',
          'source_kind': 'demo', 'snapshot_file': case_path.name,
          'snapshot_sha256': hashlib.sha256(case_bytes).hexdigest(),
          'saved_input_case_unchanged': True,

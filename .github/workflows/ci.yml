@@ -76,7 +76,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
+        # macOS ARM64 hosted runners reported capacity/provisioning failures.
+        # Run host tests on the standard Intel image and cross-link ARM64 below.
+        os: [ubuntu-latest, windows-latest, macos-15-intel]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
@@ -130,6 +132,13 @@ jobs:
       - name: Clippy
         if: success() || steps.formatting.outcome == 'failure'
         run: cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
+      - name: Cross-build the Apple Silicon desktop and CLI
+        if: runner.os == 'macOS' && (success() || steps.formatting.outcome == 'failure')
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '11.0'
+        run: |
+          rustup target add aarch64-apple-darwin
+          cargo build -p engram-desktop -p engram-cli --target aarch64-apple-darwin --features engram-desktop/custom-protocol --locked
 
   native-app:
     name: Native Tauri app and IPC / Linux
@@ -173,7 +182,7 @@ jobs:
         shell: bash
         run: |
           timeout 420s xvfb-run -a -s '-screen 0 1600x1100x24' dbus-run-session -- bash -euo pipefail <<'SMOKE'
-          for view in map findings timeline connections compare modules; do
+          for view in map findings timeline connections compare modules gallery; do
             name="$view"
             if [ "$view" = map ]; then name=workspace; fi
             log="native-captures/$name.log"
@@ -206,6 +215,19 @@ jobs:
         run: |
           bash -n scripts/native-report-smoke.sh
           timeout 180s xvfb-run -a -s '-screen 0 1600x1100x24' dbus-run-session -- bash scripts/native-report-smoke.sh native-captures/report-smoke
+      - name: Exercise native iPhone backup wizard and media preview controls
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          WEBKIT_DISABLE_COMPOSITING_MODE: '1'
+          GDK_BACKEND: x11
+          ENGRAM_BACKUP_X: '104'
+          ENGRAM_BACKUP_Y: '791'
+          ENGRAM_MEDIA_FILES_X: '353'
+          ENGRAM_MEDIA_FILES_Y: '382'
+        shell: bash
+        run: |
+          bash -n scripts/native-media-smoke.sh
+          timeout 240s xvfb-run -a -s '-screen 0 1600x1100x24' dbus-run-session -- bash scripts/native-media-smoke.sh native-captures/media-smoke
       - name: Upload native captures, IPC logs and fixture
         if: always()
         uses: actions/upload-artifact@v4

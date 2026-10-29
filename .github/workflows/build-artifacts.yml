@@ -18,14 +18,26 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux
+            target: x86_64-unknown-linux-gnu
+            release_directory: target/release
             suffix: ''
           - os: windows-latest
             name: windows
+            target: x86_64-pc-windows-msvc
+            release_directory: target/release
             suffix: .exe
-          - os: macos-15
+          # ARM64 hosted runners reported capacity/provisioning failures.
+          # Run host tests on Intel, then cross-build the Apple Silicon package.
+          - os: macos-15-intel
             name: macos
+            target: aarch64-apple-darwin
+            release_directory: target/aarch64-apple-darwin/release
             suffix: ''
     runs-on: ${{ matrix.os }}
+    env:
+      ENGRAM_BUILD_TARGET: ${{ matrix.target }}
+      ENGRAM_RELEASE_DIRECTORY: ${{ matrix.release_directory }}
+      ENGRAM_PACKAGE_PLATFORM: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
@@ -36,64 +48,216 @@ jobs:
           cache-dependency-path: apps/desktop/package-lock.json
       - uses: Swatinem/rust-cache@v2
         with:
-          key: tauri-release-${{ matrix.os }}
-      - name: Linux WebKit dependencies
+          key: tauri-release-${{ matrix.os }}-${{ matrix.target }}
+      - name: Linux WebKit and isolated display dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt-get install -y build-essential pkg-config libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xvfb xdotool imagemagick dbus-x11 fonts-dejavu-core libgl1-mesa-dri
       - name: Frontend tests and production assets
         working-directory: apps/desktop
         run: |
           npm ci
+          npm run format:check
           npm run typecheck
           npm test
           npm run build
-      - name: Verify core, CLI and desktop backend
+      - name: Verify core, CLI and desktop backend on the host
         run: cargo test --workspace --features engram-desktop/custom-protocol --locked
-      - name: Build CLI
+      - name: Build Linux and Windows CLI
+        if: runner.os != 'macOS'
         run: cargo build -p engram-cli --release --locked
+      - name: Build Apple Silicon CLI on Intel
+        if: runner.os == 'macOS'
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '11.0'
+        run: |
+          rustup target add aarch64-apple-darwin
+          cargo build -p engram-cli --release --target aarch64-apple-darwin --locked
       - name: Build Linux and Windows Tauri executable
         if: runner.os != 'macOS'
         working-directory: apps/desktop
         run: npm run tauri -- build --no-bundle --ci -- --locked
-      - name: Build macOS application bundle
+      - name: Build Apple Silicon application bundle on Intel
         if: runner.os == 'macOS'
         working-directory: apps/desktop
-        run: npm run tauri -- build --bundles app --ci -- --locked
-      - name: Package and checksum
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '11.0'
+        run: npm run tauri -- build --target aarch64-apple-darwin --bundles app --config '{"bundle":{"macOS":{"minimumSystemVersion":"11.0"}}}' --ci -- --locked
+      - name: Stage package and record its target identity
         shell: bash
         run: |
-          platform="${{ matrix.name }}-$(rustc -vV | tr -d '\r' | sed -n 's/^host: //p')"
+          set -euo pipefail
+          host=$(rustc -vV | tr -d '\r' | sed -n 's/^host: //p')
+          if [ "$ENGRAM_PACKAGE_PLATFORM" = macos ]; then
+            test "$host" = x86_64-apple-darwin
+          else
+            test "$host" = "$ENGRAM_BUILD_TARGET"
+          fi
+          platform="$ENGRAM_PACKAGE_PLATFORM-$ENGRAM_BUILD_TARGET"
           version=$(python -c 'import pathlib, tomllib; print(tomllib.loads(pathlib.Path("Cargo.toml").read_text(encoding="utf-8"))["workspace"]["package"]["version"])')
           folder="dist/engram-$platform"
+          test ! -e "$folder"
           mkdir -p "$folder"
-          cp "target/release/engram${{ matrix.suffix }}" "$folder/"
-          if [ '${{ runner.os }}' = macOS ]; then
-            cp -R target/release/bundle/macos/ENGRAM.app "$folder/"
+          cp "$ENGRAM_RELEASE_DIRECTORY/engram${{ matrix.suffix }}" "$folder/"
+          if [ "$ENGRAM_PACKAGE_PLATFORM" = macos ]; then
+            cp -R "$ENGRAM_RELEASE_DIRECTORY/bundle/macos/ENGRAM.app" "$folder/"
           else
-            cp "target/release/engram-desktop${{ matrix.suffix }}" "$folder/"
+            cp "$ENGRAM_RELEASE_DIRECTORY/engram-desktop${{ matrix.suffix }}" "$folder/"
           fi
           cp README.md LICENSE "$folder/"
+          cp -R docs "$folder/"
           printf '%s\n' "ENGRAM $version desktop app — Tauri + React" 'Offline analysis of explicitly selected files and backups.' 'Starts with a clearly labelled synthetic demonstration.' 'Unsigned packages; platform runtime requirements are listed below.' > "$folder/USAGE.txt"
-          if [ '${{ runner.os }}' = Windows ]; then
+          if [ "$ENGRAM_PACKAGE_PLATFORM" = windows ]; then
             printf '%s\n' 'Run engram-desktop.exe. Microsoft Edge WebView2 Runtime is required.' 'This portable archive does not download or install the runtime.' >> "$folder/USAGE.txt"
-          elif [ '${{ runner.os }}' = Linux ]; then
+          elif [ "$ENGRAM_PACKAGE_PLATFORM" = linux ]; then
             printf '%s\n' 'Run ./engram-desktop. GTK 3 and WebKitGTK 4.1 runtime libraries must be installed.' >> "$folder/USAGE.txt"
           else
-            printf '%s\n' 'Open ENGRAM.app. This build is unsigned and not notarized.' >> "$folder/USAGE.txt"
+            printf '%s\n' 'Open ENGRAM.app on Apple Silicon with macOS 11 or later.' 'This build is unsigned and not notarized. ARM64 executables were cross-built on Intel; ARM64 runtime was not exercised.' >> "$folder/USAGE.txt"
           fi
-          export ENGRAM_PACKAGE_DIRECTORY="$folder"
-          export ENGRAM_PACKAGE_ARCHIVE="dist/engram-$platform"
-          export ENGRAM_PACKAGE_PLATFORM='${{ matrix.name }}'
+          printf '%s\n' "ENGRAM_BUILD_HOST=$host" "ENGRAM_PACKAGE_VERSION=$version" "ENGRAM_PACKAGE_DIRECTORY=$folder" "ENGRAM_PACKAGE_ARCHIVE=dist/engram-$platform" >> "$GITHUB_ENV"
+      - name: Verify copied Linux and Windows CLI executables
+        if: runner.os != 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          verification="package-checks/$ENGRAM_PACKAGE_PLATFORM"
+          mkdir -p "$verification"
+          "$ENGRAM_PACKAGE_DIRECTORY/engram${{ matrix.suffix }}" --version > "$verification/version.txt"
+          "$ENGRAM_PACKAGE_DIRECTORY/engram${{ matrix.suffix }}" doctor --json > "$verification/doctor.json"
+          python - <<'CLI_CHECK'
+          import json, os, pathlib
+          root = pathlib.Path('package-checks') / os.environ['ENGRAM_PACKAGE_PLATFORM']
+          version = os.environ['ENGRAM_PACKAGE_VERSION']
+          assert (root / 'version.txt').read_text(encoding='utf-8').strip() == f'engram {version}'
+          doctor = json.loads((root / 'doctor.json').read_text(encoding='utf-8'))
+          assert doctor['application'] == 'ENGRAM' and doctor['version'] == version
+          assert doctor['architecture'] == 'x86_64'
+          assert doctor['operating_system'] == os.environ['ENGRAM_PACKAGE_PLATFORM']
+          assert doctor['network_required'] is False and doctor['source_mutation'] is False
+          (root / 'cli-verification.json').write_text(json.dumps({'version': version, 'target': os.environ['ENGRAM_BUILD_TARGET'], 'packaged_cli_executed': True, 'commands': ['--version', 'doctor --json'], 'status': 'passed'}, indent=2) + '\n', encoding='utf-8')
+          CLI_CHECK
+      - name: Verify copied Apple Silicon Mach-O executables and bundle metadata
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          verification="package-checks/macos"
+          mkdir -p "$verification"
+          cli="$ENGRAM_PACKAGE_DIRECTORY/engram"
+          desktop="$ENGRAM_PACKAGE_DIRECTORY/ENGRAM.app/Contents/MacOS/engram-desktop"
+          file "$cli" "$desktop" > "$verification/file-types.txt"
+          lipo -archs "$cli" > "$verification/cli-architecture.txt"
+          lipo -archs "$desktop" > "$verification/desktop-architecture.txt"
+          test "$(cat "$verification/cli-architecture.txt")" = arm64
+          test "$(cat "$verification/desktop-architecture.txt")" = arm64
+          python - <<'MAC_CHECK'
+          import json, os, pathlib, plistlib
+          root = pathlib.Path('package-checks/macos')
+          app = pathlib.Path(os.environ['ENGRAM_PACKAGE_DIRECTORY']) / 'ENGRAM.app'
+          with (app / 'Contents/Info.plist').open('rb') as source:
+              info = plistlib.load(source)
+          assert info['CFBundleShortVersionString'] == os.environ['ENGRAM_PACKAGE_VERSION']
+          assert info['LSMinimumSystemVersion'] == '11.0'
+          (root / 'architecture-verification.json').write_text(json.dumps({'version': os.environ['ENGRAM_PACKAGE_VERSION'], 'target': os.environ['ENGRAM_BUILD_TARGET'], 'architecture': 'arm64', 'minimum_system_version': info['LSMinimumSystemVersion'], 'packaged_cli_executed': False, 'packaged_gui_executed': False, 'status': 'passed'}, indent=2) + '\n', encoding='utf-8')
+          MAC_CHECK
+      - name: Exercise the copied Linux release desktop and IPC
+        if: runner.os == 'Linux'
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          WEBKIT_DISABLE_COMPOSITING_MODE: '1'
+          GDK_BACKEND: x11
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p package-checks/linux/native
+          timeout 180s xvfb-run -a -s '-screen 0 1600x1100x24' dbus-run-session -- bash -euo pipefail <<'SMOKE'
+          for view in map gallery; do
+            log="package-checks/linux/native/$view.log"
+            "$ENGRAM_PACKAGE_DIRECTORY/engram-desktop" --demo --view "$view" --smoke-test > "$log" 2>&1 &
+            app_pid=$!
+            trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+            ready=false
+            for attempt in $(seq 1 300); do
+              if grep -q ENGRAM_TAURI_SMOKE_OK "$log"; then ready=true; break; fi
+              if ! kill -0 "$app_pid" 2>/dev/null; then cat "$log"; wait "$app_pid"; exit 1; fi
+              sleep 0.2
+            done
+            if [ "$ready" != true ]; then cat "$log"; exit 1; fi
+            window_id=$(xdotool search --onlyvisible --name '^ENGRAM' | head -n 1)
+            test -n "$window_id"
+            import -window "$window_id" "package-checks/linux/native/$view.png"
+            test -s "package-checks/linux/native/$view.png"
+            wait "$app_pid"
+            trap - EXIT
+          done
+          SMOKE
+          python - <<'GUI_CHECK'
+          import json, os, pathlib
+          root = pathlib.Path('package-checks/linux/native')
+          (root / 'verification.json').write_text(json.dumps({'version': os.environ['ENGRAM_PACKAGE_VERSION'], 'target': os.environ['ENGRAM_BUILD_TARGET'], 'packaged_gui_executed': True, 'views': ['map', 'gallery'], 'source': 'real-engine synthetic demonstration', 'ipc': 'passed', 'status': 'passed'}, indent=2) + '\n', encoding='utf-8')
+          GUI_CHECK
+      - name: Record provenance, archive and checksum the verified package
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
           python - <<'PACKAGE'
-          import hashlib, os, pathlib, tarfile, zipfile
+          import hashlib, json, os, pathlib, subprocess, tarfile, tomllib, zipfile
           folder = pathlib.Path(os.environ['ENGRAM_PACKAGE_DIRECTORY'])
+          platform = os.environ['ENGRAM_PACKAGE_PLATFORM']
+          target = os.environ['ENGRAM_BUILD_TARGET']
+          version = os.environ['ENGRAM_PACKAGE_VERSION']
+          workspace = tomllib.loads(pathlib.Path('Cargo.toml').read_text(encoding='utf-8'))
+          assert version == workspace['workspace']['package']['version']
+          assert version == json.loads(pathlib.Path('apps/desktop/package.json').read_text(encoding='utf-8'))['version']
+          assert version == json.loads(pathlib.Path('apps/desktop/src-tauri/tauri.conf.json').read_text(encoding='utf-8'))['version']
+          revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip()
+          assert revision == os.environ['GITHUB_SHA']
+          expected = {'linux': 'x86_64-unknown-linux-gnu', 'windows': 'x86_64-pc-windows-msvc', 'macos': 'aarch64-apple-darwin'}
+          assert target == expected[platform]
+          checks = pathlib.Path('package-checks') / platform
+          cli_executed = platform != 'macos'
+          gui_executed = platform == 'linux'
+          if cli_executed:
+              proof = json.loads((checks / 'cli-verification.json').read_text(encoding='utf-8'))
+              assert proof['status'] == 'passed' and proof['version'] == version and proof['target'] == target
+          else:
+              proof = json.loads((checks / 'architecture-verification.json').read_text(encoding='utf-8'))
+              assert proof['status'] == 'passed' and proof['version'] == version and proof['target'] == target
+          if gui_executed:
+              proof = json.loads((checks / 'native/verification.json').read_text(encoding='utf-8'))
+              assert proof['status'] == 'passed' and proof['version'] == version and proof['target'] == target
+          frontend = pathlib.Path('apps/desktop/dist')
+          frontend_assets = [{'path': path.relative_to(frontend).as_posix(), 'bytes': path.stat().st_size, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()} for path in sorted(frontend.rglob('*')) if path.is_file()]
+          assert frontend_assets and any(asset['path'] == 'index.html' for asset in frontend_assets)
+          run_id = int(os.environ['GITHUB_RUN_ID'])
+          provenance = {
+              'schema_version': 1, 'project': os.environ['GITHUB_REPOSITORY'],
+              'version': version, 'revision': revision, 'tree': tree,
+              'run_id': run_id, 'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'run_url': f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}",
+              'workflow': os.environ['GITHUB_WORKFLOW'], 'platform': platform,
+              'target': target, 'host': os.environ['ENGRAM_BUILD_HOST'],
+              'runner_os': os.environ['RUNNER_OS'], 'runner_architecture': os.environ['RUNNER_ARCH'],
+              'macos_deployment_target': '11.0' if platform == 'macos' else None,
+              'packaged_cli_executed': cli_executed, 'packaged_gui_executed': gui_executed,
+              'verification_artifact': f'engram-{platform}-packaged-verification',
+              'frontend_assets': frontend_assets,
+              'checks': {'frontend_format': 'passed', 'frontend_typecheck': 'passed',
+                         'frontend_tests': 'passed', 'host_core_cli_desktop_tests': 'passed',
+                         'packaged_cli': 'passed' if cli_executed else 'not_executed_cross_target',
+                         'packaged_gui': 'passed' if gui_executed else 'not_executed',
+                         'macos_arm64_architecture': 'passed' if platform == 'macos' else 'not_applicable'},
+          }
+          (folder / 'BUILD-INFO.json').write_text(json.dumps(provenance, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          assert not any(path.is_symlink() for path in folder.rglob('*')), 'Package links are not allowed'
           files = sorted(path for path in folder.rglob('*') if path.is_file())
           lines = [f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.relative_to(folder).as_posix()}" for path in files]
           (folder / 'SHA256SUMS.txt').write_text('\n'.join(lines) + '\n', encoding='utf-8')
           base = os.environ['ENGRAM_PACKAGE_ARCHIVE']
-          if os.environ['ENGRAM_PACKAGE_PLATFORM'] == 'windows':
+          if platform == 'windows':
               archive = pathlib.Path(base + '.zip')
               with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as package:
                   for path in sorted(folder.rglob('*')):
@@ -106,6 +270,13 @@ jobs:
           digest = hashlib.sha256(archive.read_bytes()).hexdigest()
           pathlib.Path(str(archive) + '.sha256').write_text(f'{digest}  {archive.name}\n', encoding='utf-8')
           PACKAGE
+      - name: Upload packaged verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engram-${{ matrix.name }}-packaged-verification
+          path: package-checks/${{ matrix.name }}/
+          if-no-files-found: warn
       - name: Upload native app packages
         uses: actions/upload-artifact@v4
         with:
@@ -115,4 +286,3 @@ jobs:
             dist/*.zip
             dist/*.sha256
           if-no-files-found: error
-

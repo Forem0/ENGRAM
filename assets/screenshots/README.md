@@ -1,6 +1,22 @@
 # Native application captures
 
-These eight unedited PNGs show ENGRAM 0.6.0 in its actual Linux Tauri/WebKit window. Xvfb supplies the display and WebKit uses software rendering. Six images cover the workspace views; two show the actual report configuration and completed Markdown receipt.
+## 0.7 media workflow captures
+
+`gallery-v07.png` and `backup-wizard-v07.png` are unedited 1440 × 940 captures from the [successful native job](https://github.com/Forem0/ENGRAM/actions/runs/40926563689/job/123633731128). The app is the actual Tauri/WebKitGTK desktop on Linux/X11. The backup and its 640 × 400 DEMO calibration image were generated solely for this exercise; no personal files or connected phones were inspected.
+
+- Actual PR merge checkout: `0290a23bfbb7457e00d8bf67b3171cd26aeb6686`; tree: `d05cfd901a4a4c2b6c68f55e945641175fdc2892`.
+- PR head: `616b6b59235b262f854e3352f8510e7513272176`.
+- Artifact: `native-tauri-workspace`, ID `12920103527`; ZIP SHA-256 `d2b4df02443a8e0bb63d538e0bc5e7a68d4878cf07dfbe2265e81886dfd93ffe`.
+- Gallery image SHA-256: `49c01cb27630cd8b61c6cb85e603eef46f97ea1f44ff711d3f26fc3b77ce4788`.
+- Backup compatibility image SHA-256: `31febc4fde5d7671d25fb6b242a81d40e5f7c02fbcf02917398feb299fde6908`.
+
+All 103 ZIP entries were CRC-checked and both images visually inspected. The regular application used the actual native folder picker, displayed a supported unencrypted index with seven entries, and started analysis only after an explicit action. The saved native case contains 15 findings from seven examined files and matches the CLI analysis. Source names and bytes remain unchanged, and saving the case after image preview produces identical case bytes. The gallery capture visibly shows the generated image, the verified source hash state and **Hide image**. The automated script records the image request; visual inspection establishes the displayed pixels rather than claiming machine-parsed UI text.
+
+[Machine-readable capture provenance](v07-captures.json) records this exact source. Later source fixes and formatting passed all seven checks in the [final locked-source run](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) for commit `03bb2f7`; these images are not relabelled as captures of that later commit. The final run repeated the native folder/scan/preview exercise successfully and produced its own native artifact, ID `12921138734`; that artifact is separate from the original image-capture artifact recorded above. Windows/macOS GUI interaction, real personal backups and live devices were not exercised by these capture jobs.
+
+## 0.6 workspace and report captures
+
+The eight original PNGs show ENGRAM 0.6.0 in its actual Linux Tauri/WebKit window. Xvfb supplies the display and WebKit uses software rendering. Six images cover the workspace views; two show the actual report configuration and completed Markdown receipt. The separately named 0.7 images are documented above; the original captures retain their provenance.
 
 The shared Rust engine generated a synthetic case with 33 findings from 15 files, 10 recorded relationships and 3 coverage notes. Its review starts empty; no user annotations or personal backups are presented as recovered evidence.
 

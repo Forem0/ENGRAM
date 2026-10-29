@@ -18,6 +18,18 @@ Store saved cases outside the selected source. The CLI enforces this rule and re
 
 Imported case source paths are treated as metadata. Opening or comparing a case does not probe its recorded source, including a path that names a network share. A real source is read only after explicit selection.
 
+## Media and staged backup sources
+
+ENGRAM 0.7.0 includes a media gallery and guided backup selection. [MEDIA.md](MEDIA.md) describes the user workflow, authorization rules and bounds; [building and verification](BUILDING.md) separates source checks, Linux native interaction and package provenance.
+
+Selecting a source and completing a fresh native scan creates an opaque Rust-only registry for eligible media files. Saved cases do not contain this authority. Importing a case, including one with the same recorded ID, or loading the demonstration revokes it; recorded paths do not become permission to read a file. Preview requests contain only a case ID and finding ID. Rust resolves the captured physical file, rechecks its path boundaries and compares its current bytes with the recorded SHA-256 before decoding.
+
+Image contents open only after **Preview image** is requested. PNG/JPEG inputs are bounded to 8 MiB and 16 million pixels. The generated PNG is limited to 1024 pixels per edge and 4 MiB, and source metadata is not copied. Image bytes and decoded pixels stay local and are not added to a saved JSON case or Markdown/CSV report. Metadata stripping does not hide private information visible in the image itself. No OCR, face recognition or image upload is introduced by this workflow.
+
+The iPhone wizard first checks an explicitly selected local directory. It reads bounded backup metadata and a working copy of its supported index and available WAL. Device labels and version fields are supplied by the backup, not independently verified identities. File-entry totals describe listed paths and do not prove that all corresponding blobs exist or can be parsed.
+
+The native session retains the staged source behind a one-use token. React never supplies its path to start a scan. Cancelling clears the matching selection; a later selection supersedes an earlier token; replacing the active case invalidates the staged selection. Before scanning, Rust rechecks that the selected source still has a supported unencrypted index. Encrypted or unknown encryption states remain unavailable, without requesting or testing a password.
+
 ## Secret masking
 
 Raw secret candidates are masked before they become persistent findings and events. Matching a supported format means only that the source contains a candidate worth reviewing. ENGRAM does not determine that it is active, leaked, owned by someone else or accepted by a service.
