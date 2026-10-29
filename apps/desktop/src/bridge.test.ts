@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import demo from './fixtures/demo-case.json';
-import type { Case } from './model';
+import type { Case, ReportOptions } from './model';
+import { reviewKey } from './review';
 
 const mocks = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke, isTauri: () => true }));
-import { compareCase, loadDemo, openCase, saveCase, selectSource } from './bridge';
+import { compareCase, exportReport, loadDemo, openCase, saveCase, selectSource } from './bridge';
 
 beforeEach(() => mocks.invoke.mockReset());
 
@@ -51,5 +52,83 @@ describe('native command boundary', () => {
       } as Case),
     ).rejects.toThrow();
     expect(mocks.invoke).not.toHaveBeenCalled();
+  });
+});
+
+describe('native report export boundary', () => {
+  const options: ReportOptions = {
+    format: 'markdown',
+    finding_ids: [demo.findings[0].id],
+    include_notes: false,
+    include_paths: false,
+    include_details: false,
+  };
+  const report = {
+    path: 'exports/report.md',
+    format: 'markdown',
+    finding_count: 1,
+    sha256: 'b'.repeat(64),
+    bytes: 900,
+  };
+  it('sends only the current identity, validated review and selected IDs/options', async () => {
+    mocks.invoke.mockResolvedValueOnce(report);
+    expect(await exportReport(demo as Case, options)).toEqual(report);
+    expect(mocks.invoke).toHaveBeenCalledWith('export_report', {
+      caseId: demo.id,
+      review: {},
+      options,
+    });
+    const payload = mocks.invoke.mock.calls[0][1];
+    expect(payload).not.toHaveProperty('findings');
+    expect(payload).not.toHaveProperty('source_root');
+    expect(payload).not.toHaveProperty('path');
+    expect(payload).not.toHaveProperty('content');
+  });
+  it('retains current unsaved review for successful, cancelled and failed exports', async () => {
+    const source = {
+      ...demo,
+      review: {
+        [demo.findings[0].id]: {
+          bookmarked: true,
+          status: 'needs_review' as const,
+          note: 'My unsaved note',
+        },
+      },
+    } as Case;
+    const before = reviewKey(source.review);
+    mocks.invoke
+      .mockResolvedValueOnce(report)
+      .mockResolvedValueOnce(null)
+      .mockRejectedValueOnce('Destination already exists');
+    expect(await exportReport(source, options)).toEqual(report);
+    expect(await exportReport(source, options)).toBeNull();
+    await expect(exportReport(source, options)).rejects.toBe('Destination already exists');
+    expect(reviewKey(source.review)).toBe(before);
+    expect(source.review?.[demo.findings[0].id].note).toBe('My unsaved note');
+  });
+  it('rejects invalid selections/review before invoking the native command', async () => {
+    await expect(exportReport(demo as Case, { ...options, finding_ids: [] })).rejects.toThrow(
+      'at least one',
+    );
+    await expect(
+      exportReport(demo as Case, { ...options, finding_ids: ['not-in-the-case'] }),
+    ).rejects.toThrow();
+    await expect(
+      exportReport(
+        {
+          ...demo,
+          review: { unknown: { bookmarked: true, status: 'reviewed', note: '' } },
+        } as Case,
+        options,
+      ),
+    ).rejects.toThrow();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
+  it('does not mistake malformed native success for a completed export', async () => {
+    mocks.invoke
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ ...report, finding_count: 12 });
+    await expect(exportReport(demo as Case, options)).rejects.toThrow('invalid report receipt');
+    await expect(exportReport(demo as Case, options)).rejects.toThrow('invalid report receipt');
   });
 });
