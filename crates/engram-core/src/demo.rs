@@ -318,7 +318,7 @@ fn backup_calibration_png() -> Result<Vec<u8>, EngramError> {
     let mut bytes = Vec::new();
     image::DynamicImage::ImageRgb8(card)
         .write_to(&mut std::io::Cursor::new(&mut bytes), image::ImageFormat::Png)
-        .map_err(|_| EngramError::Input("Could not encode the synthetic calibration card.".into()))?;
+        .map_err(|_| EngramError::Input("Could not encode the synthetic test image.".into()))?;
     Ok(bytes)
 }
 
