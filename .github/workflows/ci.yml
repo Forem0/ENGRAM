@@ -153,7 +153,7 @@ jobs:
       - name: Install WebKit and isolated display dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xvfb xdotool imagemagick x11-apps dbus-x11 fonts-dejavu-core libgl1-mesa-dri
+          sudo apt-get install -y build-essential pkg-config libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xvfb xdotool imagemagick x11-apps dbus-x11 fonts-dejavu-core libgl1-mesa-dri xdg-desktop-portal xdg-desktop-portal-gtk
       - name: Build embedded React frontend
         working-directory: apps/desktop
         run: |
@@ -195,6 +195,17 @@ jobs:
             trap - EXIT
           done
           SMOKE
+      - name: Verify actual native report pickers and exported bytes
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          WEBKIT_DISABLE_COMPOSITING_MODE: '1'
+          GDK_BACKEND: x11
+          ENGRAM_EXPORT_X: '1035'
+          ENGRAM_EXPORT_Y: '35'
+        shell: bash
+        run: |
+          bash -n scripts/native-report-smoke.sh
+          timeout 180s xvfb-run -a -s '-screen 0 1600x1100x24' dbus-run-session -- bash scripts/native-report-smoke.sh native-captures/report-smoke
       - name: Upload native captures, IPC logs and fixture
         if: always()
         uses: actions/upload-artifact@v4
