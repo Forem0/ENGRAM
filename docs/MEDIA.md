@@ -43,6 +43,8 @@ Before rendering a preview, Rust checks the active observation, registered sourc
 
 Source EXIF, text chunks and other image metadata are not copied into the newly encoded PNG. This does **not** redact the pixels: an image can still display private text, faces or other personal content. Source bytes and decoded pixels are processed locally in memory; there is no cloud image service or preview file written to source evidence.
 
+Supported image orientation metadata is applied to the pixels before resizing and metadata removal. **Source dimensions** in the viewer describe those display-oriented dimensions before resizing. The original file and its recorded SHA-256 remain unchanged.
+
 HEIC/HEIF, videos, TIFF, WebP and other media can retain their existing inventory metadata, but do not gain a PNG/JPEG preview decoder through this feature. OCR and deleted-image reconstruction are not implemented by the gallery.
 
 ## Saved cases and demonstrations
