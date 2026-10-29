@@ -12,7 +12,7 @@
 
 All 103 ZIP entries were CRC-checked and both images visually inspected. The regular application used the actual native folder picker, displayed a supported unencrypted index with seven entries, and started analysis only after an explicit action. The saved native case contains 15 findings from seven examined files and matches the CLI analysis. Source names and bytes remain unchanged, and saving the case after image preview produces identical case bytes. The gallery capture visibly shows the generated image, the verified source hash state and **Hide image**. The automated script records the image request; visual inspection establishes the displayed pixels rather than claiming machine-parsed UI text.
 
-[Machine-readable capture provenance](v07-captures.json) records this exact source. Later source fixes and formatting are tracked independently by [PR #8 checks](https://github.com/Forem0/ENGRAM/pull/8/checks); these images are not relabelled as captures of a later commit. Windows/macOS GUI interaction, real personal backups and live devices were not exercised by this capture job.
+[Machine-readable capture provenance](v07-captures.json) records this exact source. Later source fixes and formatting passed all seven checks in the [final locked-source run](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) for commit `03bb2f7`; these images are not relabelled as captures of that later commit. The final run repeated the native folder/scan/preview exercise successfully. Windows/macOS GUI interaction, real personal backups and live devices were not exercised by these capture jobs.
 
 ## 0.6 workspace and report captures
 

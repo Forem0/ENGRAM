@@ -43,11 +43,11 @@
   },
   "native_saved_case_matches_cli": true,
   "case_unchanged_after_preview": true,
-  "scope": "Actual native folder selection, preflight, explicit scan and image preview. Captures establish the listed checkout and exercised state; current source validation is recorded in PR #8 checks.",
+  "scope": "Actual native folder selection, preflight, explicit scan and image preview. Captures establish the listed checkout and exercised state. Final source validation passed all seven checks at commit 03bb2f72004b4d5bb0c5af0829662de5fcc957b0; these images retain their earlier capture revision.",
   "not_exercised": [
     "real personal backups",
     "live devices",
     "Windows/macOS GUI interaction"
   ],
-  "verification": "https://github.com/Forem0/ENGRAM/pull/8/checks"
+  "verification": "https://github.com/Forem0/ENGRAM/actions/runs/40929679972"
 }
