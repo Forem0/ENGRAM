@@ -190,7 +190,13 @@ These states describe the actual reader and supplied format. An unsupported sche
 
 The 0.7 source adds **Media gallery**, a seventh workspace view for recorded media files, thumbnail-path evidence and Photos catalogue rows. Filter the gallery, select a finding and request **Preview image** for supported PNG or JPEG bytes from a source explicitly scanned in the current desktop session. The native engine verifies the recorded SHA-256 and generates a bounded, metadata-stripped PNG. Images are kept in memory and are not embedded in case files or reports.
 
+![Native 0.7 Media gallery showing a verified synthetic calibration image](assets/screenshots/gallery-v07.png)
+
 **Inspect iPhone backup** opens a guided workflow: choose a backup folder through the native picker, review its encryption state and supported index, then explicitly start analysis. Listed category counts describe the index, while the resulting **Modules** view reports actual reader coverage. Cancelling the picker or wizard keeps the current case and review.
+
+![Native 0.7 iPhone backup compatibility inspection before starting analysis](assets/screenshots/backup-wizard-v07.png)
+
+These two unedited Linux Tauri captures show a generated, unencrypted iPhone-style backup with a visibly labelled **DEMO** image. The native folder picker, explicit analysis and image preview ran through the application's normal commands. [Capture provenance](assets/screenshots/v07-captures.json) identifies the exact checkout and artifact; [PR #8 checks](https://github.com/Forem0/ENGRAM/pull/8/checks) record validation of the current source. The six-view tour and report captures above retain their separate 0.6.0 provenance.
 
 These additions are in the 0.7 source branch; the published **0.6.0** downloads linked above retain their original features and verification. Read the [media and backup workflow](docs/MEDIA.md) for formats, bounds, source authorization and synthetic testing. OCR and encrypted-backup reading remain separate research items.
 
