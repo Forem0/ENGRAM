@@ -151,31 +151,50 @@ impl Session {
             .data
             .lock()
             .map_err(|_| "The current case is unavailable; restart the application.".to_owned())?;
-        data.active = Some(ActiveCase { case: case.clone(), media });
+        data.active = Some(ActiveCase {
+            case: case.clone(),
+            media,
+        });
         data.pending_backup = None;
         self.revision.fetch_add(1, Ordering::Relaxed);
         Ok(case)
     }
 
-    pub fn preview_media(&self, expected_case_id: &str, finding_id: &str) -> Result<MediaPreview, String> {
+    pub fn preview_media(
+        &self,
+        expected_case_id: &str,
+        finding_id: &str,
+    ) -> Result<MediaPreview, String> {
         // Hold the native observation while the bounded decode runs. A loaded
         // JSON case can supply metadata, but can never authorize a source read.
-        let data = self.data.lock().map_err(|_| {
-            "The current case is unavailable; restart the application.".to_owned()
-        })?;
-        let active = data.active.as_ref().ok_or("Open a source observation first.")?;
+        let data = self
+            .data
+            .lock()
+            .map_err(|_| "The current case is unavailable; restart the application.".to_owned())?;
+        let active = data
+            .active
+            .as_ref()
+            .ok_or("Open a source observation first.")?;
         if active.case.id != expected_case_id {
             return Err("The active case changed. Select an image in the current case.".into());
         }
-        let finding = active.case.findings.iter().find(|finding| finding.id == finding_id)
-            .filter(|finding| finding.category == engram_core::Category::Media && finding.rule_id == "file.media")
+        let finding = active
+            .case
+            .findings
+            .iter()
+            .find(|finding| finding.id == finding_id)
+            .filter(|finding| {
+                finding.category == engram_core::Category::Media && finding.rule_id == "file.media"
+            })
             .ok_or("Select an observed media file from the current case.")?;
         let expected_hash = finding.sha256.as_deref()
             .ok_or("This image was not read within the scan limits. Inspect the source again before previewing it.")?;
         let access = active.media.as_ref().ok_or(
             "Image bytes are not attached to this case. Choose the original source explicitly to inspect its images."
         )?;
-        let preview = access.preview(finding_id).map_err(|error| error.to_string())?;
+        let preview = access
+            .preview(finding_id)
+            .map_err(|error| error.to_string())?;
         if preview.finding_id != finding.id || preview.source_sha256 != expected_hash {
             return Err("Image bytes do not match the recorded source observation. Inspect the source again.".into());
         }
@@ -183,21 +202,43 @@ impl Session {
     }
 
     pub fn clear_pending_backup(&self) -> Result<(), String> {
-        self.data.lock().map_err(|_| {
-            "The backup selection is unavailable; restart the application.".to_owned()
-        })?.pending_backup = None;
+        self.data
+            .lock()
+            .map_err(|_| {
+                "The backup selection is unavailable; restart the application.".to_owned()
+            })?
+            .pending_backup = None;
         Ok(())
     }
 
     pub fn stage_backup(&self, source: PathBuf) -> Result<String, String> {
         // This is a one-use local selection identifier, not an authorization
         // secret. The renderer never interprets it or sends a filesystem path.
-        let sequence = self.backup_sequence.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| value.checked_add(1))
-            .map_err(|_| "Backup selection limit reached; restart the application.".to_owned())?;
+        let mut sequence = self.backup_sequence.load(Ordering::Relaxed);
+        loop {
+            let next = sequence.checked_add(1).ok_or_else(|| {
+                "Backup selection limit reached; restart the application.".to_owned()
+            })?;
+            match self.backup_sequence.compare_exchange_weak(
+                sequence,
+                next,
+                Ordering::Relaxed,
+                Ordering::Relaxed,
+            ) {
+                Ok(_) => break,
+                Err(current) => sequence = current,
+            }
+        }
         let token = format!("backup-{sequence:016x}");
-        self.data.lock().map_err(|_| {
-            "The backup selection is unavailable; restart the application.".to_owned()
-        })?.pending_backup = Some(PendingBackup { token: token.clone(), source });
+        self.data
+            .lock()
+            .map_err(|_| {
+                "The backup selection is unavailable; restart the application.".to_owned()
+            })?
+            .pending_backup = Some(PendingBackup {
+            token: token.clone(),
+            source,
+        });
         Ok(token)
     }
 
@@ -205,10 +246,18 @@ impl Session {
         let mut data = self.data.lock().map_err(|_| {
             "The backup selection is unavailable; restart the application.".to_owned()
         })?;
-        if data.pending_backup.as_ref().is_none_or(|pending| pending.token != token) {
+        if data
+            .pending_backup
+            .as_ref()
+            .is_none_or(|pending| pending.token != token)
+        {
             return Err("This backup selection expired. Choose the backup folder again.".into());
         }
-        Ok(data.pending_backup.take().expect("Matching pending selection exists").source)
+        Ok(data
+            .pending_backup
+            .take()
+            .expect("Matching pending selection exists")
+            .source)
     }
 
     pub fn cancel_backup(&self, token: &str) -> Result<(), String> {
@@ -224,9 +273,13 @@ impl Session {
             let data = self.data.lock().map_err(|_| {
                 "The current case is unavailable; restart the application.".to_owned()
             })?;
-            let case = &data.active.as_ref().ok_or_else(|| {
-                "Open a case, choose a source or load the demonstration first.".to_owned()
-            })?.case;
+            let case = &data
+                .active
+                .as_ref()
+                .ok_or_else(|| {
+                    "Open a case, choose a source or load the demonstration first.".to_owned()
+                })?
+                .case;
             if expected_case_id != case.id {
                 return Err("The active case changed. Save the current case again.".into());
             }
@@ -249,7 +302,8 @@ impl Session {
             .lock()
             .map_err(|_| "The current case is unavailable; restart the application.".to_owned())?;
         if self.revision.load(Ordering::Relaxed) != snapshot.revision
-            || data.active
+            || data
+                .active
                 .as_ref()
                 .is_none_or(|active| active.case.id != snapshot.case.id)
         {
@@ -268,7 +322,11 @@ impl Session {
         if self.revision.load(Ordering::Relaxed) != snapshot.revision {
             return false;
         }
-        let Some(active) = data.active.as_mut().filter(|active| active.case.id == snapshot.case.id) else {
+        let Some(active) = data
+            .active
+            .as_mut()
+            .filter(|active| active.case.id == snapshot.case.id)
+        else {
             return false;
         };
         active.case.review = snapshot.case.review.clone();
@@ -322,7 +380,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use engram_core::{create_demo_fixture, demo_case, scan_path_with_media, Category, ReviewAnnotation, ReviewStatus, ScanOptions};
+    use engram_core::{
+        create_demo_fixture, demo_case, scan_path_with_media, Category, ReviewAnnotation,
+        ReviewStatus, ScanOptions,
+    };
 
     fn scanned_fixture() -> (tempfile::TempDir, Case, MediaAccess) {
         let directory = tempfile::tempdir().unwrap();
@@ -333,7 +394,14 @@ mod tests {
     }
 
     fn image_finding(case: &Case) -> &engram_core::Finding {
-        case.findings.iter().find(|finding| finding.category == Category::Media && finding.rule_id == "file.media" && finding.path.ends_with("IMG_0001.PNG")).unwrap()
+        case.findings
+            .iter()
+            .find(|finding| {
+                finding.category == Category::Media
+                    && finding.rule_id == "file.media"
+                    && finding.path.ends_with("IMG_0001.PNG")
+            })
+            .unwrap()
     }
 
     fn marked_review(case: &Case) -> CaseReview {
@@ -465,7 +533,12 @@ mod tests {
 
     #[test]
     fn gallery_is_an_explicit_native_launch_view() {
-        assert_eq!(Launch::parse(["--view".into(), "gallery".into()]).unwrap().initial_view, "gallery");
+        assert_eq!(
+            Launch::parse(["--view".into(), "gallery".into()])
+                .unwrap()
+                .initial_view,
+            "gallery"
+        );
     }
 
     #[test]
@@ -475,7 +548,10 @@ mod tests {
         let finding = image_finding(&case);
         let id = finding.id.clone();
         let hash = finding.sha256.clone().unwrap();
-        state.session.replace_scanned_case(case.clone(), access).unwrap();
+        state
+            .session
+            .replace_scanned_case(case.clone(), access)
+            .unwrap();
         let preview = state.session.preview_media(&case.id, &id).unwrap();
         assert_eq!(preview.finding_id, id);
         assert_eq!(preview.source_sha256, hash);
@@ -483,7 +559,10 @@ mod tests {
         assert!((1..=1024).contains(&preview.width));
         assert!((1..=1024).contains(&preview.height));
         assert!(state.session.preview_media("stale-case", &id).is_err());
-        assert!(state.session.preview_media(&case.id, "unknown-finding").is_err());
+        assert!(state
+            .session
+            .preview_media(&case.id, "unknown-finding")
+            .is_err());
     }
 
     #[test]
@@ -502,8 +581,15 @@ mod tests {
         let (_directory, mut case, access) = scanned_fixture();
         let state = DesktopState::new(Launch::default());
         let id = image_finding(&case).id.clone();
-        case.findings.iter_mut().find(|finding| finding.id == id).unwrap().sha256 = Some("0".repeat(64));
-        state.session.replace_scanned_case(case.clone(), access).unwrap();
+        case.findings
+            .iter_mut()
+            .find(|finding| finding.id == id)
+            .unwrap()
+            .sha256 = Some("0".repeat(64));
+        state
+            .session
+            .replace_scanned_case(case.clone(), access)
+            .unwrap();
         assert!(state.session.preview_media(&case.id, &id).is_err());
     }
 
@@ -512,13 +598,19 @@ mod tests {
         let (_directory, case, access) = scanned_fixture();
         let state = DesktopState::new(Launch::default());
         let id = image_finding(&case).id.clone();
-        state.session.replace_scanned_case(case.clone(), access).unwrap();
+        state
+            .session
+            .replace_scanned_case(case.clone(), access)
+            .unwrap();
         assert!(state.session.preview_media(&case.id, &id).is_ok());
         // Importing even identical evidence must not grant its stored paths any
         // filesystem authority. No reads are re-created from case.source_root.
         state.session.replace_case(case.clone()).unwrap();
         assert!(state.session.preview_media(&case.id, &id).is_err());
-        assert_eq!(state.session.active_case().unwrap().findings.len(), case.findings.len());
+        assert_eq!(
+            state.session.active_case().unwrap().findings.len(),
+            case.findings.len()
+        );
     }
 
     #[test]
@@ -526,8 +618,14 @@ mod tests {
         let (_directory, case, access) = scanned_fixture();
         let state = DesktopState::new(Launch::default());
         let id = image_finding(&case).id.clone();
-        state.session.replace_scanned_case(case.clone(), access).unwrap();
-        let snapshot = state.session.prepare_save(&case.id, marked_review(&case)).unwrap();
+        state
+            .session
+            .replace_scanned_case(case.clone(), access)
+            .unwrap();
+        let snapshot = state
+            .session
+            .prepare_save(&case.id, marked_review(&case))
+            .unwrap();
         assert!(state.session.accept_saved_review(&snapshot));
         assert!(state.session.preview_media(&case.id, &id).is_ok());
     }
@@ -539,7 +637,10 @@ mod tests {
         let finding = image_finding(&case);
         let id = finding.id.clone();
         let path = PathBuf::from(&case.source_root).join(&finding.path);
-        state.session.replace_scanned_case(case.clone(), access).unwrap();
+        state
+            .session
+            .replace_scanned_case(case.clone(), access)
+            .unwrap();
         std::fs::write(path, b"changed synthetic image").unwrap();
         assert!(state.session.preview_media(&case.id, &id).is_err());
         assert_eq!(state.session.active_case().unwrap().id, case.id);
@@ -549,12 +650,21 @@ mod tests {
     #[test]
     fn backup_tokens_are_single_use_and_stale_tokens_cannot_consume_a_new_selection() {
         let state = DesktopState::new(Launch::default());
-        let old = state.session.stage_backup(PathBuf::from("first-synthetic-selection")).unwrap();
-        let current = state.session.stage_backup(PathBuf::from("second-synthetic-selection")).unwrap();
+        let old = state
+            .session
+            .stage_backup(PathBuf::from("first-synthetic-selection"))
+            .unwrap();
+        let current = state
+            .session
+            .stage_backup(PathBuf::from("second-synthetic-selection"))
+            .unwrap();
         assert_ne!(old, current);
         assert!(state.session.take_backup(&old).is_err());
         assert!(state.session.cancel_backup(&old).is_err());
-        assert_eq!(state.session.take_backup(&current).unwrap(), PathBuf::from("second-synthetic-selection"));
+        assert_eq!(
+            state.session.take_backup(&current).unwrap(),
+            PathBuf::from("second-synthetic-selection")
+        );
         assert!(state.session.take_backup(&current).is_err());
     }
 
@@ -563,14 +673,23 @@ mod tests {
         let state = DesktopState::new(Launch::default());
         let case = demo_case();
         state.session.replace_case(case.clone()).unwrap();
-        let token = state.session.stage_backup(PathBuf::from("cancelled-synthetic-selection")).unwrap();
+        let token = state
+            .session
+            .stage_backup(PathBuf::from("cancelled-synthetic-selection"))
+            .unwrap();
         state.session.cancel_backup(&token).unwrap();
         assert!(state.session.take_backup(&token).is_err());
         assert_eq!(state.session.active_case().unwrap().id, case.id);
-        let token = state.session.stage_backup(PathBuf::from("replaced-synthetic-selection")).unwrap();
+        let token = state
+            .session
+            .stage_backup(PathBuf::from("replaced-synthetic-selection"))
+            .unwrap();
         state.session.replace_case(case.clone()).unwrap();
         assert!(state.session.take_backup(&token).is_err());
-        let token = state.session.stage_backup(PathBuf::from("picker-cancelled-selection")).unwrap();
+        let token = state
+            .session
+            .stage_backup(PathBuf::from("picker-cancelled-selection"))
+            .unwrap();
         state.session.clear_pending_backup().unwrap();
         assert!(state.session.take_backup(&token).is_err());
     }

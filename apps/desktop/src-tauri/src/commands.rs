@@ -176,7 +176,10 @@ pub(crate) async fn scan_backup(
 ) -> Result<Case, String> {
     require_main(&window)?;
     let operation = state.session.begin()?;
-    on_worker(operation, move |session| scan_selected_backup(session, &token)).await
+    on_worker(operation, move |session| {
+        scan_selected_backup(session, &token)
+    })
+    .await
 }
 
 #[tauri::command]
@@ -199,7 +202,10 @@ pub(crate) async fn preview_media(
 ) -> Result<MediaPreview, String> {
     require_main(&window)?;
     let operation = state.session.begin()?;
-    on_worker(operation, move |session| session.preview_media(&case_id, &finding_id)).await
+    on_worker(operation, move |session| {
+        session.preview_media(&case_id, &finding_id)
+    })
+    .await
 }
 
 #[tauri::command]
@@ -622,7 +628,10 @@ mod tests {
         let original = demo_case();
         state.session.replace_case(original.clone()).unwrap();
         let temporary = tempfile::tempdir().unwrap();
-        let token = state.session.stage_backup(temporary.path().to_owned()).unwrap();
+        let token = state
+            .session
+            .stage_backup(temporary.path().to_owned())
+            .unwrap();
         assert!(scan_selected_backup(&state.session, &token).is_err());
         assert!(state.session.take_backup(&token).is_err());
         assert_eq!(state.session.active_case().unwrap().id, original.id);
@@ -636,8 +645,15 @@ mod tests {
         state.session.replace_case(original.clone()).unwrap();
         let temporary = tempfile::tempdir().unwrap();
         std::fs::write(temporary.path().join("Manifest.plist"), b"<?xml version=\"1.0\" encoding=\"UTF-8\"?><plist version=\"1.0\"><dict><key>IsEncrypted</key><true/></dict></plist>").unwrap();
-        std::fs::write(temporary.path().join("Manifest.db"), b"synthetic encrypted data").unwrap();
-        let token = state.session.stage_backup(temporary.path().to_owned()).unwrap();
+        std::fs::write(
+            temporary.path().join("Manifest.db"),
+            b"synthetic encrypted data",
+        )
+        .unwrap();
+        let token = state
+            .session
+            .stage_backup(temporary.path().to_owned())
+            .unwrap();
         assert!(scan_selected_backup(&state.session, &token).is_err());
         assert_eq!(state.session.active_case().unwrap().id, original.id);
     }
@@ -665,7 +681,13 @@ mod tests {
         assert_eq!(case.source_kind, SourceKind::IosBackup);
         assert_eq!(state.session.active_case().unwrap().id, case.id);
         assert!(state.session.take_backup(&token).is_err());
-        let image = case.findings.iter().find(|finding| finding.rule_id == "file.media" && finding.path.ends_with("IMG_0001.PNG")).unwrap();
+        let image = case
+            .findings
+            .iter()
+            .find(|finding| {
+                finding.rule_id == "file.media" && finding.path.ends_with("IMG_0001.PNG")
+            })
+            .unwrap();
         let preview = state.session.preview_media(&case.id, &image.id).unwrap();
         assert_eq!(Some(preview.source_sha256), image.sha256);
         assert!(preview.data_url.starts_with("data:image/png;base64,"));
