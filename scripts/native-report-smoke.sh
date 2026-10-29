@@ -63,7 +63,7 @@ cleanup() {
     import -window root "$out/failure-desktop.png" 2>/dev/null || true
     xdotool search --onlyvisible --name '.' 2>/dev/null | while read -r id; do
       xdotool getwindowname "$id" 2>/dev/null || true
-    done
+    done || true
   fi
   if [[ -n "$app_pid" ]]; then
     kill "$app_pid" 2>/dev/null || true
