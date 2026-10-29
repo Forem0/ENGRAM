@@ -9,6 +9,7 @@ import {
   mediaName,
   mediaRows,
   mediaUnmatched,
+  selectedMedia,
   previewEligible,
   validateMediaPreview,
   type MediaFilter,
@@ -76,7 +77,8 @@ export function MediaGallery({
     () => Object.fromEntries(filters.map((item) => [item.id, mediaRows(visible, item.id).length])),
     [visible],
   );
-  const current = rows.find((finding) => finding.id === selected?.id) ?? null;
+  const current = selectedMedia(caseData.findings, selected?.id);
+  const outsideFilters = current !== null && !rows.some((finding) => finding.id === current.id);
   const key = JSON.stringify([caseData.id, current?.id, current?.sha256]);
   const latestKey = useRef(key);
   latestKey.current = key;
@@ -229,6 +231,9 @@ export function MediaGallery({
               <span className={`media-kind-label ${mediaKind(current)}`}>
                 {kindLabels[mediaKind(current)]}
               </span>
+              {outsideFilters && (
+                <span className="media-outside-filter">Outside current filters</span>
+              )}
               <dl>
                 <div>
                   <dt>Recorded source</dt>

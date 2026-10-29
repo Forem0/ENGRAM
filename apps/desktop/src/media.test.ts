@@ -4,6 +4,7 @@ import {
   mediaName,
   mediaRows,
   mediaUnmatched,
+  selectedMedia,
   previewEligible,
   validateMediaPreview,
   MEDIA_PREVIEW_LIMITS,
@@ -49,6 +50,32 @@ const preview: MediaPreview = {
 };
 
 describe('media evidence grouping', () => {
+  it('follows a catalogue relationship to the current case file while preserving filters and evidence', () => {
+    const catalogue: Finding = {
+      ...finding,
+      id: 'catalogue-record',
+      rule_id: 'media.photos_catalogue',
+      path: 'PhotoData/Photos.sqlite',
+      related_ids: [finding.id],
+    };
+    const document: Finding = { ...finding, id: 'document-record', category: 'document' };
+    const findings = Object.freeze([finding, catalogue, document]);
+    const sharedQueue = Object.freeze([catalogue]);
+    const filter = 'catalogue' as const;
+    const rows = mediaRows(sharedQueue, filter);
+    const before = JSON.stringify({ findings, sharedQueue, rows, filter });
+
+    expect(rows).toEqual([catalogue]);
+    expect(rows).not.toContain(finding);
+    const current = selectedMedia(findings, catalogue.related_ids[0]);
+    expect(current).toBe(finding);
+    expect(previewEligible(current!)).toBe(true);
+    expect(selectedMedia(findings, 'unknown-record')).toBeNull();
+    expect(selectedMedia(findings, document.id)).toBeNull();
+    expect(selectedMedia(findings, null)).toBeNull();
+    expect(JSON.stringify({ findings, sharedQueue, rows, filter })).toBe(before);
+  });
+
   it('groups the actual Rust-generated fixture without manufacturing findings', () => {
     const rows = mediaRows(demo.findings as Finding[]);
     expect(rows.length).toBeGreaterThan(0);

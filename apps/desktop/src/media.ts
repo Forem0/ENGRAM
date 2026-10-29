@@ -40,7 +40,7 @@ export function mediaUnmatched(finding: Finding): boolean {
   );
 }
 
-export function mediaRows(findings: Finding[], filter: MediaFilter = 'all'): Finding[] {
+export function mediaRows(findings: readonly Finding[], filter: MediaFilter = 'all'): Finding[] {
   return findings.filter((finding) => {
     if (finding.category !== 'media') return false;
     const kind = mediaKind(finding);
@@ -51,6 +51,17 @@ export function mediaRows(findings: Finding[], filter: MediaFilter = 'all'): Fin
     if (filter === 'unmatched') return mediaUnmatched(finding);
     return false;
   });
+}
+
+/** Selection follows the current observation, even when filters hide its card. */
+export function selectedMedia(
+  findings: readonly Finding[],
+  selectedId: string | null | undefined,
+): Finding | null {
+  if (!selectedId) return null;
+  return (
+    findings.find((finding) => finding.id === selectedId && finding.category === 'media') ?? null
+  );
 }
 
 export function mediaName(finding: Finding): string {

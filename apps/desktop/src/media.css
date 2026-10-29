@@ -224,6 +224,12 @@
   background: #2c2143;
   border-color: #5b427d;
 }
+.media-outside-filter {
+  display: block;
+  color: #d3b583;
+  font-size: 9px;
+  margin-top: 7px;
+}
 .media-selection-context dl {
   margin: 17px 0 0;
   display: grid;
