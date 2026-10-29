@@ -1,4 +1,8 @@
-use crate::{database, scan::{is_reparse, metadata_for}, EngramError};
+use crate::{
+    database,
+    scan::{is_reparse, metadata_for},
+    EngramError,
+};
 use rusqlite::{Connection, OpenFlags};
 use serde::Serialize;
 use std::{
@@ -45,7 +49,9 @@ pub struct BackupInspection {
 pub fn inspect_backup(path: &Path) -> Result<BackupInspection, EngramError> {
     let metadata = path.symlink_metadata()?;
     if !metadata.is_dir() || metadata.file_type().is_symlink() || is_reparse(&metadata) {
-        return Err(EngramError::Input("Choose a regular backup directory, not a link or file.".into()));
+        return Err(EngramError::Input(
+            "Choose a regular backup directory, not a link or file.".into(),
+        ));
     }
     let root = path.canonicalize()?;
     let mut inspection = BackupInspection {
@@ -71,11 +77,14 @@ pub fn inspect_backup(path: &Path) -> Result<BackupInspection, EngramError> {
 }
 
 fn inspect_selected(root: &Path, inspection: &mut BackupInspection) -> Result<(), EngramError> {
-    let plist_bytes = read_stable(root, &root.join("Manifest.plist"), MAX_PLIST_BYTES)
-        .map_err(|_| input("A readable Manifest.plist is required to identify backup encryption."))?;
+    let plist_bytes =
+        read_stable(root, &root.join("Manifest.plist"), MAX_PLIST_BYTES).map_err(|_| {
+            input("A readable Manifest.plist is required to identify backup encryption.")
+        })?;
     let metadata = plist::Value::from_reader(Cursor::new(plist_bytes))
         .map_err(|_| input("Manifest.plist is malformed or unsupported."))?;
-    let metadata = metadata.as_dictionary()
+    let metadata = metadata
+        .as_dictionary()
         .ok_or_else(|| input("Manifest.plist must contain a metadata dictionary."))?;
     let encrypted = metadata.get("IsEncrypted").and_then(plist::Value::as_boolean)
         .ok_or_else(|| input("Backup encryption could not be determined. IsEncrypted must be an explicit boolean."))?;
@@ -87,13 +96,25 @@ fn inspect_selected(root: &Path, inspection: &mut BackupInspection) -> Result<()
         match plist::Value::from_reader(Cursor::new(bytes)) {
             Ok(value) => {
                 if let Some(info) = value.as_dictionary() {
-                    inspection.device_name = info.get("Device Name").and_then(plist::Value::as_string).map(bounded_text).filter(|value| !value.is_empty());
-                    inspection.product_version = info.get("Product Version").and_then(plist::Value::as_string).map(bounded_text).filter(|value| !value.is_empty());
+                    inspection.device_name = info
+                        .get("Device Name")
+                        .and_then(plist::Value::as_string)
+                        .map(bounded_text)
+                        .filter(|value| !value.is_empty());
+                    inspection.product_version = info
+                        .get("Product Version")
+                        .and_then(plist::Value::as_string)
+                        .map(bounded_text)
+                        .filter(|value| !value.is_empty());
                 } else {
-                    inspection.warnings.push("Optional Info.plist has an unsupported metadata layout.".into());
+                    inspection
+                        .warnings
+                        .push("Optional Info.plist has an unsupported metadata layout.".into());
                 }
             }
-            Err(_) => inspection.warnings.push("Optional Info.plist could not be parsed; device metadata is unavailable.".into()),
+            Err(_) => inspection.warnings.push(
+                "Optional Info.plist could not be parsed; device metadata is unavailable.".into(),
+            ),
         }
     }
     let database_bytes = read_stable(root, &root.join("Manifest.db"), MAX_INDEX_BYTES)
@@ -104,20 +125,30 @@ fn inspect_selected(root: &Path, inspection: &mut BackupInspection) -> Result<()
     let wal = root.join("Manifest.db-wal");
     match wal.symlink_metadata() {
         Ok(_) => {
-            let bytes = read_stable(root, &wal, MAX_INDEX_BYTES)
-                .map_err(|_| input("The backup index WAL could not be copied safely within the read limit."))?;
+            let bytes = read_stable(root, &wal, MAX_INDEX_BYTES).map_err(|_| {
+                input("The backup index WAL could not be copied safely within the read limit.")
+            })?;
             fs::write(temporary.path().join("manifest.sqlite-wal"), bytes)?;
         }
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => (),
         Err(_) => return Err(input("The backup index WAL could not be inspected.")),
     }
-    let connection = Connection::open_with_flags(&database_path, OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX)?;
+    let connection = Connection::open_with_flags(
+        &database_path,
+        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )?;
     connection.busy_timeout(Duration::from_millis(200))?;
-    connection.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_LENGTH, 16 * 1024 * 1024)?;
+    connection.set_limit(
+        rusqlite::limits::Limit::SQLITE_LIMIT_LENGTH,
+        16 * 1024 * 1024,
+    )?;
     connection.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_SQL_LENGTH, 64 * 1024)?;
     connection.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_EXPR_DEPTH, 64)?;
     let started = Instant::now();
-    connection.progress_handler(1_000, Some(move || started.elapsed() > Duration::from_secs(2)));
+    connection.progress_handler(
+        1_000,
+        Some(move || started.elapsed() > Duration::from_secs(2)),
+    );
     connection.execute_batch("PRAGMA query_only=ON; PRAGMA trusted_schema=OFF;")?;
     if !database::is_regular_table(&connection, "Files") {
         return Err(input("The backup needs a supported ordinary Files index table; views and virtual tables are excluded."));
@@ -139,10 +170,15 @@ fn inspect_selected(root: &Path, inspection: &mut BackupInspection) -> Result<()
         let domain: String = row.get(1)?;
         let relative: String = row.get(2)?;
         let flags: i64 = row.get(3)?;
-        if flags != 1 { continue; }
-        metadata_bytes = metadata_bytes.saturating_add(identifier.len() + domain.len() + relative.len());
-        if identifier.len() != 40 || !identifier.bytes().all(|byte| byte.is_ascii_hexdigit())
-            || domain.len() > 1024 || relative.len() > 16_384
+        if flags != 1 {
+            continue;
+        }
+        metadata_bytes =
+            metadata_bytes.saturating_add(identifier.len() + domain.len() + relative.len());
+        if identifier.len() != 40
+            || !identifier.bytes().all(|byte| byte.is_ascii_hexdigit())
+            || domain.len() > 1024
+            || relative.len() > 16_384
             || Path::new(&relative).is_absolute()
             || relative.split(['/', '\\']).any(|part| part == "..")
         {
@@ -153,11 +189,18 @@ fn inspect_selected(root: &Path, inspection: &mut BackupInspection) -> Result<()
         *counts.entry(category_for(&relative)).or_default() += 1;
     }
     if excluded > 0 {
-        inspection.warnings.push(format!("Excluded {excluded} invalid index paths or file identifiers."));
+        inspection.warnings.push(format!(
+            "Excluded {excluded} invalid index paths or file identifiers."
+        ));
     }
-    inspection.categories = counts.into_iter().map(|(id, count)| BackupCategory {
-        id: id.into(), label: category_label(id).into(), count,
-    }).collect();
+    inspection.categories = counts
+        .into_iter()
+        .map(|(id, count)| BackupCategory {
+            id: id.into(),
+            label: category_label(id).into(),
+            count,
+        })
+        .collect();
     inspection.state = BackupInspectionState::Ready;
     Ok(())
 }
@@ -166,7 +209,24 @@ fn category_for(relative: &str) -> &'static str {
     let path = relative.replace('\\', "/").to_ascii_lowercase();
     let filename = path.rsplit('/').next().unwrap_or("");
     let extension = filename.rsplit('.').next().unwrap_or("");
-    if matches!(extension, "png" | "jpg" | "jpeg" | "heic" | "heif" | "gif" | "webp" | "mov" | "mp4" | "m4v" | "avi" | "ithmb" | "thmb" | "tiff" | "bmp") {
+    if matches!(
+        extension,
+        "png"
+            | "jpg"
+            | "jpeg"
+            | "heic"
+            | "heif"
+            | "gif"
+            | "webp"
+            | "mov"
+            | "mp4"
+            | "m4v"
+            | "avi"
+            | "ithmb"
+            | "thmb"
+            | "tiff"
+            | "bmp"
+    ) {
         "media"
     } else if matches!(filename, "sms.db" | "chat.db") {
         "messages"
@@ -174,7 +234,10 @@ fn category_for(relative: &str) -> &'static str {
         "browser"
     } else if matches!(extension, "db" | "sqlite" | "sqlite3") {
         "databases"
-    } else if matches!(extension, "txt" | "md" | "pdf" | "doc" | "docx" | "csv" | "json" | "xml" | "log" | "env" | "plist") {
+    } else if matches!(
+        extension,
+        "txt" | "md" | "pdf" | "doc" | "docx" | "csv" | "json" | "xml" | "log" | "env" | "plist"
+    ) {
         "documents"
     } else {
         "other"
@@ -193,7 +256,13 @@ fn category_label(id: &str) -> &'static str {
 }
 
 fn bounded_text(value: &str) -> String {
-    value.chars().filter(|character| !character.is_control()).take(256).collect::<String>().trim().to_owned()
+    value
+        .chars()
+        .filter(|character| !character.is_control())
+        .take(256)
+        .collect::<String>()
+        .trim()
+        .to_owned()
 }
 
 fn input(message: &str) -> EngramError {
@@ -206,12 +275,17 @@ fn read_stable(root: &Path, path: &Path, limit: u64) -> Result<Vec<u8>, EngramEr
         return Err(input("Backup metadata exceeds its read limit."));
     }
     let mut bytes = Vec::new();
-    fs::File::open(path)?.take(limit + 1).read_to_end(&mut bytes)?;
+    fs::File::open(path)?
+        .take(limit + 1)
+        .read_to_end(&mut bytes)?;
     let after = metadata_for(root, path)?;
-    if bytes.len() as u64 != before.len() || after.len() != before.len()
+    if bytes.len() as u64 != before.len()
+        || after.len() != before.len()
         || before.modified().ok() != after.modified().ok()
     {
-        return Err(input("Backup metadata changed while it was inspected. Select the backup again."));
+        return Err(input(
+            "Backup metadata changed while it was inspected. Select the backup again.",
+        ));
     }
     Ok(bytes)
 }

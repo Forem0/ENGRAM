@@ -1,8 +1,8 @@
 use crate::{
     database::{self, PhotoAsset},
     digest, finding_id, secrets, time_from_system, Case, CaseStats, Category, Confidence,
-    EngramError, Evidence, Finding, MediaAccess, ModuleState, ModuleStatus, ScanEvent, ScanOptions, SourceKind,
-    MAX_FINDINGS,
+    EngramError, Evidence, Finding, MediaAccess, ModuleState, ModuleStatus, ScanEvent, ScanOptions,
+    SourceKind, MAX_FINDINGS,
 };
 use chrono::Utc;
 use rand::RngCore;
@@ -94,7 +94,9 @@ pub(crate) fn metadata_for(root: &Path, path: &Path) -> Result<fs::Metadata, Eng
         || is_reparse(&root_metadata)
         || root.canonicalize()?.as_path() != root
     {
-        return Err(EngramError::Input("The selected source directory changed or became a link.".into()));
+        return Err(EngramError::Input(
+            "The selected source directory changed or became a link.".into(),
+        ));
     }
     let relative = path
         .strip_prefix(root)
@@ -185,7 +187,10 @@ pub fn scan_path(path: &Path, options: &ScanOptions) -> Result<Case, EngramError
 
 /// Keep source access separate from serializable cases. Only a fresh, explicitly
 /// selected scan can grant access to the physical file behind a finding.
-pub fn scan_path_with_media(path: &Path, options: &ScanOptions) -> Result<(Case, MediaAccess), EngramError> {
+pub fn scan_path_with_media(
+    path: &Path,
+    options: &ScanOptions,
+) -> Result<(Case, MediaAccess), EngramError> {
     if options.max_files == 0
         || options.max_files > 1_000_000
         || options.max_file_bytes == 0
@@ -722,7 +727,12 @@ impl Engine<'_> {
             if let Some(index) = self.push(item) {
                 if media {
                     if let Some(hash) = &hash {
-                        self.media_access.register(self.case.findings[index].id.clone(), input.physical.clone(), input.bytes, hash.clone());
+                        self.media_access.register(
+                            self.case.findings[index].id.clone(),
+                            input.physical.clone(),
+                            input.bytes,
+                            hash.clone(),
+                        );
                     }
                 }
                 if let Some(hash) = &hash {

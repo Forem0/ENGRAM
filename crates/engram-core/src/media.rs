@@ -1,6 +1,8 @@
 use crate::{digest, scan::metadata_for, EngramError};
 use base64::{engine::general_purpose::STANDARD, Engine as _};
-use image::{codecs::png::PngEncoder, ExtendedColorType, ImageEncoder, ImageFormat, ImageReader, Limits};
+use image::{
+    codecs::png::PngEncoder, ExtendedColorType, ImageEncoder, ImageFormat, ImageReader, Limits,
+};
 use serde::Serialize;
 use std::{
     collections::HashMap,
@@ -43,12 +45,23 @@ pub struct MediaPreview {
 
 impl MediaAccess {
     pub(crate) fn new(root: PathBuf, case_id: String) -> Self {
-        Self { root, case_id, sources: HashMap::new() }
+        Self {
+            root,
+            case_id,
+            sources: HashMap::new(),
+        }
     }
 
     pub(crate) fn register(&mut self, id: String, path: PathBuf, bytes: u64, sha256: String) {
         if bytes > 0 && bytes <= MAX_MEDIA_INPUT_BYTES {
-            self.sources.insert(id, MediaSource { path, bytes, sha256 });
+            self.sources.insert(
+                id,
+                MediaSource {
+                    path,
+                    bytes,
+                    sha256,
+                },
+            );
         }
     }
 
@@ -65,7 +78,9 @@ impl MediaAccess {
         ))?;
         let before = metadata_for(&self.root, &source.path)?;
         if before.len() != source.bytes {
-            return Err(unavailable("The source image changed since this case was scanned. Scan it again."));
+            return Err(unavailable(
+                "The source image changed since this case was scanned. Scan it again.",
+            ));
         }
         let file = fs::File::open(&source.path)?;
         let opened = file.metadata()?;
@@ -80,7 +95,9 @@ impl MediaAccess {
             || before.modified().ok() != after.modified().ok()
             || digest(&bytes) != source.sha256
         {
-            return Err(unavailable("The source image changed since this case was scanned. Scan it again."));
+            return Err(unavailable(
+                "The source image changed since this case was scanned. Scan it again.",
+            ));
         }
         let format = image::guess_format(&bytes)
             .map_err(|_| unavailable("This file is not a supported PNG or JPEG image."))?;
@@ -89,31 +106,47 @@ impl MediaAccess {
         }
         let mut dimensions_reader = ImageReader::with_format(Cursor::new(&bytes), format);
         dimensions_reader.limits(decode_limits());
-        let (source_width, source_height) = dimensions_reader.into_dimensions()
-            .map_err(|_| unavailable("The image dimensions are invalid or exceed preview limits."))?;
-        if source_width == 0 || source_height == 0
+        let (source_width, source_height) = dimensions_reader.into_dimensions().map_err(|_| {
+            unavailable("The image dimensions are invalid or exceed preview limits.")
+        })?;
+        if source_width == 0
+            || source_height == 0
             || u64::from(source_width) * u64::from(source_height) > MAX_MEDIA_PIXELS
         {
-            return Err(unavailable("Image previews are limited to 16 million source pixels."));
+            return Err(unavailable(
+                "Image previews are limited to 16 million source pixels.",
+            ));
         }
         let mut reader = ImageReader::with_format(Cursor::new(&bytes), format);
         reader.limits(decode_limits());
-        let decoded = reader.decode()
-            .map_err(|_| unavailable("This image could not be decoded within the preview limits."))?;
-        let resized = if source_width <= MAX_MEDIA_PREVIEW_EDGE && source_height <= MAX_MEDIA_PREVIEW_EDGE {
-            decoded.to_rgba8()
-        } else {
-            decoded.thumbnail(MAX_MEDIA_PREVIEW_EDGE, MAX_MEDIA_PREVIEW_EDGE).to_rgba8()
-        };
+        let decoded = reader.decode().map_err(|_| {
+            unavailable("This image could not be decoded within the preview limits.")
+        })?;
+        let resized =
+            if source_width <= MAX_MEDIA_PREVIEW_EDGE && source_height <= MAX_MEDIA_PREVIEW_EDGE {
+                decoded.to_rgba8()
+            } else {
+                decoded
+                    .thumbnail(MAX_MEDIA_PREVIEW_EDGE, MAX_MEDIA_PREVIEW_EDGE)
+                    .to_rgba8()
+            };
         let (width, height) = resized.dimensions();
         let mut output = BoundedOutput(Vec::new());
-        PngEncoder::new(&mut output).write_image(
-            resized.as_raw(), width, height, ExtendedColorType::Rgba8,
-        ).map_err(|_| unavailable("The rendered preview exceeds the output limit or could not be encoded."))?;
+        PngEncoder::new(&mut output)
+            .write_image(resized.as_raw(), width, height, ExtendedColorType::Rgba8)
+            .map_err(|_| {
+                unavailable(
+                    "The rendered preview exceeds the output limit or could not be encoded.",
+                )
+            })?;
         Ok(MediaPreview {
             finding_id: finding_id.into(),
             data_url: format!("data:image/png;base64,{}", STANDARD.encode(&output.0)),
-            width, height, source_width, source_height, source_sha256: source.sha256.clone(),
+            width,
+            height,
+            source_width,
+            source_height,
+            source_sha256: source.sha256.clone(),
         })
     }
 }

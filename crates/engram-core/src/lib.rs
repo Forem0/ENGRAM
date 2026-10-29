@@ -14,9 +14,12 @@ mod scan;
 mod secrets;
 mod storage;
 
-pub use demo::{create_demo_backup_fixture, create_demo_fixture, demo_case};
 pub use backup::{inspect_backup, BackupCategory, BackupInspection, BackupInspectionState};
-pub use media::{MediaAccess, MediaPreview, MAX_MEDIA_INPUT_BYTES, MAX_MEDIA_OUTPUT_BYTES, MAX_MEDIA_PIXELS, MAX_MEDIA_PREVIEW_EDGE};
+pub use demo::{create_demo_backup_fixture, create_demo_fixture, demo_case};
+pub use media::{
+    MediaAccess, MediaPreview, MAX_MEDIA_INPUT_BYTES, MAX_MEDIA_OUTPUT_BYTES, MAX_MEDIA_PIXELS,
+    MAX_MEDIA_PREVIEW_EDGE,
+};
 pub use model::*;
 pub use report::{
     render_report, write_report, RenderedReport, ReportFormat, ReportOptions, ReportReceipt,
