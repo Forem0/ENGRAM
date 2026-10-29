@@ -1,6 +1,6 @@
 # Build ENGRAM
 
-ENGRAM uses a Tauri 2 native shell and a React/TypeScript frontend. Version 0.6.0 adds report export to the Atlas Focus review workspace. The Rust engine and CLI share the workspace. Earlier releases retain their own source and provenance; the 0.1 release used egui, so its binaries and capture flags are not the current desktop build.
+ENGRAM uses a Tauri 2 native shell and a React/TypeScript frontend. Version 0.7.0 adds the media gallery and guided iPhone backup workflow to the Atlas Focus review and report workspace. The Rust engine and CLI share the workspace. Earlier releases retain their own source and provenance; the 0.1 release used egui, so its binaries and capture flags are not the current desktop build.
 
 Install the current stable Rust toolchain compatible with the workspace's declared minimum and dependency requirements using the [official Rust installer](https://www.rust-lang.org/tools/install). SQLite is built through the bundled crate feature, so a platform C compiler is required.
 
@@ -37,7 +37,7 @@ The production frontend is embedded through Tauri's custom protocol. Development
 
 ## macOS
 
-Install Rust, Node.js and the Xcode Command Line Tools. Build on the intended architecture; the artifact workflow uses the architecture of the selected GitHub runner. The release artifact workflow selects `macos-15` for the Apple Silicon build. Source CI runs macOS host tests on `macos-15-intel` and separately cross-compiles and links the desktop and CLI for `aarch64-apple-darwin` with a macOS 11 deployment target. This avoids current hosted ARM64 runner provisioning failures while retaining an explicit ARM64 build check; it does not execute ARM64 binaries.
+Install Rust, Node.js and the Xcode Command Line Tools. The release workflow runs host tests on `macos-15-intel`, then cross-builds the desktop application bundle and CLI for `aarch64-apple-darwin` with a macOS 11 deployment target. Source CI also runs macOS Intel host tests and an explicit ARM64 compile/link check. The resulting release archive targets Apple Silicon; neither the Intel host tests nor cross-compilation execute the ARM64 binaries or establish macOS GUI behavior.
 
 ```bash
 xcode-select --install
@@ -46,7 +46,16 @@ npm ci
 npm run tauri -- build --bundles app --ci -- --locked
 ```
 
-The application bundle is written under the workspace's `target/release/bundle/macos/ENGRAM.app`. Current distribution packages are unsigned and not notarized. Packaging a `.app` is distinct from proving that distribution signing and notarization are complete.
+The command above builds for the current host architecture and writes the application bundle under the workspace's `target/release/bundle/macos/ENGRAM.app`. To cross-build an Apple Silicon bundle from an Intel Mac, install the target and select it explicitly:
+
+```bash
+rustup target add aarch64-apple-darwin
+MACOSX_DEPLOYMENT_TARGET=11.0 npm run tauri -- build \
+  --target aarch64-apple-darwin --bundles app \
+  --config '{"bundle":{"macOS":{"minimumSystemVersion":"11.0"}}}' --ci -- --locked
+```
+
+That target-specific bundle is under `target/aarch64-apple-darwin/release/bundle/macos/ENGRAM.app` in the workspace. Current distribution packages are unsigned and not notarized. Packaging a `.app` is distinct from proving that distribution signing and notarization are complete.
 
 ## Linux
 
@@ -119,13 +128,13 @@ timeout 180s xvfb-run -a -s '-screen 0 1600x1100x24' \
 
 Use a new output directory for each run. The coordinates identify **Export report** in the verified 1440 × 940 workspace; review them if the layout changes. Run this script only against synthetic fixtures in an isolated display.
 
-## Native media and backup interaction in the 0.7 source
+## Native media and backup interaction in 0.7.0
 
 [`scripts/native-media-smoke.sh`](../scripts/native-media-smoke.sh) drives the ordinary Tauri desktop through its real XDG/GTK folder picker and the guided backup workflow. It creates a synthetic backup using `engram fixture --iphone-backup`, checks picker cancellation, reviews index compatibility, explicitly starts analysis, selects a media file and requests **Preview image**. The workflow uses normal visible input, without injecting renderer state or exposing arbitrary source paths through IPC.
 
 The exercise compares the saved native case with CLI analysis, verifies all source names and bytes remain unchanged, and confirms that previewing an image changes no saved case bytes. The artifact includes intermediate screens, verification data and a requested-preview capture that must be visually inspected. The seven startup views additionally exercise the guarded native readiness handshake. Use only generated synthetic fixtures and an isolated display for this script.
 
-The [successful 0.7 locked-source run](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) validates commit `03bb2f7`. All seven checks passed: 100 frontend tests and production assets, Rust formatting, core/CLI/native backend tests and Clippy on Linux, Windows and the Intel macOS host, plus an ARM64 compile/link check on macOS. Linux and macOS each passed 82 core, 24 CLI and 30 backend tests; Windows passed 77 core, 21 CLI and 30 backend tests. Actual GUI interaction is exercised on Linux; host tests and cross-compilation do not establish Windows/macOS GUI behavior or ARM64 runtime execution. The two [0.7 media captures](../assets/screenshots/README.md#07-media-workflow-captures) retain their own exact source and artifact provenance. Published 0.6.0 packages and their verification remain unchanged.
+The [successful 0.7 locked-source run](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) validates commit `03bb2f7`. All seven checks passed: 100 frontend tests and production assets, Rust formatting, core/CLI/native backend tests and Clippy on Linux, Windows and the Intel macOS host, plus an ARM64 compile/link check on macOS. Linux and macOS each passed 82 core, 24 CLI and 30 backend tests; Windows passed 77 core, 21 CLI and 30 backend tests. Its `native-tauri-workspace` artifact, ID `12921138734`, records the repeated Linux native exercise for that verified source. Actual GUI interaction is exercised on Linux; host tests and cross-compilation do not establish Windows/macOS GUI behavior or ARM64 runtime execution. The two [0.7 media captures](../assets/screenshots/README.md#07-media-workflow-captures) retain their earlier exact capture source and artifact provenance. Earlier packages and their verification remain unchanged.
 
 ## Lockfile bootstrap during migration
 
@@ -133,8 +142,8 @@ The CI prepare job checks the committed Rust lockfile. If the Tauri migration re
 
 ## Build artifacts
 
-The manually dispatched [Build artifacts workflow](../.github/workflows/build-artifacts.yml) requires the committed lockfile, tests the frontend/backend, builds through the Tauri CLI and uploads platform archives with SHA-256 checksums. Windows gets a portable ZIP; Linux gets a binary tar archive with runtime prerequisites; macOS gets a tar archive containing the proper `.app` bundle. Each includes the CLI and documentation.
+The manually dispatched [Build artifacts workflow](../.github/workflows/build-artifacts.yml) requires the committed lockfile, tests the frontend/backend, builds through the Tauri CLI and uploads platform archives with SHA-256 checksums. Windows gets a portable ZIP; Linux gets a binary tar archive with runtime prerequisites; macOS gets an Apple Silicon tar archive containing the cross-built `.app` bundle and CLI. Each package includes documentation and its own build information. Host tests run on the package job's runner; the macOS ARM64 bundle is cross-built on Intel and is not executed there.
 
-The [Build artifacts workflow](https://github.com/Forem0/ENGRAM/actions/workflows/build-artifacts.yml) records platform packaging jobs. The [0.6.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0) accompanies published archives with their checksums and exact build provenance. The [0.5.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) and [0.4.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) retain their own source, interface and verification evidence.
+The [Build artifacts workflow](https://github.com/Forem0/ENGRAM/actions/workflows/build-artifacts.yml) records platform packaging jobs. The [0.7.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0) accompanies the current archives with their checksums and exact build provenance. The [0.6.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0), [0.5.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) and [0.4.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.4.0) retain their own source, interface and verification evidence.
 
 The workflow does not publish a release or install signing credentials. A successful compile is not a substitute for exercising the packaged executable on its target platform. Release availability, provenance and download links are updated only after build artifacts are actually verified and published.

@@ -13,10 +13,11 @@ Reader state is independent of application version. **Ready**, **Experimental**,
 - Local JSON cases, reopening and snapshot comparison.
 - Optional review metadata: finding bookmarks, review states and plain-text notes saved with a case.
 - Structured literal search, review filters and bounded map pan/zoom.
-- Trace map, findings, timeline, connections, comparison and module views.
+- Seven workspace views: Trace map, findings, timeline, connections, comparison, modules and media gallery.
 - Experimental unencrypted iPhone manifest/Photos association and supported SQLite activity readers.
 - Native source/case dialogs and guarded Rust background operations.
 - Markdown/CSV reports from selected findings, with separate privacy options and checksum receipts.
+- Explicit source-verified PNG/JPEG previews and a guided index/encryption check before iPhone backup analysis.
 
 ## Desktop workflow
 
@@ -32,11 +33,11 @@ The [0.6.0 verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874
 
 ## Media and guided backup inspection
 
-The 0.7 source adds a media gallery with evidence-based file, thumbnail and catalogue filters, and explicit PNG/JPEG previews from sources scanned in the current native session. Previews check the original content hash, enforce image bounds and omit source image metadata from their newly generated PNG. Imported case paths never authorize reading their source.
+Version 0.7.0 adds a media gallery with evidence-based file, thumbnail and catalogue filters, and explicit PNG/JPEG previews from sources scanned in the current native session. Previews check the original content hash, enforce image bounds, apply supported orientation and omit source image metadata from their newly generated PNG. Imported case paths never authorize reading their source.
 
 The iPhone wizard stages a native folder selection, checks its encryption state and compatible index, and starts analysis only after an explicit action. A cancelled or failed operation retains the current case and unsaved review. A new synthetic iPhone-style fixture exercises the same readers without connecting a phone. See [media and backup workflows](MEDIA.md).
 
-Version 0.6 remains the current published download while 0.7 undergoes source and native verification. OCR, protected case containers and encrypted-backup support are outside this increment.
+The [0.7.0 release](https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0) records the current downloads. Its [completed source verification](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) includes Linux native interaction and cross-platform backend checks; the archives retain separate build provenance. OCR, protected case containers and encrypted-backup support are outside this increment.
 
 ## Reader validation
 

@@ -18,9 +18,9 @@ Store saved cases outside the selected source. The CLI enforces this rule and re
 
 Imported case source paths are treated as metadata. Opening or comparing a case does not probe its recorded source, including a path that names a network share. A real source is read only after explicit selection.
 
-## Media and staged backup sources in 0.7 development
+## Media and staged backup sources
 
-The 0.7 development source adds a media gallery and guided backup selection; the current public download remains 0.6.0 until a separately verified release is published. [MEDIA.md](MEDIA.md) describes the source implementation and its bounds without claiming completed native verification.
+ENGRAM 0.7.0 includes a media gallery and guided backup selection. [MEDIA.md](MEDIA.md) describes the user workflow, authorization rules and bounds; [building and verification](BUILDING.md) separates source checks, Linux native interaction and package provenance.
 
 Selecting a source and completing a fresh native scan creates an opaque Rust-only registry for eligible media files. Saved cases do not contain this authority. Importing a case, including one with the same recorded ID, or loading the demonstration revokes it; recorded paths do not become permission to read a file. Preview requests contain only a case ID and finding ID. Rust resolves the captured physical file, rechecks its path boundaries and compares its current bytes with the recorded SHA-256 before decoding.
 

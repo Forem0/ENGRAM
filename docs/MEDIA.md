@@ -1,6 +1,6 @@
 # Media gallery and iPhone backup workflow
 
-This document describes the **0.7.0 development source**. The current published download remains [ENGRAM 0.6.0](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0). Source implementation and authored tests do not establish completed native verification or a new public release.
+This document describes **ENGRAM 0.7.0**, available from the [release downloads](https://github.com/Forem0/ENGRAM/releases/tag/v0.7.0). The [completed locked-source verification](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) covers frontend, backend and Linux native interaction; [capture provenance](../assets/screenshots/README.md#07-media-workflow-captures) identifies each image's original checkout. Downloaded packages retain their separate build and checksum records.
 
 ## Inspect media in context
 
@@ -97,4 +97,4 @@ The generated backup contains seven invented file entries, hashed blob paths, an
 
 `engram fixture ./synthetic-folder` continues to generate the ordinary folder fixture. The CLI does not have a separate image-preview command; PNG/JPEG preview access belongs to the native desktop session.
 
-Development tests cover source/hash changes, preview limits, unsupported content, metadata stripping, malformed/encrypted backup metadata, ordinary-table checks, WAL snapshots and native selection lifetime. Their presence is not a claim that Rust, packaged native interaction or platform builds have completed successfully. Release verification and actual captures must be recorded separately.
+Tests cover source/hash changes, preview limits, unsupported content, metadata stripping, image orientation, malformed/encrypted backup metadata, ordinary-table checks, WAL snapshots and native selection lifetime. The [0.7 source run](https://github.com/Forem0/ENGRAM/actions/runs/40929679972) records their execution and the real Linux folder/scan/preview workflow. Linux native interaction, Windows/macOS host checks, Apple Silicon cross-compilation and downloadable package verification are distinct evidence; the source run does not establish Windows/macOS GUI behavior or ARM64 runtime execution.
