@@ -1,7 +1,8 @@
 use crate::{digest, scan::metadata_for, EngramError};
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use image::{
-    codecs::png::PngEncoder, ExtendedColorType, ImageEncoder, ImageFormat, ImageReader, Limits,
+    codecs::png::PngEncoder, ExtendedColorType, ImageDecoder, ImageEncoder, ImageFormat,
+    ImageReader, Limits,
 };
 use serde::Serialize;
 use std::{
@@ -104,24 +105,34 @@ impl MediaAccess {
         if !matches!(format, ImageFormat::Png | ImageFormat::Jpeg) {
             return Err(unavailable("Image previews currently support PNG and JPEG. Other media retain their recorded metadata."));
         }
-        let mut dimensions_reader = ImageReader::with_format(Cursor::new(&bytes), format);
-        dimensions_reader.limits(decode_limits());
-        let (source_width, source_height) = dimensions_reader.into_dimensions().map_err(|_| {
-            unavailable("The image dimensions are invalid or exceed preview limits.")
-        })?;
-        if source_width == 0
-            || source_height == 0
-            || u64::from(source_width) * u64::from(source_height) > MAX_MEDIA_PIXELS
-        {
-            return Err(unavailable(
-                "Image previews are limited to 16 million source pixels.",
-            ));
-        }
+        let orientation = {
+            let mut probe_reader = ImageReader::with_format(Cursor::new(&bytes), format);
+            probe_reader.limits(decode_limits());
+            let mut probe = probe_reader.into_decoder().map_err(|_| {
+                unavailable("The image dimensions are invalid or exceed preview limits.")
+            })?;
+            let (encoded_width, encoded_height) = probe.dimensions();
+            if encoded_width == 0
+                || encoded_height == 0
+                || u64::from(encoded_width) * u64::from(encoded_height) > MAX_MEDIA_PIXELS
+            {
+                return Err(unavailable(
+                    "Image previews are limited to 16 million source pixels.",
+                ));
+            }
+            probe.orientation().map_err(|_| {
+                unavailable("The image orientation metadata could not be read safely.")
+            })?
+        };
         let mut reader = ImageReader::with_format(Cursor::new(&bytes), format);
         reader.limits(decode_limits());
-        let decoded = reader.decode().map_err(|_| {
+        let mut decoded = reader.decode().map_err(|_| {
             unavailable("This image could not be decoded within the preview limits.")
         })?;
+        // Keep ImageReader::decode's allocation accounting, then bake the
+        // recorded orientation into pixels before stripping all source metadata.
+        decoded.apply_orientation(orientation);
+        let (source_width, source_height) = (decoded.width(), decoded.height());
         let resized =
             if source_width <= MAX_MEDIA_PREVIEW_EDGE && source_height <= MAX_MEDIA_PREVIEW_EDGE {
                 decoded.to_rgba8()

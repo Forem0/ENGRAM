@@ -293,10 +293,18 @@ fn backup_calibration_png() -> Result<Vec<u8>, EngramError> {
     // Five-by-seven bitmap glyphs: DEMO. Integer geometry is reproducible and
     // requires no fonts, external image assets, text rasterizer or network.
     let glyphs = [
-        [0b11110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b11110],
-        [0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b11111],
-        [0b10001, 0b11011, 0b10101, 0b10101, 0b10001, 0b10001, 0b10001],
-        [0b01110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110],
+        [
+            0b11110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b11110,
+        ],
+        [
+            0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b11111,
+        ],
+        [
+            0b10001, 0b11011, 0b10101, 0b10101, 0b10001, 0b10001, 0b10001,
+        ],
+        [
+            0b01110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110,
+        ],
     ];
     for (index, glyph) in glyphs.iter().enumerate() {
         for (row, bits) in glyph.iter().enumerate() {
@@ -317,7 +325,10 @@ fn backup_calibration_png() -> Result<Vec<u8>, EngramError> {
     }
     let mut bytes = Vec::new();
     image::DynamicImage::ImageRgb8(card)
-        .write_to(&mut std::io::Cursor::new(&mut bytes), image::ImageFormat::Png)
+        .write_to(
+            &mut std::io::Cursor::new(&mut bytes),
+            image::ImageFormat::Png,
+        )
         .map_err(|_| EngramError::Input("Could not encode the synthetic test image.".into()))?;
     Ok(bytes)
 }
