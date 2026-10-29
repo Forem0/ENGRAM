@@ -121,7 +121,7 @@ With the map focused, the arrow keys pan, **+ / −** zoom, and **0** or **Home*
 | **Ctrl/⌘ S** | Save a new case in the desktop app. |
 | **B** | Toggle the selected current finding's bookmark. |
 | **R** | Toggle Reviewed / Unreviewed for the selected current finding. |
-| **1–6** | Switch workspace views. |
+| **1–6** | Switch workspace views; **7** opens Media gallery in the 0.7 source. |
 | **?** | Open Search & shortcuts. |
 
 Letter shortcuts stay inactive while typing. Saved-case selection and persistence use the native desktop application.
@@ -355,7 +355,7 @@ flowchart LR
 | --- | --- |
 | Rust core | source classification, bounded readers, evidence, masking, relationships, case validation and report rendering |
 | Rust Tauri backend | native dialogs, active-case session, validated review snapshots, guarded persistence and report export |
-| React / TypeScript | six workspace views, review controls, search, map navigation, evidence presentation and export options |
+| React / TypeScript | six workspace views in 0.6, plus Media gallery and guided backup inspection in the 0.7 source; review controls, search, map navigation, evidence presentation and export options |
 | CLI | explicit source commands, repeatable workflows and structured output |
 
 The renderer is not given a general filesystem or shell API. A cancelled dialog leaves the open case in place; a failed operation reports its error without quietly replacing the case with a demo. See [architecture](docs/ARCHITECTURE.md).
