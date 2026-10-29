@@ -49,5 +49,14 @@
     "live devices",
     "Windows/macOS GUI interaction"
   ],
-  "verification": "https://github.com/Forem0/ENGRAM/actions/runs/40929679972"
+  "verification": "https://github.com/Forem0/ENGRAM/actions/runs/40929679972",
+  "source_verification": {
+    "run_id": 40929679972,
+    "verified_pull_request_head": "03bb2f72004b4d5bb0c5af0829662de5fcc957b0",
+    "native_artifact_id": 12921138734,
+    "all_seven_checks_passed": true,
+    "frontend_tests_passed": 100,
+    "scope": "Source and Linux runtime verification, separate from the original image-capture artifact above; not a packaging run or a replacement image source.",
+    "verification_url": "https://github.com/Forem0/ENGRAM/actions/runs/40929679972"
+  }
 }
