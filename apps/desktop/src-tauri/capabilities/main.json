@@ -13,6 +13,7 @@
     "allow-select-source",
     "allow-open-case",
     "allow-save-case",
+    "allow-export-report",
     "allow-compare-case",
     "allow-finish-smoke-test"
   ]

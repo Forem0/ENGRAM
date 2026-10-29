@@ -2,10 +2,10 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use engram_core::{
-    compare_cases, create_demo_fixture, demo_case, read_case, scan_path, write_case, Case,
-    Category, Confidence, EngramError, ScanOptions, SourceKind,
+    compare_cases, create_demo_fixture, demo_case, read_case, scan_path, write_case, write_report,
+    Case, Category, Confidence, EngramError, ReportFormat, ReportOptions, ScanOptions, SourceKind,
 };
 use serde_json::json;
 
@@ -44,6 +44,32 @@ enum Command {
     },
     /// Open a saved case and show its coverage, findings and module states.
     Inspect { case: PathBuf },
+    /// Export selected findings to a new Markdown report or spreadsheet-safe CSV.
+    Export {
+        /// Saved ENGRAM case. Export does not read its original source again.
+        case: PathBuf,
+        /// New report file outside the source recorded in the case.
+        #[arg(long)]
+        out: PathBuf,
+        /// Human-readable report or CSV table; neither format is a restorable case.
+        #[arg(long, value_enum, default_value_t = ExportFormat::Markdown)]
+        format: ExportFormat,
+        /// Include this known finding ID. Repeat to choose multiple findings.
+        #[arg(long = "finding", value_name = "ID", conflicts_with = "bookmarked", value_parser = parse_finding_id)]
+        findings: Vec<String>,
+        /// Export only findings bookmarked in this saved case.
+        #[arg(long, conflicts_with = "findings")]
+        bookmarked: bool,
+        /// Include analyst notes as entered; notes are not automatically redacted.
+        #[arg(long)]
+        include_notes: bool,
+        /// Include recorded source paths instead of filename-only locations.
+        #[arg(long)]
+        include_paths: bool,
+        /// Include source-derived details, which can contain private text or paths.
+        #[arg(long)]
+        include_details: bool,
+    },
     /// Compare two saved cases. A missing finding is not proof of secure deletion.
     Compare {
         before: PathBuf,
@@ -56,6 +82,21 @@ enum Command {
     Doctor,
     /// Generate synthetic files for reproducible local testing.
     Fixture { destination: PathBuf },
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum ExportFormat {
+    Markdown,
+    Csv,
+}
+
+impl From<ExportFormat> for ReportFormat {
+    fn from(value: ExportFormat) -> Self {
+        match value {
+            ExportFormat::Markdown => Self::Markdown,
+            ExportFormat::Csv => Self::Csv,
+        }
+    }
 }
 
 #[derive(Args)]
@@ -88,6 +129,15 @@ fn parse_positive_u64(value: &str) -> Result<u64, String> {
         .ok()
         .filter(|v| *v > 0)
         .ok_or_else(|| "must be a positive integer".to_owned())
+}
+
+fn parse_finding_id(value: &str) -> Result<String, String> {
+    if value.is_empty() || value.len() > 256 || value.chars().any(char::is_control) {
+        return Err(
+            "must be a nonempty finding ID of at most 256 bytes without control characters".into(),
+        );
+    }
+    Ok(value.to_owned())
 }
 
 fn main() -> ExitCode {
@@ -139,6 +189,62 @@ fn run(cli: Cli) -> Result<(), EngramError> {
             }
         }
         Command::Inspect { case } => print_case(&read_case(&case)?, cli.json)?,
+        Command::Export {
+            case,
+            out,
+            format,
+            findings,
+            bookmarked,
+            include_notes,
+            include_paths,
+            include_details,
+        } => {
+            let case = read_case(&case)?;
+            let finding_ids = if !findings.is_empty() {
+                findings
+            } else {
+                case.findings
+                    .iter()
+                    .filter(|finding| {
+                        !bookmarked
+                            || case
+                                .review
+                                .get(&finding.id)
+                                .is_some_and(|review| review.bookmarked)
+                    })
+                    .map(|finding| finding.id.clone())
+                    .collect()
+            };
+            let options = ReportOptions {
+                format: format.into(),
+                finding_ids,
+                include_notes,
+                include_paths,
+                include_details,
+            };
+            let receipt = write_report(&case, &options, &out)?;
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&receipt)?);
+            } else {
+                let format = match format {
+                    ExportFormat::Markdown => "Markdown",
+                    ExportFormat::Csv => "CSV",
+                };
+                println!("ENGRAM / EVIDENCE REPORT\n");
+                println!("Saved:    {}", visible(&receipt.path));
+                println!(
+                    "Format:   {format}\nFindings: {}\nBytes:    {}",
+                    receipt.finding_count, receipt.bytes
+                );
+                println!("SHA-256:  {}", visible(&receipt.sha256));
+                println!("\nThe input case is unchanged. Reports cannot be reopened as cases.");
+                if include_notes {
+                    println!(
+                        "Included analyst notes are plain text and are not automatically redacted."
+                    );
+                }
+            }
+        }
         Command::Compare { before, after, out } => {
             let out = out
                 .map(|path| absolute_resolved_target(&path))
@@ -414,6 +520,45 @@ mod tests {
     #[test]
     fn terminal_control_sequences_are_escaped() {
         assert_eq!(visible("file\u{1b}[31m\n"), "file\\u{1b}[31m\\u{a}");
+    }
+
+    #[test]
+    fn export_flags_have_a_valid_command_schema() {
+        use clap::CommandFactory;
+        Cli::command().debug_assert();
+    }
+
+    #[test]
+    fn export_selector_modes_are_mutually_exclusive() {
+        assert!(Cli::try_parse_from([
+            "engram",
+            "export",
+            "saved.json",
+            "--out",
+            "report.md",
+            "--finding",
+            "id-1",
+            "--bookmarked",
+        ])
+        .is_err());
+        assert!(Cli::try_parse_from([
+            "engram",
+            "export",
+            "saved.json",
+            "--out",
+            "report.md",
+            "--format",
+            "markdown",
+        ])
+        .is_ok());
+    }
+
+    #[test]
+    fn export_finding_ids_reject_controls_and_excess_utf8_bytes() {
+        assert!(parse_finding_id("finding-1").is_ok());
+        assert!(parse_finding_id("").is_err());
+        assert!(parse_finding_id("finding\u{1b}[31m").is_err());
+        assert!(parse_finding_id(&"é".repeat(129)).is_err());
     }
 
     #[test]

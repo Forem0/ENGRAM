@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0 — Evidence reports](https://github.com/Forem0/ENGRAM/releases/tag/v0.6.0) — 2026-10-29
+
+- Add selected-finding Markdown reports and spreadsheet-safe CSV tables through the shared Rust core.
+- Export the desktop's current results, all findings or bookmarks with a native destination dialog and a checksum receipt.
+- Keep analyst notes, full recorded paths and source-derived details as separate opt-ins; defaults omit those fields and use filename-only path labels.
+- Preserve engine confidence, case evidence and review state. Export is independent from Save case and never marks unsaved review as saved.
+- Add `engram export` with explicit finding IDs or saved-bookmark selection, format choice and structured JSON receipts.
+- Bound exports to 10,000 known, unique finding IDs and 16 MiB; reject unknown IDs, empty scopes, unsafe destinations and existing outputs without silent fallback or truncation.
+- Escape report markup, neutralize spreadsheet formula prefixes and retain deterministic content checksums.
+
+The [0.6.0 verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records frontend checks, cross-platform Rust/backend tests and Clippy, six native Linux Tauri/IPC views, and an actual Linux report-picker exercise. The report exercise cancels a real picker, writes Markdown and CSV through the normal native command, and compares the outputs with the shared-engine CLI render of the same synthetic snapshot. It checks minimal-field defaults and retains the saved input case unchanged. Rust snapshot regressions cover stale requests, failed writes and review retention; the Linux GUI exercise does not edit annotations or exercise Windows/macOS pickers. Platform archives are produced by the [Build artifacts workflow](https://github.com/Forem0/ENGRAM/actions/workflows/build-artifacts.yml); release assets carry checksums and exact build provenance.
+
+Case schema remains 1; reports do not replace restorable case files. No new recovery or reader-support claims are introduced. Earlier captures and releases retain their original provenance.
+
 ## [0.5.0 — Review workspace](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) — 2026-10-28
 
 - Add finding bookmarks, Unreviewed / Needs review / Reviewed states, and plain-text analyst notes in the persistent inspector.

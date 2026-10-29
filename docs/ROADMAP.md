@@ -16,12 +16,19 @@ Reader state is independent of application version. **Ready**, **Experimental**,
 - Trace map, findings, timeline, connections, comparison and module views.
 - Experimental unencrypted iPhone manifest/Photos association and supported SQLite activity readers.
 - Native source/case dialogs and guarded Rust background operations.
+- Markdown/CSV reports from selected findings, with separate privacy options and checksum receipts.
 
 ## Desktop workflow
 
 Version 0.5.0 adds the review workflow to Atlas Focus: bookmarks and review states, plain-text notes, field/phrase/exclusion search, real map pan/zoom, selection fitting and keyboard shortcuts. The save-case path validates review metadata against the actual active snapshot. Unsaved-review prompts protect ordinary case replacement and desktop closing; source evidence and engine confidence remain separate from analyst annotations. Release downloads and screenshot provenance follow completed verification for their own source.
 
 Next interface work should strengthen reproducible native interaction coverage, accessibility across platforms, source-specific diagnostics and review ergonomics. Keep older schema-1 cases readable and preserve the bounds and provenance of optional review metadata.
+
+## Evidence reports
+
+Version 0.6.0 adds evidence reports: select the current filtered queue, all findings or bookmarks; choose Markdown or CSV; opt in independently to notes, recorded paths and source-derived details; and save through the native dialog. The CLI uses the same Rust rendering and output rules. Exports preserve confidence and review state and return a content-checksum receipt. They do not replace Save case or expand the set of supported readers.
+
+The [0.6.0 verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records cross-platform Rust checks and a Linux native report exercise using the real destination picker. The exercise covers cancellation, both formats, minimal-field defaults and byte equality with the CLI output for the same synthetic snapshot. Rust regressions cover invalid selections, stale snapshots, output bounds and source-preserving writes. Broader native interaction coverage should exercise unsaved annotation edits, destination conflicts and platform-specific pickers on Windows and macOS. Frontend tests and browser demonstrations remain supplementary evidence.
 
 ## Reader validation
 

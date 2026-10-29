@@ -1,0 +1,317 @@
+.workspace-dialog.report-export-dialog {
+  width: min(810px, calc(100vw - 36px));
+}
+.report-export-dialog .report-intro {
+  margin: -3px 0 21px;
+  max-width: 640px;
+}
+.report-export-dialog fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.report-export-dialog legend {
+  color: #5b94dc;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 0;
+  margin-bottom: 12px;
+}
+.report-export-dialog legend span {
+  color: #d5e3f7;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin-left: 9px;
+}
+.report-scope-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+.report-scope-card {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr);
+  gap: 9px;
+  border: 1px solid #2a3f56;
+  background: #12202e;
+  padding: 14px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.report-scope-card.active {
+  border-color: #2479f3;
+  background: #10294a;
+  box-shadow: inset 0 0 0 1px #2479f326;
+}
+.report-export-dialog input {
+  accent-color: #237bff;
+  flex: 0 0 auto;
+}
+.report-scope-card input {
+  margin: 2px 0 0;
+  width: 13px;
+  height: 13px;
+}
+.report-scope-title {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+.report-scope-title strong {
+  font-size: 11px;
+  font-weight: 500;
+  color: #80b6ff;
+}
+.report-scope-card small {
+  grid-column: 2;
+  font-size: 10px;
+  color: #91a9c6;
+  line-height: 1.6;
+}
+.report-options-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  gap: 27px;
+  margin-top: 24px;
+}
+.report-format label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 13px 11px;
+  border: 1px solid #2b4058;
+  background: #12202e;
+  border-radius: 7px;
+  margin-bottom: 9px;
+  cursor: pointer;
+}
+.report-format label.active {
+  border-color: #2670ca;
+  background: #122841;
+}
+.report-format input {
+  margin: 3px 0 0;
+}
+.report-format strong,
+.report-privacy strong {
+  font-size: 11px;
+  display: block;
+  font-weight: 600;
+  color: #dce9fa;
+}
+.report-format small,
+.report-privacy small {
+  font-size: 10px;
+  display: block;
+  color: #91a9c6;
+  margin-top: 5px;
+  line-height: 1.6;
+}
+.report-format b {
+  color: #6898d7;
+  font: 10px monospace;
+  margin: 3px 0 0 auto;
+}
+.report-privacy label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0 9px;
+  cursor: pointer;
+}
+.report-privacy input {
+  margin-top: 2px;
+}
+.report-privacy em {
+  color: #91abc9;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 400;
+  border: 1px solid #2e4762;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+.report-selection-summary {
+  border: 1px solid #2a415b;
+  background: #0c1723;
+  border-radius: 8px;
+  margin-top: 19px;
+  padding: 13px 15px;
+}
+.report-selection-summary > div {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+.report-selection-summary strong {
+  font-size: 12px;
+  color: #d6e6f9;
+}
+.report-selection-summary small {
+  font-size: 10px;
+  color: #8fa8c8;
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.report-file-mark {
+  flex: 0 0 35px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #285b9b;
+  border-radius: 6px;
+  background: #102c4e;
+  color: #7ab1fa;
+  font-size: 9px;
+  letter-spacing: 0.07em;
+}
+.report-selection-summary ul {
+  margin: 11px 0 0 47px;
+  padding: 10px 0 0;
+  border-top: 1px solid #223951;
+  list-style: none;
+  display: grid;
+  gap: 5px;
+}
+.report-selection-summary li {
+  font-size: 10px;
+  color: #a5b9d2;
+  overflow-wrap: anywhere;
+}
+.report-export-dialog .report-persistence-note {
+  font-size: 11px;
+  color: #9cb2cd;
+  padding-left: 12px;
+  border-left: 2px solid #2a598c;
+  line-height: 1.65;
+  margin-top: 16px;
+}
+.report-export-dialog .report-native-note {
+  padding: 9px 12px;
+  background: #112b45;
+  border: 1px solid #27517d;
+  color: #acd0fd;
+  font-size: 11px;
+  border-radius: 6px;
+}
+.report-export-dialog .report-message {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  color: #9bc9ff;
+}
+.report-export-dialog .report-message.error {
+  color: #f7bd89;
+}
+.report-complete-mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background: #103f3c;
+  border: 1px solid #257f72;
+  color: #73e0c8;
+  font-size: 26px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.report-receipt {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin: 18px 0;
+  border: 1px solid #2b435f;
+  border-radius: 8px;
+  background: #0b1724;
+  padding: 3px 15px;
+}
+.report-receipt > div {
+  display: grid;
+  grid-template-columns: 95px minmax(0, 1fr);
+  gap: 15px;
+  padding: 12px 0;
+  border-bottom: 1px solid #23384e;
+}
+.report-receipt > div:last-child {
+  border-bottom: 0;
+}
+.report-receipt dt {
+  font-size: 11px;
+  color: #91a9c6;
+}
+.report-receipt dd {
+  margin: 0;
+  font-size: 12px;
+  color: #d3e4fa;
+  overflow-wrap: anywhere;
+}
+.report-checksum dd {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+.report-receipt code {
+  display: block;
+  word-break: break-all;
+  user-select: all;
+  font-size: 10px;
+  line-height: 1.7;
+}
+.top-actions .report-export-trigger {
+  border-color: #2d5b96;
+  color: #b8d5fc;
+  background: #132a43;
+}
+@media (max-width: 1300px) and (min-width: 901px) {
+  .top-actions > .tag.demo {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .report-scope-grid {
+    grid-template-columns: 1fr;
+  }
+  .report-scope-card {
+    gap: 5px 9px;
+    padding: 11px;
+  }
+  .report-options-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+    margin-top: 19px;
+  }
+  .report-scope-card small {
+    grid-column: 2;
+  }
+  .report-receipt > div {
+    grid-template-columns: 75px minmax(0, 1fr);
+    gap: 10px;
+  }
+}
+@media (max-height: 780px) and (min-width: 701px) {
+  .workspace-dialog.report-export-dialog {
+    padding: 19px;
+  }
+  .report-export-dialog .report-intro {
+    margin-bottom: 14px;
+  }
+  .report-scope-card {
+    padding: 10px;
+  }
+  .report-options-grid {
+    margin-top: 18px;
+    gap: 20px;
+  }
+  .report-selection-summary ul {
+    display: none;
+  }
+  .report-export-dialog .dialog-actions {
+    margin-top: 15px;
+  }
+}

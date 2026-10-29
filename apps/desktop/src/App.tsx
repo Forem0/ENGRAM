@@ -3,6 +3,7 @@ import * as bridge from './bridge';
 import { AtlasTraceMap } from './AtlasTraceMap';
 import { BookmarkGlyph, ReviewPanel, ReviewToolbar, WorkspaceHelp } from './ReviewUI';
 import { WorkspaceDialog } from './WorkspaceDialog';
+import { ReportExport } from './ReportExport';
 import { getReview, reviewKey, reviewSummary, updateReview } from './review';
 import { describeSearch } from './search';
 import {
@@ -30,6 +31,8 @@ import {
   type RuntimeInfo,
   type CaseReview,
   type ReviewAnnotation,
+  type ReportOptions,
+  type ReportReceipt,
   type View,
 } from './model';
 
@@ -48,7 +51,8 @@ type IconName =
   | 'shield'
   | 'close'
   | 'copy'
-  | 'check';
+  | 'check'
+  | 'export';
 const paths: Record<IconName, string[]> = {
   map: [
     'M6 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM22 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM6 21a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM22 21a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM6 6l4 4M18 6l-4 4M6 19l4-5M18 19l-4-5',
@@ -70,6 +74,7 @@ const paths: Record<IconName, string[]> = {
   close: ['M6 6l12 12M18 6 6 18'],
   copy: ['M8 8h12v13H8zM16 8V3H3v13h5'],
   check: ['M5 12l4 4 10-10'],
+  export: ['M12 3v12M7 8l5-5 5 5M4 14v7h16v-7'],
 };
 
 function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
@@ -931,14 +936,16 @@ export function App() {
   );
   const [savedReviewKey, setSavedReviewKey] = useState(reviewKey(undefined));
   const [helpOpen, setHelpOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
     { kind: 'case'; label: string; action: () => Promise<Case | null> } | { kind: 'close' } | null
   >(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const currentReviewKey = useMemo(() => reviewKey(caseData?.review), [caseData?.review]);
   const reviewChanged = currentReviewKey !== savedReviewKey;
-  const closeState = useRef({ dirty: false });
+  const closeState = useRef({ dirty: false, exporting: false });
   closeState.current.dirty = reviewChanged;
+  closeState.current.exporting = exportOpen && busy === 'Exporting the investigation report';
   const reviewCounts = useMemo(
     () =>
       caseData
@@ -1046,6 +1053,16 @@ export function App() {
       setBusy(null);
     }
   }
+  async function exportInvestigation(options: ReportOptions): Promise<ReportReceipt | null> {
+    if (busy || !caseData || !bridge.native)
+      throw new Error('Wait for the current desktop operation to finish.');
+    setBusy('Exporting the investigation report');
+    try {
+      return await bridge.exportReport(caseData, options);
+    } finally {
+      setBusy(null);
+    }
+  }
   async function compare() {
     if (busy || !caseData) return;
     setBusy('Opening the baseline');
@@ -1124,9 +1141,14 @@ export function App() {
       void import('@tauri-apps/api/window')
         .then(async ({ getCurrentWindow }) => {
           const stop = await getCurrentWindow().onCloseRequested((event) => {
+            if (closeState.current.exporting) {
+              event.preventDefault();
+              return;
+            }
             if (!closeState.current.dirty) return;
             event.preventDefault();
             setHelpOpen(false);
+            setExportOpen(false);
             setPendingAction({ kind: 'close' });
           });
           if (cancelled) stop();
@@ -1154,7 +1176,7 @@ export function App() {
       const command = event.ctrlKey || event.metaKey;
       if (command && (key === 'k' || key === 's')) {
         event.preventDefault();
-        if (pendingAction || helpOpen) return;
+        if (pendingAction || helpOpen || exportOpen) return;
         if (key === 's') {
           void save();
           return;
@@ -1167,6 +1189,7 @@ export function App() {
       if (
         pendingAction ||
         helpOpen ||
+        exportOpen ||
         command ||
         event.altKey ||
         (target instanceof HTMLElement &&
@@ -1201,13 +1224,34 @@ export function App() {
     }
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
-  }, [pendingAction, helpOpen, view, selected, selectionSource, caseData, busy, currentReviewKey]);
+  }, [
+    pendingAction,
+    helpOpen,
+    exportOpen,
+    view,
+    selected,
+    selectionSource,
+    caseData,
+    busy,
+    currentReviewKey,
+  ]);
   const inspectorCase = selectionSource === 'baseline' ? (comparison?.before ?? null) : caseData;
   const nativeTitle = !bridge.native ? 'Available in the ENGRAM desktop application.' : undefined;
 
   return (
     <div className="app-shell" data-view={view}>
       {helpOpen && <WorkspaceHelp onClose={() => setHelpOpen(false)} />}
+      {exportOpen && caseData && (
+        <ReportExport
+          caseData={caseData}
+          visible={filtered}
+          native={bridge.native}
+          busy={!!busy}
+          unsavedReview={reviewChanged}
+          onExport={exportInvestigation}
+          onClose={() => setExportOpen(false)}
+        />
+      )}
       {pendingAction && (
         <WorkspaceDialog
           title="Keep your review?"
@@ -1312,7 +1356,7 @@ export function App() {
           </div>
           <span className="sidebar-version">
             {bridge.native ? 'Desktop application' : 'Browser demonstration'} ·{' '}
-            {runtime?.version ?? '0.5.0'}
+            {runtime?.version ?? '0.6.0'}
           </span>
         </div>
       </aside>
@@ -1352,6 +1396,14 @@ export function App() {
           )}
 
           <div className="top-actions">
+            <button
+              className="button secondary report-export-trigger"
+              disabled={!!busy || !caseData}
+              onClick={() => setExportOpen(true)}
+            >
+              <Icon name="export" size={16} />
+              Export report
+            </button>
             {reviewChanged && <span className="review-dirty">Unsaved review</span>}
             <Tag state={bridge.native ? 'offline' : 'demo'}>
               {bridge.native ? 'Local workspace' : 'Browser demo · synthetic data'}

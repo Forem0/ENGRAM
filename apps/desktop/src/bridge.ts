@@ -1,14 +1,15 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { assertCase } from './data';
 import { validateReview } from './review';
-import type { Case, Comparison, RuntimeInfo } from './model';
+import { validateReportOptions, validateReportReceipt } from './report';
+import type { Case, Comparison, ReportOptions, ReportReceipt, RuntimeInfo } from './model';
 
 export const native = isTauri();
 
 export async function runtimeInfo(): Promise<RuntimeInfo> {
   if (native) return invoke<RuntimeInfo>('get_runtime_info');
   return {
-    version: '0.5.0',
+    version: '0.6.0',
     engine: 'Browser demo · Rust-generated synthetic fixture',
     schema_version: 1,
     initial_view: new URLSearchParams(location.search).get('view') ?? 'map',
@@ -52,6 +53,16 @@ export async function compareCase(): Promise<Comparison | null> {
   const result = await invoke<Comparison | null>('compare_case');
   if (result !== null) assertCase(result.before);
   return result;
+}
+export async function exportReport(
+  caseData: Case,
+  input: ReportOptions,
+): Promise<ReportReceipt | null> {
+  requireNative();
+  const options = validateReportOptions(input, caseData.findings);
+  const review = validateReview(caseData.review ?? {}, caseData.findings);
+  const result = await invoke<unknown>('export_report', { caseId: caseData.id, review, options });
+  return result === null ? null : validateReportReceipt(result, options);
 }
 export async function finishSmokeTest(): Promise<void> {
   if (native) await invoke('finish_smoke_test');

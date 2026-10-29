@@ -30,6 +30,10 @@ ENGRAM does not bypass encryption, brute-force passwords, unlock Keychain, recov
 
 ## Sharing a report
 
+Report export defaults to omitting analyst notes, source root and source-derived detail fields, with filename-only values for the structured path field. These options minimize fields; they do not anonymize arbitrary imported text. Titles, filenames, dates, IDs and hashes can still identify activity. An explicit details opt-in can contain private source text or paths; entered notes are plain text and are not automatically redacted.
+
+The desktop chooses the report destination through a native dialog. React sends a case ID, review metadata and selected IDs/options; Rust uses its own validated evidence snapshot. Reports are written to new files outside source evidence and existing outputs are not overwritten. Exporting current review changes does not save them back to the restorable case or clear the unsaved-review indicator. The CLI exports only metadata already present in its supplied saved case.
+
 Use `engram fixture <new-folder>` to produce a synthetic reproduction. Include the application version, operating system, command, module state and redacted error. Review every exported path, URL and metadata field before sharing.
 
 Do not upload a real phone backup, personal case, password database, private key or message archive in a GitHub issue. The issue template asks for synthetic reproduction steps rather than private evidence.

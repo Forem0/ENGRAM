@@ -24,6 +24,7 @@ pub fn run() {
             commands::select_source,
             commands::open_case,
             commands::save_case,
+            commands::export_report,
             commands::compare_case,
             commands::finish_smoke_test,
         ])

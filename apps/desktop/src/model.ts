@@ -69,6 +69,22 @@ export interface RuntimeInfo {
   smoke_test: boolean;
 }
 
+export type ReportFormat = 'markdown' | 'csv';
+export interface ReportOptions {
+  format: ReportFormat;
+  finding_ids: string[];
+  include_notes: boolean;
+  include_paths: boolean;
+  include_details: boolean;
+}
+export interface ReportReceipt {
+  path: string;
+  format: ReportFormat;
+  finding_count: number;
+  sha256: string;
+  bytes: number;
+}
+
 export const CATEGORIES: { id: Category; label: string; color: string; short: string }[] = [
   { id: 'media', label: 'Media', color: '#19C5C7', short: 'ME' },
   { id: 'secret', label: 'Secrets', color: '#F4AA36', short: 'SE' },

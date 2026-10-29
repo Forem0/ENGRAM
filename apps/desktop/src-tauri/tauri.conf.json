@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "ENGRAM",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "identifier": "com.forem0.engram",
   "build": {
     "beforeDevCommand": "npm run dev",
