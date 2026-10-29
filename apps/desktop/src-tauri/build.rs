@@ -6,6 +6,7 @@ fn main() {
             "select_source",
             "open_case",
             "save_case",
+            "export_report",
             "compare_case",
             "finish_smoke_test",
         ]),
