@@ -30,6 +30,14 @@ Version 0.6.0 adds evidence reports: select the current filtered queue, all find
 
 The [0.6.0 verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records cross-platform Rust checks and a Linux native report exercise using the real destination picker. The exercise covers cancellation, both formats, minimal-field defaults and byte equality with the CLI output for the same synthetic snapshot. Rust regressions cover invalid selections, stale snapshots, output bounds and source-preserving writes. Broader native interaction coverage should exercise unsaved annotation edits, destination conflicts and platform-specific pickers on Windows and macOS. Frontend tests and browser demonstrations remain supplementary evidence.
 
+## Media and guided backup inspection
+
+The 0.7 source adds a media gallery with evidence-based file, thumbnail and catalogue filters, and explicit PNG/JPEG previews from sources scanned in the current native session. Previews check the original content hash, enforce image bounds and omit source image metadata from their newly generated PNG. Imported case paths never authorize reading their source.
+
+The iPhone wizard stages a native folder selection, checks its encryption state and compatible index, and starts analysis only after an explicit action. A cancelled or failed operation retains the current case and unsaved review. A new synthetic iPhone-style fixture exercises the same readers without connecting a phone. See [media and backup workflows](MEDIA.md).
+
+Version 0.6 remains the current published download while 0.7 undergoes source and native verification. OCR, protected case containers and encrypted-backup support are outside this increment.
+
 ## Reader validation
 
 The next parser priority is reproducible fixtures across supported operating-system and application versions, with a published compatibility matrix. Unknown schemas must remain visible as unsupported or partial coverage.
