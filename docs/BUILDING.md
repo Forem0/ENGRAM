@@ -37,7 +37,7 @@ The production frontend is embedded through Tauri's custom protocol. Development
 
 ## macOS
 
-Install Rust, Node.js and the Xcode Command Line Tools. Build on the intended architecture; the artifact workflow uses the architecture of the selected GitHub runner. The CI and artifact workflows select `macos-15` for the Apple Silicon build.
+Install Rust, Node.js and the Xcode Command Line Tools. Build on the intended architecture; the artifact workflow uses the architecture of the selected GitHub runner. The release artifact workflow selects `macos-15` for the Apple Silicon build. Source CI runs macOS host tests on `macos-15-intel` and separately cross-compiles and links the desktop and CLI for `aarch64-apple-darwin` with a macOS 11 deployment target. This avoids current hosted ARM64 runner provisioning failures while retaining an explicit ARM64 build check; it does not execute ARM64 binaries.
 
 ```bash
 xcode-select --install
@@ -118,6 +118,14 @@ timeout 180s xvfb-run -a -s '-screen 0 1600x1100x24' \
 ```
 
 Use a new output directory for each run. The coordinates identify **Export report** in the verified 1440 × 940 workspace; review them if the layout changes. Run this script only against synthetic fixtures in an isolated display.
+
+## Native media and backup interaction in the 0.7 source
+
+[`scripts/native-media-smoke.sh`](../scripts/native-media-smoke.sh) drives the ordinary Tauri desktop through its real XDG/GTK folder picker and the guided backup workflow. It creates a synthetic backup using `engram fixture --iphone-backup`, checks picker cancellation, reviews index compatibility, explicitly starts analysis, selects a media file and requests **Preview image**. The workflow uses normal visible input, without injecting renderer state or exposing arbitrary source paths through IPC.
+
+The exercise compares the saved native case with CLI analysis, verifies all source names and bytes remain unchanged, and confirms that previewing an image changes no saved case bytes. The artifact includes intermediate screens, verification data and a requested-preview capture that must be visually inspected. The seven startup views additionally exercise the guarded native readiness handshake. Use only generated synthetic fixtures and an isolated display for this script.
+
+The current source's [PR checks](https://github.com/Forem0/ENGRAM/pull/8/checks) separately record frontend validation, Rust formatting, core/CLI/native backend tests and Clippy on Linux, Windows and the Intel macOS host, plus an ARM64 compile/link check on macOS. Actual GUI interaction is exercised on Linux; host tests and cross-compilation do not establish Windows/macOS GUI behavior. The two [0.7 media captures](../assets/screenshots/README.md#07-media-workflow-captures) retain their own exact source and artifact provenance. Published 0.6.0 packages and their verification remain unchanged.
 
 ## Lockfile bootstrap during migration
 

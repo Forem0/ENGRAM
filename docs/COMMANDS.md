@@ -33,9 +33,12 @@ Generates a synthetic dataset and uses the analysis engine to build the demonstr
 
 ```bash
 engram fixture ./sample-source
+engram fixture ./sample-iphone-backup --iphone-backup --json
 ```
 
 Writes synthetic files for repeatable engine testing. Use a new destination. This is the one command whose purpose is to create source material; it does not inspect personal data.
+
+In the 0.7 source, `--iphone-backup` creates an explicitly synthetic, unencrypted iPhone-style backup with seven indexed entries and generated DEMO calibration images. Its JSON receipt includes `synthetic: true` and `format: "iphone_backup"`. The ordinary fixture remains unchanged. Use the backup fixture to exercise the native compatibility workflow and media preview without personal data.
 
 ## Scan
 
@@ -133,7 +136,7 @@ npm ci
 npm run tauri -- dev -- -- --demo
 ```
 
-The default launch opens a synthetic case. `--view` accepts `map`, `findings`, `timeline`, `connections`, `compare` or `modules`. For an already built production executable:
+The default launch opens a synthetic case. `--view` accepts `map`, `findings`, `timeline`, `connections`, `compare` or `modules`; the 0.7 source also accepts `gallery`. For an already built production executable:
 
 ```bash
 ./target/release/engram-desktop --demo --view findings
