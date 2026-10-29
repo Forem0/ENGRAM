@@ -1,33 +1,56 @@
 # Native application captures
 
-These unedited PNGs show ENGRAM 0.5.0 in its actual Linux Tauri/WebKit window. Xvfb supplies the display and WebKit uses software rendering. The interface includes case review controls and the map viewport toolbar.
+These eight unedited PNGs show ENGRAM 0.6.0 in its actual Linux Tauri/WebKit window. Xvfb supplies the display and WebKit uses software rendering. Six images cover the workspace views; two show the actual report configuration and completed Markdown receipt.
 
 The shared Rust engine generated a synthetic case with 33 findings from 15 files, 10 recorded relationships and 3 coverage notes. Its review starts empty; no user annotations or personal backups are presented as recovered evidence.
 
-Source: [023d641](https://github.com/Forem0/ENGRAM/commit/023d64122c28e35fd8d84fcea9477d8f4f21710c).
-Capture: [successful native Tauri/IPC job](https://github.com/Forem0/ENGRAM/actions/runs/40766085166/job/123090713655).
-Verification record: [CI run](https://github.com/Forem0/ENGRAM/actions/runs/40766085166).
+- Actual checkout: [9c7d9c3e1e65b9ce95d597b3f59dc41a885afeaa](https://github.com/Forem0/ENGRAM/commit/9c7d9c3e1e65b9ce95d597b3f59dc41a885afeaa), the workflow's GitHub PR merge checkout.
+- Checkout tree: `318c51ab3824f9e9e6cfe31f4701f5b82371e057`.
+- PR head: [f8d702148433b04bf30a271ebb9464927c26545e](https://github.com/Forem0/ENGRAM/commit/f8d702148433b04bf30a271ebb9464927c26545e). The PR head and actual merge checkout are recorded separately.
+- Capture and report interaction: [successful native Tauri/IPC job](https://github.com/Forem0/ENGRAM/actions/runs/40874129225/job/123451027724).
+- Verification: [all seven passing CI checks](https://github.com/Forem0/ENGRAM/actions/runs/40874129225).
+- Artifact: `native-tauri-workspace`, ID `12898250680`.
 
-The downloaded artifact ZIP (ID `12850117723`) matches its API-provided SHA-256 `06aec2ffaff5fd8d804c2c1f00912067ef09afa6ac442e912ce31ec83e84b8fe`. All six logs contain `ENGRAM_TAURI_SMOKE_OK`. All six images were visually inspected.
+The downloaded artifact ZIP matches its API-provided SHA-256 `48456c901369ad3c992e56ffeb7084b3f2dec1e2b4c394a09c5563240297aaaf`. All eight images are 1440 × 940 pixels and were visually inspected. They are copied byte for byte from the artifact, without cropping, compositing or relabelling earlier captures.
 
-Each launch uses `--demo --view VIEW --smoke-test`. The renderer loads the generated case through the real native command bridge and signals readiness after rendering. CI captures the visible 1440 × 940 window before the guarded smoke process exits. These captures establish native launch and initial IPC, not every interactive workflow; persistence and stale/cancelled saves have separate Rust regression coverage.
+## Six startup views
 
-- `workspace.png`: Trace map, review filters, viewport controls and inspector. The findings dock continues below the visible fold.
+Each startup launch uses `--demo --view VIEW --smoke-test`. The renderer loads the generated case through the real native command bridge and signals readiness after rendering. All six logs contain `ENGRAM_TAURI_SMOKE_OK`. CI captures the visible window before the guarded smoke process exits. These six images establish native launch and initial IPC; the report exercise below is separate evidence of writing a report.
+
+- `workspace.png`: Trace map, Export report action, review filters, viewport controls and inspector. The findings dock continues below the visible fold.
 - `findings.png`: searchable paginated index and finding review controls; more rows and pagination are available by scrolling.
 - `timeline.png`: source chronology with review filters and timestamp context.
 - `connections.png`: actual recorded evidence relationships and their endpoints.
 - `compare.png`: native baseline-selection state, before opening an earlier case. No comparison result is invented.
 - `modules.png`: implemented and experimental readers, with more states and source notes below the visible fold.
 
-SHA-256:
+## Actual report interaction
+
+[`scripts/native-report-smoke.sh`](../../scripts/native-report-smoke.sh) launches the ordinary native `--demo` application and drives its visible controls with normal mouse and keyboard events. It uses the actual XDG/GTK destination pickers through the regular Tauri commands, saves a synthetic case, cancels one report picker, then exports Markdown and CSV. Both output files match the shared-engine CLI rendering of the exact saved native snapshot byte for byte.
+
+- `report-export.png` is the artifact's unchanged `report-smoke/report-default-options.png`: 33 current results, Markdown selected, all three private-field opt-ins off.
+- `report-receipt.png` is the artifact's unchanged `report-smoke/report-markdown-receipt.png`: completed local Markdown export with 33 findings, file size and SHA-256 receipt.
+
+The interaction log contains `ENGRAM_NATIVE_REPORT_PICKER_OK` and `report-smoke/verification.json` records `native_report_e2e: passed`. Independent checks confirm minimal-field defaults, filename-only structured paths, CSV finding IDs/order, BOM and CRLF records, and unchanged bytes in the saved input case. The actual Markdown and CSV receipt screens were visually inspected and their hashes match the output proof; receipt UI text was not machine-parsed.
+
+| Output | Findings | Bytes | SHA-256 |
+| --- | --- | --- | --- |
+| Markdown | 33 | 14,083 | `d7f7b51e82219c9f237fb756ff22abbe0a0dc4e660b076dfb3a924d18891505c` |
+| CSV | 33 | 11,265 | `a8ab76261e3aa2b53352f3ba15cc40b7c149018e8c1b5d1ff6141ba17c2298f0` |
+
+This exercise establishes the tested Linux/X11/WebKitGTK path. It does not exercise unsaved annotation edits, overwrite-picker confirmation, Windows/macOS GUI interactions or real user evidence. Stale snapshots, failed writes, review retention and output guards have separate Rust regression coverage. See [building and verification](../../docs/BUILDING.md#native-report-interaction) for the full scope.
+
+## Image SHA-256
 
 ```text
-47810a6cc99b8ba37c9b981cf807d79c8ff90c9eab6715810c6b9241bf357bea  workspace.png
-e4174d4efa777cf32860bf8dcf6cf4bbbc726d24586f1b18ed57fc9547d468ed  findings.png
-465bc3d9e964ca7a78adbeffec0f567dbf4430e6df5fa3cbf53c0a98a024131d  timeline.png
-8f2fc641618954c2a1a0064b33dec8de5e8ea62b4c0c7467449a715e9f66958e  connections.png
-524d911f1178b5d8bc30dcdc143d94f65a5cbdb7661f7efe51aa24447046e1c1  compare.png
-2694fbfdbb7e79abae4ce3e11637969f4876f9b30a95393024c9a8463715f322  modules.png
+d8233db452aa14448aaf539188c2e5db7de0fb4fc945617a3e2f1cc49d3d1095  workspace.png
+78db6502c8b34ba14b1bba40eb22b6abf93f2ea03e5846df859d784f1d019d89  findings.png
+761ca3521f71232a06148fa5d8b2ad00f33a93cc5e0b5395db2e528cadedb80e  timeline.png
+d926f479f4af8f0ddf293bb07cd53f0c3a9cc42512ea737bc373531f40ff9b16  connections.png
+23612ba5ee02d3b133d7a2adc6f1acf31b53e8efd3e78ee1af3ec96b3b7cbabb  compare.png
+376c8b73e0617129d6f5c14ef1bcd0c1e23dfbe7d831cf53e968c1916380bfc8  modules.png
+18f8d0485635c77b597791408807666b4fe042fe83299b34ceb7b70a75b0c865  report-export.png
+7d31b6e60594e482520aa6d732ba04d7b04b040e0cfe52f127a8b6c964259bc9  report-receipt.png
 ```
 
-Original design illustrations remain separately labelled under [assets/design/atlas-focus](../design/atlas-focus/README.md). Historical native galleries retain their own evidence in the [0.4 release source](https://github.com/Forem0/ENGRAM/tree/v0.4.0/assets/screenshots), [0.3 release source](https://github.com/Forem0/ENGRAM/tree/v0.3.0/assets/screenshots) and [0.2 release source](https://github.com/Forem0/ENGRAM/tree/v0.2.0-preview.2/assets/screenshots).
+Original design illustrations remain separately labelled under [assets/design/atlas-focus](../design/atlas-focus/README.md). Historical native galleries retain their own evidence in the [0.5 release source](https://github.com/Forem0/ENGRAM/tree/v0.5.0/assets/screenshots), [0.4 release source](https://github.com/Forem0/ENGRAM/tree/v0.4.0/assets/screenshots), [0.3 release source](https://github.com/Forem0/ENGRAM/tree/v0.3.0/assets/screenshots) and [0.2 release source](https://github.com/Forem0/ENGRAM/tree/v0.2.0-preview.2/assets/screenshots).
