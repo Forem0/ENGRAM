@@ -222,6 +222,54 @@ fn backup_preflight_counts_index_paths_and_reads_optional_device_metadata() {
 }
 
 #[test]
+fn backup_fixture_previews_are_visible_calibration_cards_with_identical_source_bytes() {
+    let folder = tempfile::tempdir().unwrap();
+    create_demo_backup_fixture(folder.path()).unwrap();
+    let (case, access) = scan_path_with_media(folder.path(), &ScanOptions::default()).unwrap();
+    let media: Vec<_> = case
+        .findings
+        .iter()
+        .filter(|finding| finding.rule_id == "file.media")
+        .collect();
+    assert_eq!(media.len(), 3);
+    let mut source_bytes = Vec::new();
+    for finding in &media {
+        let logical = format!("synthetic:{}:{}", finding.origin, finding.path);
+        let identifier = format!("{:x}", Sha256::digest(logical.as_bytes()))[..40].to_owned();
+        let bytes = fs::read(folder.path().join(&identifier[..2]).join(&identifier)).unwrap();
+        let expected_hash = format!("{:x}", Sha256::digest(&bytes));
+        assert_eq!(finding.sha256.as_deref(), Some(expected_hash.as_str()));
+        let preview = access.preview(&finding.id).unwrap();
+        assert_eq!((preview.source_width, preview.source_height), (640, 400));
+        assert_eq!((preview.width, preview.height), (640, 400));
+        assert_eq!(preview.source_sha256, expected_hash);
+        let rendered = STANDARD
+            .decode(
+                preview
+                    .data_url
+                    .strip_prefix("data:image/png;base64,")
+                    .unwrap(),
+            )
+            .unwrap();
+        let image = image::load_from_memory(&rendered).unwrap().to_rgba8();
+        assert_eq!(image.dimensions(), (640, 400));
+        assert!(image.pixels().all(|pixel| pixel[3] == 255));
+        assert_eq!(*image.get_pixel(0, 0), image::Rgba([244, 240, 229, 255]));
+        assert_eq!(*image.get_pixel(30, 30), image::Rgba([36, 107, 254, 255]));
+        assert_eq!(*image.get_pixel(28, 150), image::Rgba([25, 197, 199, 255]));
+        assert_ne!(image.get_pixel(80, 180), image.get_pixel(320, 232));
+        source_bytes.push(bytes);
+    }
+    assert!(source_bytes.windows(2).all(|pair| pair[0] == pair[1]));
+    for finding in &media {
+        assert!(media
+            .iter()
+            .filter(|other| other.id != finding.id)
+            .all(|other| finding.related_ids.contains(&other.id)));
+    }
+}
+
+#[test]
 fn blank_or_control_only_optional_device_metadata_is_absent() {
     let folder = tempfile::tempdir().unwrap();
     create_demo_backup_fixture(folder.path()).unwrap();
