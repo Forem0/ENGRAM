@@ -76,7 +76,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
+        # macOS ARM64 hosted runners reported capacity/provisioning failures.
+        # Run host tests on the standard Intel image and cross-link ARM64 below.
+        os: [ubuntu-latest, windows-latest, macos-15-intel]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
@@ -130,6 +132,13 @@ jobs:
       - name: Clippy
         if: success() || steps.formatting.outcome == 'failure'
         run: cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
+      - name: Cross-build the Apple Silicon desktop and CLI
+        if: runner.os == 'macOS' && success()
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '11.0'
+        run: |
+          rustup target add aarch64-apple-darwin
+          cargo build -p engram-desktop -p engram-cli --target aarch64-apple-darwin --features engram-desktop/custom-protocol --locked
 
   native-app:
     name: Native Tauri app and IPC / Linux
