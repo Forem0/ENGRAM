@@ -13,7 +13,7 @@ pub fn run() {
         }
     };
     if launch.help {
-        println!("ENGRAM — Trace desk\n\n  --demo         Open the synthetic demonstration (default)\n  --view VIEW    Start in map, findings, timeline, connections, compare or modules\n  --smoke-test   Verify the real frontend/engine bridge and exit\n\nChoose real sources and case files through the native app dialogs.");
+        println!("ENGRAM — Trace desk\n\n  --demo         Open the synthetic demonstration (default)\n  --view VIEW    Start in map, findings, timeline, connections, compare, modules or gallery\n  --smoke-test   Verify the real frontend/engine bridge and exit\n\nChoose real sources and case files through the native app dialogs.");
         return;
     }
     tauri::Builder::default()
@@ -22,6 +22,10 @@ pub fn run() {
             commands::get_runtime_info,
             commands::load_demo,
             commands::select_source,
+            commands::select_backup,
+            commands::scan_backup,
+            commands::cancel_backup,
+            commands::preview_media,
             commands::open_case,
             commands::save_case,
             commands::export_report,
