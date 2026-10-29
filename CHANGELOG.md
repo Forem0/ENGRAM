@@ -4,6 +4,7 @@
 
 - Add a seventh workspace view for recorded media files, thumbnail-path evidence, Photos catalogue rows and unmatched associations.
 - Preview selected PNG/JPEG files through native-owned source access captured during an explicit scan. Check the source SHA-256 and generate a metadata-stripped PNG with bounded input, dimensions and output.
+- Apply supported image orientation before resizing so portrait JPEGs retain their intended display direction; keep the original source unchanged.
 - Keep previews transient. Opening a saved case or demonstration does not restore source-read access, even when an imported case reuses a previous ID.
 - Add a three-step iPhone backup workflow: native folder selection, bounded index/encryption inspection and explicit analysis. Index counts and actual reader coverage stay separate.
 - Require explicit unencrypted metadata; keep encrypted, malformed and unsupported backups unavailable. Cancelled or failed operations retain the current observation and review.
