@@ -30,7 +30,7 @@ ENGRAM does not bypass encryption, brute-force passwords, unlock Keychain, recov
 
 ## Sharing a report
 
-The 0.6.0 report-export source defaults to omitting analyst notes, source root and source-derived detail fields, with filename-only values for the structured path field. These options minimize fields; they do not anonymize arbitrary imported text. Titles, filenames, dates, IDs and hashes can still identify activity. An explicit details opt-in can contain private source text or paths; entered notes are plain text and are not automatically redacted.
+Report export defaults to omitting analyst notes, source root and source-derived detail fields, with filename-only values for the structured path field. These options minimize fields; they do not anonymize arbitrary imported text. Titles, filenames, dates, IDs and hashes can still identify activity. An explicit details opt-in can contain private source text or paths; entered notes are plain text and are not automatically redacted.
 
 The desktop chooses the report destination through a native dialog. React sends a case ID, review metadata and selected IDs/options; Rust uses its own validated evidence snapshot. Reports are written to new files outside source evidence and existing outputs are not overwritten. Exporting current review changes does not save them back to the restorable case or clear the unsaved-review indicator. The CLI exports only metadata already present in its supplied saved case.
 

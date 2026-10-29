@@ -89,8 +89,8 @@ Future modules should implement the same evidence, bounds, masking and explicit-
 
 ## Release identity and compatibility
 
-Version 0.6.0 source continues the cobalt creature and Trace desk identity, the Tauri desktop and schema-1 case format with optional review metadata. The desktop and CLI share case validation, comparison and report rendering. Markdown/CSV reports are output artifacts, not an extension of the restorable case schema.
+Version 0.6.0 continues the cobalt creature and Trace desk identity, the Tauri desktop and schema-1 case format with optional review metadata. The desktop and CLI share case validation, comparison and report rendering. Markdown/CSV reports are output artifacts, not an extension of the restorable case schema.
 
-The 0.6.0 work is being prepared locally. Its Rust/native tests, IPC and production packages require verification for the corresponding revision before release. Existing 0.5.0 native captures retain their own version and provenance.
+The [0.6.0 verification run](https://github.com/Forem0/ENGRAM/actions/runs/40874129225) records cross-platform Rust/frontend checks and Linux native interaction evidence. A separate native report exercise uses ordinary renderer actions, guarded Tauri IPC and actual XDG/GTK save pickers; its output is compared with the CLI rendering of the same saved synthetic snapshot. This Linux exercise does not establish Windows/macOS GUI behavior or every review interaction. [Build and capture documentation](BUILDING.md) describes the scope, while release assets retain their own package provenance.
 
 Every release keeps its own native build and capture provenance. Screenshots must identify their source revision and frontend; earlier binaries or captures are not relabelled as a new interface.

@@ -70,7 +70,7 @@ The CLI escapes terminal control characters when displaying untrusted paths or s
 
 ## Export
 
-The export command is added in the local **0.6.0 source preparation**. It is not available in the 0.5.0 download.
+The **0.6.0** CLI includes `engram export` for reports from saved cases.
 
 ```bash
 engram export ./sample.engram.json --out ./findings.report.md
