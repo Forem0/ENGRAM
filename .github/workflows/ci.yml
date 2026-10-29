@@ -133,7 +133,7 @@ jobs:
         if: success() || steps.formatting.outcome == 'failure'
         run: cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
       - name: Cross-build the Apple Silicon desktop and CLI
-        if: runner.os == 'macOS' && success()
+        if: runner.os == 'macOS' && (success() || steps.formatting.outcome == 'failure')
         env:
           MACOSX_DEPLOYMENT_TARGET: '11.0'
         run: |
