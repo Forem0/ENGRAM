@@ -1,4 +1,4 @@
-use crate::{validate_review, Case, CaseDiff, EngramError, MAX_FINDINGS};
+use crate::{validate_review, Case, CaseDiff, CaseReview, EngramError, MAX_FINDINGS};
 use std::{
     collections::{BTreeMap, HashSet},
     fs,
@@ -35,6 +35,47 @@ pub fn write_case(case: &Case, destination: &Path) -> Result<(), EngramError> {
     temporary
         .persist_noclobber(&destination)
         .map_err(|error| EngramError::Io(error.error))?;
+    Ok(())
+}
+
+/// Persist a bounded derived artifact through the same output guard as a case.
+/// Source roots from imported cases remain inert metadata throughout this write.
+pub(crate) fn write_new_artifact(
+    case: &Case,
+    destination: &Path,
+    bytes: &[u8],
+    limit: usize,
+) -> Result<PathBuf, EngramError> {
+    if bytes.len() > limit {
+        return Err(EngramError::Input("Report size limit exceeded.".into()));
+    }
+    validate_artifact_path_text(destination)?;
+    let destination = validate_destination(case, destination)?;
+    validate_artifact_path_text(&destination)?;
+    let parent = destination
+        .parent()
+        .ok_or_else(|| EngramError::Input("Choose a report filename.".into()))?;
+    fs::create_dir_all(parent)?;
+    validate_destination(case, &destination)?;
+    let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
+    temporary.write_all(bytes)?;
+    temporary.as_file().sync_all()?;
+    // Noclobber also covers a destination created after the validation above.
+    temporary
+        .persist_noclobber(&destination)
+        .map_err(|error| EngramError::Io(error.error))?;
+    Ok(destination)
+}
+
+fn validate_artifact_path_text(path: &Path) -> Result<(), EngramError> {
+    let text = path.to_str().ok_or_else(|| {
+        EngramError::Input("Choose a report destination with a valid Unicode path.".into())
+    })?;
+    if text.is_empty() || text.len() > 32_768 || text.chars().any(char::is_control) {
+        return Err(EngramError::Input(
+            "Report destination must be at most 32768 UTF-8 bytes and contain no control characters.".into(),
+        ));
+    }
     Ok(())
 }
 
@@ -128,6 +169,13 @@ pub fn read_case(path: &Path) -> Result<Case, EngramError> {
         return Err(EngramError::Input("Case size limit exceeded.".into()));
     }
     let mut case: Case = serde_json::from_slice(&bytes)?;
+    case.review = validate_case(&case)?;
+    Ok(case)
+}
+
+/// The report renderer shares the importer's structural bounds without opening
+/// any of the source paths described by the case.
+pub(crate) fn validate_case(case: &Case) -> Result<CaseReview, EngramError> {
     if case.schema_version != 1 {
         return Err(EngramError::Input(format!(
             "Unsupported case schema {}. This build supports schema 1.",
@@ -199,8 +247,7 @@ pub fn read_case(path: &Path) -> Result<Case, EngramError> {
             "Case contains a dangling or self-referencing evidence connection.".into(),
         ));
     }
-    case.review = validate_review(&case.findings, &case.review)?;
-    Ok(case)
+    validate_review(&case.findings, &case.review)
 }
 
 /// Compare exported evidence and metadata. Case-local secret HMACs are deliberately

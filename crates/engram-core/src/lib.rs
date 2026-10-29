@@ -6,6 +6,7 @@
 mod database;
 mod demo;
 pub mod model;
+mod report;
 mod review;
 mod scan;
 mod secrets;
@@ -13,6 +14,10 @@ mod storage;
 
 pub use demo::{create_demo_fixture, demo_case};
 pub use model::*;
+pub use report::{
+    render_report, write_report, RenderedReport, ReportFormat, ReportOptions, ReportReceipt,
+    MAX_REPORT_BYTES, MAX_REPORT_FINDINGS,
+};
 pub use review::{
     validate_review, MAX_REVIEW_ANNOTATIONS, MAX_REVIEW_NOTE_BYTES, MAX_REVIEW_TOTAL_NOTE_BYTES,
 };
