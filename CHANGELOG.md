@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0 — Evidence reports — local preparation
+
+- Add selected-finding Markdown reports and spreadsheet-safe CSV tables through the shared Rust core.
+- Export the desktop's current results, all findings or bookmarks with a native destination dialog and a checksum receipt.
+- Keep analyst notes, full recorded paths and source-derived details as separate opt-ins; defaults omit those fields and use filename-only path labels.
+- Preserve engine confidence, case evidence and review state. Export is independent from Save case and never marks unsaved review as saved.
+- Add `engram export` with explicit finding IDs or saved-bookmark selection, format choice and structured JSON receipts.
+- Bound exports to 10,000 known, unique finding IDs and 16 MiB; reject unknown IDs, empty scopes, unsafe destinations and existing outputs without silent fallback or truncation.
+- Escape report markup, neutralize spreadsheet formula prefixes and retain deterministic content checksums.
+
+This is local source preparation, not a published 0.6.0 release. New Rust and CLI regressions are authored; execution of those tests, native IPC and platform production packages must be verified for this revision before release. The existing downloads and six native gallery images remain 0.5.0 with their original provenance. Case schema remains 1; reports do not replace restorable case files. No new recovery or reader-support claims are introduced.
+
 ## [0.5.0 — Review workspace](https://github.com/Forem0/ENGRAM/releases/tag/v0.5.0) — 2026-10-28
 
 - Add finding bookmarks, Unreviewed / Needs review / Reviewed states, and plain-text analyst notes in the persistent inspector.

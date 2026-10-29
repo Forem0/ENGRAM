@@ -19,6 +19,8 @@ ENGRAM examines the offline sources you choose and turns their readable contents
 
 The **Trace desk** brings the map, findings, timeline, connections and evidence inspector into one native application. **ENGRAM 0.5.0** builds on the **Atlas Focus** workspace with finding bookmarks, review states, plain-text notes, structured search and a pannable, zoomable evidence map. Save a case locally and reopen it without rescanning the original source. The desktop and command-line tool share the same Rust analysis engine.
 
+This checkout prepares **ENGRAM 0.6.0** with selected-finding reports in Markdown and CSV. The published download and native gallery below remain **0.5.0**. Regression tests accompany the report workflow; Rust/native execution and platform packages for 0.6.0 must be verified before its release. The 0.5.0 download does not include the new export command.
+
 ![Native Atlas Focus Trace map with the evidence inspector](assets/screenshots/workspace.png)
 
 These six views were captured on Linux from the actual **0.5.0** Tauri application, using synthetic files processed by the shared Rust engine. The [successful native Tauri/IPC capture job](https://github.com/Forem0/ENGRAM/actions/runs/40766085166/job/123090713655) exercised [source 023d641](https://github.com/Forem0/ENGRAM/commit/023d64122c28e35fd8d84fcea9477d8f4f21710c); the [verification run](https://github.com/Forem0/ENGRAM/actions/runs/40768086711) records the platform checks. [Capture provenance](assets/screenshots/README.md) records the exact images and execution evidence. The original [Atlas Focus design gallery](assets/design/atlas-focus/README.md) remains a separate visual reference.
@@ -118,6 +120,18 @@ With the map focused, the arrow keys pan, **+ / −** zoom, and **0** or **Home*
 | **?** | Open Search & shortcuts. |
 
 Letter shortcuts stay inactive while typing. Saved-case selection and persistence use the native desktop application.
+
+## Export findings from a case
+
+The 0.6.0 source adds **Export report** to the Trace desk. In **Export investigation**, choose **Current results**, **Bookmarked** or **Entire case**, then select **Markdown report** or **CSV table**. Current results include the full filtered queue, rather than only the visible page or representative map nodes. An empty scope cannot silently become an export of the whole case.
+
+The export starts with a minimal set of finding fields. The structured path field is reduced to a filename; the source root, analyst notes and source-derived detail fields are omitted. Opt in separately to full recorded paths, evidence details or notes. Path settings do not anonymize arbitrary source text: details can contain private text or paths, and notes are the plain text you entered without automatic redaction. Titles, filenames, dates, IDs and hashes can still identify activity, so a report remains a sensitive local artifact.
+
+Select **Choose destination & export** to open the native save dialog for a new file outside source evidence. A successful export returns its format, finding count, byte count and SHA-256 checksum. Cancelled or failed exports preserve the open case and its review. Export uses the current review in the desktop; it does **not** mark an unsaved review as saved. Use **Save case** to retain changes in a case you can reopen.
+
+Markdown is escaped as report text, and CSV uses UTF-8 with a BOM, quoted fields and CRLF records. Spreadsheet formula prefixes in text cells are neutralized. CSV refuses provenance identifiers that would require formula rewriting; choose Markdown for those cases. Both formats preserve the engine's confidence labels and describe the selected observation; neither format is a restorable ENGRAM case or evidence of secure deletion. Reports contain at most 10,000 selected findings and 16 MiB of output, with an explicit error rather than truncation when a bound is exceeded.
+
+The browser demonstration can show export options against the synthetic case. Writing a report requires the native application. The six native images below retain their actual 0.5.0 provenance and do not establish that the 0.6.0 export path ran.
 
 ## A tour of the app
 
@@ -251,6 +265,17 @@ engram compare ./before.engram.json ./after.engram.json \
 
 `--json` emits one structured value to stdout. Errors go to stderr with a nonzero exit status. `compare --out` writes a separate comparison document; it does not replace either input case.
 
+The 0.6.0 CLI source also exports reports from a saved case:
+
+```bash
+engram export ./after.engram.json --out ./findings.report.md
+engram export ./after.engram.json --out ./bookmarks.csv --format csv --bookmarked
+engram export ./after.engram.json --out ./selected.report.md \
+  --finding <finding-id> --finding <another-finding-id> --json
+```
+
+Use `--include-notes`, `--include-paths` and `--include-details` only for fields you intend to retain in the report. Explicit IDs and `--bookmarked` are mutually exclusive. The CLI reads review metadata already saved in the supplied case; it cannot see unsaved changes in an open desktop window. See the [export command reference](docs/COMMANDS.md#export).
+
 ### Set inspection bounds
 
 ```bash
@@ -300,13 +325,14 @@ flowchart LR
     D --> U[React and TypeScript Trace desk]
     C --> T[CLI and structured output]
     C --> V[Snapshot comparison]
+    C --> X[Selected Markdown or CSV report]
 ```
 
 | Layer | Responsibility |
 | --- | --- |
-| Rust core | source classification, bounded readers, evidence, masking, relationships and case validation |
-| Rust Tauri backend | native dialogs, active-case session, validated review snapshots, guarded background operations and persistence |
-| React / TypeScript | six workspace views, review controls, structured search, map navigation and evidence presentation |
+| Rust core | source classification, bounded readers, evidence, masking, relationships, case validation and report rendering |
+| Rust Tauri backend | native dialogs, active-case session, validated review snapshots, guarded persistence and report export |
+| React / TypeScript | six workspace views, review controls, search, map navigation, evidence presentation and export options |
 | CLI | explicit source commands, repeatable workflows and structured output |
 
 The renderer is not given a general filesystem or shell API. A cancelled dialog leaves the open case in place; a failed operation reports its error without quietly replacing the case with a demo. See [architecture](docs/ARCHITECTURE.md).
@@ -328,7 +354,7 @@ The Tauri CLI starts the frontend and native Rust process together. For a produc
 npm run tauri -- build --ci -- --locked
 ```
 
-`npm run dev` alone starts a browser-only synthetic layout demonstration. Real source dialogs, case persistence and baseline selection require the native app. Browser captures are separate from native execution evidence.
+`npm run dev` alone starts a browser-only synthetic layout demonstration. Real source dialogs, case persistence, report writing and baseline selection require the native app. Browser captures are separate from native execution evidence.
 
 ### Development checks
 
@@ -348,11 +374,11 @@ cargo test -p engram-desktop --features engram-desktop/custom-protocol --locked
 cargo clippy --workspace --all-targets --features engram-desktop/custom-protocol --locked -- -D warnings
 ```
 
-Tests use synthetic sources. CI checks the Rust workspace on Windows, macOS and Linux, verifies the frontend, and separately launches real Tauri/WebKit windows under a Linux display to exercise the renderer-to-Rust path. Native build and capture evidence belongs with the release it describes.
+Tests use synthetic sources. CI checks the Rust workspace on Windows, macOS and Linux, verifies the frontend, and separately launches real Tauri/WebKit windows under a Linux display to exercise the renderer-to-Rust path. Native build and capture evidence belongs with the release it describes. The local 0.6.0 preparation has not been submitted to remote CI; its Rust/native tests and production packages require that later verification.
 
 ## Next work
 
-The current source supports the folder-to-case workflow, local persistence, review annotations, structured search, map navigation and comparison. Next priorities are broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, continued accessibility checks, and platform signing and notarization.
+The current source supports the folder-to-case workflow, local persistence, review annotations, structured search, map navigation and comparison. The 0.6.0 preparation adds report export from selected findings. Next priorities are native report-workflow verification, broader reader fixtures and compatibility coverage, clearer source-specific diagnostics, continued accessibility checks, and platform signing and notarization.
 
 Deleted-record reconstruction, owner-unlocked encrypted backups and optional local OCR remain research items. They need reproducible evidence and explicit support boundaries before moving into the working capability matrix. See the [roadmap](docs/ROADMAP.md).
 
