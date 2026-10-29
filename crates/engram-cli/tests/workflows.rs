@@ -178,9 +178,15 @@ fn iphone_backup_fixture_is_explicit_synthetic_and_scannable_without_source_writ
     let output = temporary.path().join("backup.engram.json");
     let case = successful_json(&["scan", text(&source), "--out", text(&output), "--json"]);
     assert_eq!(case["source_kind"], "ios_backup");
-    assert!(case["findings"].as_array().unwrap().iter().any(|finding| finding["rule_id"] == "file.media"));
+    assert!(case["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|finding| finding["rule_id"] == "file.media"));
     assert_eq!(source_snapshot(&source), before);
-    assert!(!engram(&["fixture", text(&source), "--iphone-backup"]).status.success());
+    assert!(!engram(&["fixture", text(&source), "--iphone-backup"])
+        .status
+        .success());
     assert_eq!(source_snapshot(&source), before);
 }
 
