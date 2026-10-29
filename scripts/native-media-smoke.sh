@@ -205,7 +205,19 @@ echo "Observed actual folder picker: $(xdotool getwindowname "$picker")"
 xdotool getwindowgeometry --shell "$picker" > "$out/backup-folder-picker-geometry.txt"
 import -window "$picker" "$out/backup-folder-picker.png"
 xdotool windowfocus --sync "$picker"
-xdotool key --clearmodifiers ctrl+l
+# GTK's Recent mode ignores its location-entry text for folder selection. The
+# observed chooser exposes the checkout bookmark ENGRAM at 63,135. Enter that
+# filesystem location first; this is a UI action, not a preconfigured test path
+# in the application or a bypass of its real folder picker.
+eval "$(xdotool getwindowgeometry --shell "$picker")"
+[[ "$WIDTH" == 1096 && "$HEIGHT" == 822 ]] || {
+  echo 'Folder picker dimensions differ from the observed bookmark layout.' >&2
+  exit 1
+}
+xdotool mousemove --window "$picker" 63 135 click 1
+sleep 1
+import -window "$picker" "$out/backup-folder-browser-mode.png"
+xdotool key --clearmodifiers ctrl+l ctrl+a
 xdotool type --clearmodifiers --delay 8 "$source/"
 sleep 1
 import -window "$picker" "$out/backup-folder-picker-filled.png"
