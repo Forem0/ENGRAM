@@ -239,7 +239,9 @@ fn run(cli: Cli) -> Result<(), EngramError> {
                 println!("SHA-256:  {}", visible(&receipt.sha256));
                 println!("\nThe input case is unchanged. Reports cannot be reopened as cases.");
                 if include_notes {
-                    println!("Included analyst notes are plain text and are not automatically redacted.");
+                    println!(
+                        "Included analyst notes are plain text and are not automatically redacted."
+                    );
                 }
             }
         }
