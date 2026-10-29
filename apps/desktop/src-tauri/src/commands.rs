@@ -1,7 +1,7 @@
 use crate::session::{on_worker, Comparison, DesktopState, RuntimeInfo, SaveSnapshot, Session};
 use engram_core::{
-    compare_cases, demo_case, read_case, scan_path, write_case, Case, CaseReview, ScanOptions,
-    SourceKind,
+    compare_cases, demo_case, read_case, render_report, scan_path, write_case, write_report, Case,
+    CaseReview, ReportFormat, ReportOptions, ReportReceipt, ScanOptions, SourceKind,
 };
 use std::{io::Write, path::Path};
 use tauri::{AppHandle, State, WebviewWindow};
@@ -35,6 +35,32 @@ fn persist_review_snapshot(
     write_case(snapshot.case(), destination).map_err(|error| error.to_string())?;
     session.accept_saved_review(snapshot);
     Ok(destination.to_string_lossy().into_owned())
+}
+
+fn prepare_report_snapshot(
+    session: &Session,
+    case_id: &str,
+    review: CaseReview,
+    options: &ReportOptions,
+) -> Result<SaveSnapshot, String> {
+    let snapshot = session.prepare_save(case_id, review)?;
+    // Invalid selections and over-limit output fail before opening a save picker.
+    // Rendering is deterministic and is repeated from this immutable snapshot
+    // after the picker; the renderer never supplies report content or paths.
+    render_report(snapshot.case(), options).map_err(|error| error.to_string())?;
+    session.require_current_snapshot(&snapshot)?;
+    Ok(snapshot)
+}
+
+fn persist_report_snapshot(
+    session: &Session,
+    snapshot: &SaveSnapshot,
+    options: &ReportOptions,
+    destination: &Path,
+) -> Result<ReportReceipt, String> {
+    session.require_current_snapshot(snapshot)?;
+    // Deliberately do not accept_saved_review: a report is not a saved case.
+    write_report(snapshot.case(), options, destination).map_err(|error| error.to_string())
 }
 
 #[tauri::command]
@@ -139,6 +165,45 @@ pub(crate) async fn save_case(
     let destination = selection.path().to_owned();
     on_worker(operation, move |session| {
         persist_review_snapshot(session, &snapshot, &destination).map(Some)
+    })
+    .await
+}
+
+#[tauri::command]
+pub(crate) async fn export_report(
+    window: WebviewWindow,
+    state: State<'_, DesktopState>,
+    case_id: String,
+    review: CaseReview,
+    options: ReportOptions,
+) -> Result<Option<ReportReceipt>, String> {
+    require_main(&window)?;
+    let operation = state.session.begin()?;
+    let (operation, snapshot, options) = tauri::async_runtime::spawn_blocking(move || {
+        let snapshot = prepare_report_snapshot(&operation.session, &case_id, review, &options)?;
+        Ok::<_, String>((operation, snapshot, options))
+    })
+    .await
+    .map_err(|_| {
+        "Report preparation stopped. The current case and review were retained.".to_owned()
+    })??;
+    let picker = rfd::AsyncFileDialog::new()
+        .set_parent(&window)
+        .set_title("Export a new report outside the source folder");
+    let picker = match options.format {
+        ReportFormat::Markdown => picker
+            .set_file_name("case.report.md")
+            .add_filter("Markdown report", &["md"]),
+        ReportFormat::Csv => picker
+            .set_file_name("case.report.csv")
+            .add_filter("CSV table", &["csv"]),
+    };
+    let Some(selection) = picker.save_file().await else {
+        return Ok(None);
+    };
+    let destination = selection.path().to_owned();
+    on_worker(operation, move |session| {
+        persist_report_snapshot(session, &snapshot, &options, &destination).map(Some)
     })
     .await
 }
@@ -286,6 +351,121 @@ mod tests {
             std::fs::read_to_string(&output).unwrap(),
             "Existing data must remain."
         );
+    }
+
+    #[test]
+    fn successful_report_export_keeps_review_unsaved_and_snapshot_current() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let review = reviewed_metadata(&original);
+        let options = ReportOptions {
+            format: ReportFormat::Csv,
+            finding_ids: vec![original.findings[0].id.clone()],
+            include_notes: true,
+            include_paths: false,
+            include_details: false,
+        };
+        let snapshot = prepare_report_snapshot(&state.session, &original.id, review, &options).unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("report.csv");
+        let receipt = persist_report_snapshot(&state.session, &snapshot, &options, &output).unwrap();
+        let content = std::fs::read_to_string(&output).unwrap();
+        assert!(content.contains("Checked this source observation."));
+        assert_eq!(receipt.finding_count, 1);
+        assert_eq!(receipt.format, ReportFormat::Csv);
+        assert_eq!(receipt.bytes, content.len());
+        assert_eq!(receipt.sha256.len(), 64);
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+        assert!(state.session.require_current_snapshot(&snapshot).is_ok());
+    }
+
+    #[test]
+    fn cancelled_report_selection_drops_the_guard_without_saving_review() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let options = ReportOptions {
+            format: ReportFormat::Markdown,
+            finding_ids: vec![original.findings[0].id.clone()],
+            include_notes: false,
+            include_paths: false,
+            include_details: false,
+        };
+        let operation = state.session.begin().unwrap();
+        let snapshot = prepare_report_snapshot(&operation.session, &original.id, reviewed_metadata(&original), &options).unwrap();
+        assert!(snapshot.case().review[&original.findings[0].id].bookmarked);
+        drop(snapshot);
+        drop(operation);
+        assert!(!state.session.busy());
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+    }
+
+    #[test]
+    fn invalid_report_requests_fail_before_a_picker_or_output() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let mut options = ReportOptions {
+            format: ReportFormat::Markdown,
+            finding_ids: vec!["unknown-finding".into()],
+            include_notes: false,
+            include_paths: false,
+            include_details: false,
+        };
+        assert!(prepare_report_snapshot(&state.session, &original.id, reviewed_metadata(&original), &options).is_err());
+        options.finding_ids = vec![original.findings[0].id.clone()];
+        assert!(prepare_report_snapshot(&state.session, "stale-case", reviewed_metadata(&original), &options).is_err());
+        let mut review = reviewed_metadata(&original);
+        review.get_mut(&original.findings[0].id).unwrap().note = "invalid\0note".into();
+        assert!(prepare_report_snapshot(&state.session, &original.id, review, &options).is_err());
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+    }
+
+    #[test]
+    fn report_snapshot_is_rechecked_after_a_picker_before_writing() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let options = ReportOptions {
+            format: ReportFormat::Markdown,
+            finding_ids: vec![original.findings[0].id.clone()],
+            include_notes: false,
+            include_paths: false,
+            include_details: false,
+        };
+        let snapshot = prepare_report_snapshot(&state.session, &original.id, reviewed_metadata(&original), &options).unwrap();
+        let mut replacement = original.clone();
+        replacement.title = "A replacement with the same imported case ID".into();
+        state.session.replace_case(replacement.clone()).unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("must-not-be-written.md");
+        assert!(persist_report_snapshot(&state.session, &snapshot, &options, &output).is_err());
+        assert!(!output.exists());
+        assert_eq!(state.session.active_case().unwrap().title, replacement.title);
+        assert_eq!(state.session.active_case().unwrap().review, replacement.review);
+    }
+
+    #[test]
+    fn failed_report_write_does_not_replace_existing_data_or_save_review() {
+        let state = DesktopState::new(Launch::default());
+        let original = demo_case();
+        state.session.replace_case(original.clone()).unwrap();
+        let options = ReportOptions {
+            format: ReportFormat::Markdown,
+            finding_ids: vec![original.findings[0].id.clone()],
+            include_notes: false,
+            include_paths: false,
+            include_details: false,
+        };
+        let snapshot = prepare_report_snapshot(&state.session, &original.id, reviewed_metadata(&original), &options).unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let output = directory.path().join("existing.md");
+        std::fs::write(&output, "Existing output must remain unchanged.").unwrap();
+        assert!(persist_report_snapshot(&state.session, &snapshot, &options, &output).is_err());
+        assert_eq!(std::fs::read_to_string(&output).unwrap(), "Existing output must remain unchanged.");
+        assert_eq!(state.session.active_case().unwrap().review, original.review);
+        assert!(state.session.require_current_snapshot(&snapshot).is_ok());
     }
 
     #[test]
