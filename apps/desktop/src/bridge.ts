@@ -3,13 +3,16 @@ import { assertCase } from './data';
 import { validateReview } from './review';
 import { validateReportOptions, validateReportReceipt } from './report';
 import type { Case, Comparison, ReportOptions, ReportReceipt, RuntimeInfo } from './model';
+import type { BackupInspection, MediaPreview } from './media-model';
+import { validateBackupInspection } from './backup';
+import { validateMediaPreview } from './media';
 
 export const native = isTauri();
 
 export async function runtimeInfo(): Promise<RuntimeInfo> {
   if (native) return invoke<RuntimeInfo>('get_runtime_info');
   return {
-    version: '0.6.0',
+    version: '0.7.0',
     engine: 'Browser demo · Rust-generated synthetic fixture',
     schema_version: 1,
     initial_view: new URLSearchParams(location.search).get('view') ?? 'map',
@@ -37,6 +40,31 @@ export async function selectSource(): Promise<Case | null> {
   requireNative();
   const result = await invoke<Case | null>('select_source');
   return result === null ? null : assertCase(result);
+}
+export async function selectBackup(): Promise<BackupInspection | null> {
+  requireNative();
+  const result = await invoke<unknown>('select_backup');
+  return result === null ? null : validateBackupInspection(result);
+}
+export async function scanBackup(token: string): Promise<Case> {
+  requireNative();
+  if (typeof token !== 'string' || !token || token.length > 256)
+    throw new Error('Select a backup again before scanning.');
+  return assertCase(await invoke<unknown>('scan_backup', { token }));
+}
+export async function cancelBackup(token: string): Promise<void> {
+  requireNative();
+  if (typeof token !== 'string' || !token || token.length > 256)
+    throw new Error('Invalid backup selection.');
+  await invoke('cancel_backup', { token });
+}
+export async function previewMedia(caseData: Case, findingId: string): Promise<MediaPreview> {
+  requireNative();
+  const finding = caseData.findings.find((item) => item.id === findingId);
+  if (!finding || finding.category !== 'media' || finding.rule_id !== 'file.media')
+    throw new Error('Choose a recorded media file to preview.');
+  const result = await invoke<unknown>('preview_media', { caseId: caseData.id, findingId });
+  return validateMediaPreview(result, finding);
 }
 export async function openCase(): Promise<Case | null> {
   requireNative();

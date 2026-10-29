@@ -4,6 +4,11 @@ import { AtlasTraceMap } from './AtlasTraceMap';
 import { BookmarkGlyph, ReviewPanel, ReviewToolbar, WorkspaceHelp } from './ReviewUI';
 import { WorkspaceDialog } from './WorkspaceDialog';
 import { ReportExport } from './ReportExport';
+import { MediaGallery } from './MediaGallery';
+import { BackupWizard } from './BackupWizard';
+import type { BackupInspection } from './media-model';
+import './media.css';
+import './backup.css';
 import { getReview, reviewKey, reviewSummary, updateReview } from './review';
 import { describeSearch } from './search';
 import {
@@ -43,6 +48,7 @@ type IconName =
   | 'connections'
   | 'compare'
   | 'modules'
+  | 'gallery'
   | 'folder'
   | 'open'
   | 'save'
@@ -65,6 +71,7 @@ const paths: Record<IconName, string[]> = {
   ],
   compare: ['M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4'],
   modules: ['M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'],
+  gallery: ['M3 4h18v16H3zM3 16l5-5 5 5 3-3 5 5', 'M8 8h.01'],
   folder: ['M3 6h7l2 2h9v12H3zM3 6V4h7l2 2'],
   open: ['M3 20V6h7l2 2h9v3M3 20l4-9h15l-4 9H3Z'],
   save: ['M4 3h13l3 3v15H4zM8 3v6h8V3M8 21v-8h8v8'],
@@ -925,6 +932,7 @@ function Inspector({
 export function App() {
   const [runtime, setRuntime] = useState<RuntimeInfo | null>(null);
   const [caseData, setCaseData] = useState<Case | null>(null);
+  const [observation, setObservation] = useState(0);
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const [view, setView] = useState<View>('map');
   const [selected, setSelected] = useState<Finding | null>(null);
@@ -937,8 +945,12 @@ export function App() {
   const [savedReviewKey, setSavedReviewKey] = useState(reviewKey(undefined));
   const [helpOpen, setHelpOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [backupOpen, setBackupOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
-    { kind: 'case'; label: string; action: () => Promise<Case | null> } | { kind: 'close' } | null
+    | { kind: 'case'; label: string; action: () => Promise<Case | null> }
+    | { kind: 'backup' }
+    | { kind: 'close' }
+    | null
   >(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const currentReviewKey = useMemo(() => reviewKey(caseData?.review), [caseData?.review]);
@@ -962,6 +974,7 @@ export function App() {
   const activeView = VIEWS.find((item) => item.id === view)!;
 
   function receiveCase(next: Case) {
+    setObservation((value) => value + 1);
     setCaseData(next);
     setComparison(null);
     setSelected(next.findings[0] ?? null);
@@ -1053,6 +1066,29 @@ export function App() {
       setBusy(null);
     }
   }
+  function openBackupWizard() {
+    if (busy) return;
+    if (reviewChanged) setPendingAction({ kind: 'backup' });
+    else setBackupOpen(true);
+  }
+  async function scanBackup(inspection: BackupInspection): Promise<void> {
+    if (busy || inspection.state !== 'ready')
+      throw new Error('Choose an available backup and wait for the current operation to finish.');
+    setBusy('Inspecting the selected iPhone backup');
+    setNotice(null);
+    try {
+      const next = await bridge.scanBackup(inspection.token);
+      receiveCase(next);
+      setView('gallery');
+      setBackupOpen(false);
+      setNotice({
+        kind: 'success',
+        text: `iPhone backup inspected. ${next.findings.length} findings recorded. Review Modules for actual reader coverage.`,
+      });
+    } finally {
+      setBusy(null);
+    }
+  }
   async function exportInvestigation(options: ReportOptions): Promise<ReportReceipt | null> {
     if (busy || !caseData || !bridge.native)
       throw new Error('Wait for the current desktop operation to finish.');
@@ -1116,6 +1152,7 @@ export function App() {
     const next = pendingAction;
     setPendingAction(null);
     if (next.kind === 'case') await changeCase(next.label, next.action, true);
+    else if (next.kind === 'backup') setBackupOpen(true);
     else {
       try {
         const { getCurrentWindow } = await import('@tauri-apps/api/window');
@@ -1149,6 +1186,7 @@ export function App() {
             event.preventDefault();
             setHelpOpen(false);
             setExportOpen(false);
+            setBackupOpen(false);
             setPendingAction({ kind: 'close' });
           });
           if (cancelled) stop();
@@ -1176,12 +1214,13 @@ export function App() {
       const command = event.ctrlKey || event.metaKey;
       if (command && (key === 'k' || key === 's')) {
         event.preventDefault();
-        if (pendingAction || helpOpen || exportOpen) return;
+        if (pendingAction || helpOpen || exportOpen || backupOpen) return;
         if (key === 's') {
           void save();
           return;
         }
-        if (!['map', 'findings', 'timeline', 'connections'].includes(view)) setView('findings');
+        if (!['map', 'findings', 'timeline', 'connections', 'gallery'].includes(view))
+          setView('findings');
         requestAnimationFrame(() => searchInput.current?.focus());
         return;
       }
@@ -1190,6 +1229,7 @@ export function App() {
         pendingAction ||
         helpOpen ||
         exportOpen ||
+        backupOpen ||
         command ||
         event.altKey ||
         (target instanceof HTMLElement &&
@@ -1199,7 +1239,7 @@ export function App() {
       if (key === '?') {
         event.preventDefault();
         setHelpOpen(true);
-      } else if (/^[1-6]$/.test(key)) {
+      } else if (/^[1-7]$/.test(key)) {
         event.preventDefault();
         setView(VIEWS[Number(key) - 1].id);
       } else if (
@@ -1228,6 +1268,7 @@ export function App() {
     pendingAction,
     helpOpen,
     exportOpen,
+    backupOpen,
     view,
     selected,
     selectionSource,
@@ -1241,6 +1282,9 @@ export function App() {
   return (
     <div className="app-shell" data-view={view}>
       {helpOpen && <WorkspaceHelp onClose={() => setHelpOpen(false)} />}
+      {backupOpen && (
+        <BackupWizard busy={!!busy} onClose={() => setBackupOpen(false)} onScan={scanBackup} />
+      )}
       {exportOpen && caseData && (
         <ReportExport
           caseData={caseData}
@@ -1340,6 +1384,15 @@ export function App() {
               Choose source
             </button>
             <button
+              className="button secondary backup-wizard-trigger"
+              disabled={!!busy}
+              title={nativeTitle}
+              onClick={openBackupWizard}
+            >
+              <Icon name="shield" size={16} />
+              Inspect iPhone backup
+            </button>
+            <button
               className="demo-link"
               disabled={!!busy}
               onClick={() => void changeCase('Generating a synthetic case', bridge.loadDemo)}
@@ -1356,7 +1409,7 @@ export function App() {
           </div>
           <span className="sidebar-version">
             {bridge.native ? 'Desktop application' : 'Browser demonstration'} ·{' '}
-            {runtime?.version ?? '0.6.0'}
+            {runtime?.version ?? '0.7.0'}
           </span>
         </div>
       </aside>
@@ -1434,7 +1487,7 @@ export function App() {
         <div className="workspace-body">
           <main className="main-content" id="main-content">
             <div
-              className={`view-heading ${['map', 'findings', 'timeline', 'connections'].includes(view) ? 'with-filters' : ''}`}
+              className={`view-heading ${['map', 'findings', 'timeline', 'connections', 'gallery'].includes(view) ? 'with-filters' : ''}`}
             >
               <div className="view-heading-copy">
                 <h1>{activeView.name}</h1>
@@ -1444,26 +1497,28 @@ export function App() {
                 (view === 'map' ||
                   view === 'findings' ||
                   view === 'timeline' ||
-                  view === 'connections') && (
+                  view === 'connections' ||
+                  view === 'gallery') && (
                   <FilterBar filters={filters} setFilters={setFilters} inputRef={searchInput} />
                 )}
             </div>
-            {caseData && ['map', 'findings', 'timeline', 'connections'].includes(view) && (
-              <>
-                <ReviewToolbar
-                  filters={filters}
-                  setFilters={setFilters}
-                  summary={reviewCounts}
-                  total={caseData.findings.length}
-                  onHelp={() => setHelpOpen(true)}
-                />
-                {searchDescription.error && (
-                  <p className="search-query-error" role="alert">
-                    {searchDescription.error}
-                  </p>
-                )}
-              </>
-            )}
+            {caseData &&
+              ['map', 'findings', 'timeline', 'connections', 'gallery'].includes(view) && (
+                <>
+                  <ReviewToolbar
+                    filters={filters}
+                    setFilters={setFilters}
+                    summary={reviewCounts}
+                    total={caseData.findings.length}
+                    onHelp={() => setHelpOpen(true)}
+                  />
+                  {searchDescription.error && (
+                    <p className="search-query-error" role="alert">
+                      {searchDescription.error}
+                    </p>
+                  )}
+                </>
+              )}
 
             {notice && (
               <div
@@ -1540,6 +1595,16 @@ export function App() {
                   />
                 )}
                 {view === 'modules' && <Modules caseData={caseData} />}
+                {view === 'gallery' && (
+                  <MediaGallery
+                    key={observation}
+                    caseData={caseData}
+                    visible={filtered}
+                    selected={selectionSource === 'current' ? selected : null}
+                    onSelect={select}
+                    busy={!!busy}
+                  />
+                )}
               </>
             ) : (
               !busy && (

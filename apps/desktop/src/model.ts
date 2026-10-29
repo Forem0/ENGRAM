@@ -9,7 +9,8 @@ export interface ReviewAnnotation {
   note: string;
 }
 export type CaseReview = Record<string, ReviewAnnotation>;
-export type View = 'map' | 'findings' | 'timeline' | 'connections' | 'compare' | 'modules';
+export type View =
+  'map' | 'findings' | 'timeline' | 'connections' | 'compare' | 'modules' | 'gallery';
 
 export interface Finding {
   id: string;
@@ -137,6 +138,13 @@ export const VIEWS: { id: View; name: string; subtitle: string; description: str
     subtitle: 'Know the boundaries.',
     description:
       'Reader availability, source coverage and the limits of this inspection, in plain sight.',
+  },
+  {
+    id: 'gallery',
+    name: 'Media gallery',
+    subtitle: 'See the trace.',
+    description:
+      'Browse recorded media, distinguish files from catalogue records, and inspect selected local images.',
   },
 ];
 

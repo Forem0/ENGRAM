@@ -186,7 +186,7 @@ export function WorkspaceHelp({ onClose }: { onClose: () => void }) {
         </dt>
         <dd>Toggle reviewed / unreviewed</dd>
         <dt>
-          <kbd>1–6</kbd>
+          <kbd>1–7</kbd>
         </dt>
         <dd>Switch workspace views</dd>
         <dt>
