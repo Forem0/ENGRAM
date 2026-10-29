@@ -265,8 +265,19 @@ export function MediaGallery({
                   <span className="eyebrow">RECORDED RELATIONSHIPS</span>
                   {related.map((finding) => (
                     <button key={finding.id} onClick={() => onSelect(finding)}>
-                      <span>
-                        {finding.category === 'media' ? mediaName(finding) : finding.title}
+                      <span className="media-related-copy">
+                        <strong>
+                          {finding.category === 'media' ? mediaName(finding) : finding.title}
+                        </strong>
+                        <small>
+                          {finding.category === 'media'
+                            ? kindLabels[mediaKind(finding)]
+                            : finding.category}
+                          {mediaKind(finding) === 'catalogue' && ` · ${finding.locator}`}
+                        </small>
+                        <span className="media-related-path" title={finding.path}>
+                          {finding.path}
+                        </span>
                       </span>
                       <span aria-hidden="true">↗</span>
                     </button>

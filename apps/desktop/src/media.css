@@ -273,10 +273,28 @@
   color: #a9c7eb;
   font-size: 10px;
 }
-.media-related button > span:first-child {
+.media-related-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.media-related-copy strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+.media-related-copy small {
+  font-size: 9px;
+  color: #8ba6c6;
+}
+.media-related-path {
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: #708eaf;
+  font-size: 9px;
 }
 .media-related button:hover {
   color: #e6f1ff;
